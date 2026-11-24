@@ -4,8 +4,9 @@ Community-App der TRACACON Trade Card Conventions. *Collect. Connect. Trade.*
 
 Grundlage ist das [Entscheidungsdokument](https://claude.ai/artifact/2BZqtKyEzQiHVrAccM2YuY). Stand:
 
-- **Phase 1 (Fundament):** Anmeldung mit E-Mail-Einmalcode, Begrüßung mit Mindestalter 16, Profile, Rollen (Mitglied, Team, Admin), Verwaltung, Konto löschen, Deutsch und Englisch.
-- **Phase 2 (Marktplatz):** Inserate mit bis zu 6 Fotos anlegen, bearbeiten, Status (aktiv, reserviert, erledigt), löschen. Suche und Filter auf dem Server mit Seitenaufteilung. Melden von Inseraten und Profilen, Moderationsseite für das Team mit Begründung an den Anbieter.
+- **Phase 1 (Fundament):** Anmeldung mit E-Mail und Passwort (Registrierung und Passwort vergessen per E-Mail-Einmalcode), Begrüßung mit Mindestalter 16, Profile, Rollen (Mitglied, Team, Admin), Verwaltung, Konto löschen, Deutsch und Englisch.
+- **Phase 3 (App-Chat):** Unterhaltung je Inserat und Interessent, Echtzeit über Supabase Realtime (mit Nachladen als Rückfallebene), Ungelesen-Zähler, Blockieren, Ausblenden, Melden (das Team sieht nur gemeldete Unterhaltungen), Grenzen gegen Spam.
+- **Phase 2 (Marktplatz):** Inserate mit bis zu 6 Fotos anlegen (Einzelkarten und Slabs: Vorder- und Rückseite Pflicht), bearbeiten, Status (aktiv, reserviert, erledigt), löschen. Suche und Filter auf dem Server mit Seitenaufteilung. Melden von Inseraten und Profilen, Moderationsseite für das Team mit Begründung an den Anbieter.
 
 ## Technik
 
@@ -85,6 +86,8 @@ npm run cf:build   # Bau für Cloudflare
 Bei jedem Push prüft GitHub dasselbe automatisch (`.github/workflows/pruefung.yml`). Den Browsertest beschreibt `tests/e2e/README.md`.
 
 ## Bekannte Punkte
+
+- Benachrichtigung per E-Mail bei neuen Chat-Nachrichten fehlt noch, bis ein E-Mail-Dienst gewählt ist. Bis dahin zeigt die App ungelesene Nachrichten mit einem Zähler.
 
 - Fotos lädt der Browser direkt in den eigenen Ordner bei Supabase Storage hoch (Abweichung vom Entscheidungsdokument, das alle Schreibzugriffe über die API vorsah). Grund: keine Größengrenzen und keine Rechenzeit im Worker. Der Speicher erzwingt Ordner, Dateinamen, Typ (JPEG/WebP) und 2 MB je Datei. Der Browser verkleinert die Fotos vorher und entfernt dabei Metadaten wie den Aufnahmeort.
 - Fotos entfernter Inserate bleiben über ihre direkte Adresse erreichbar, bis der Anbieter das Inserat löscht.

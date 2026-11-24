@@ -18,6 +18,8 @@ type OpenReport = {
   listing_owner_nickname: string | null;
   profile_id: string | null;
   profile_nickname: string | null;
+  conversation_id: string | null;
+  conversation_title: string | null;
   total_count: number;
 };
 
@@ -58,7 +60,9 @@ export default async function ModerationPage({ params }: PageProps<"/[locale]/mo
             <li key={r.id} className="card space-y-3">
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <span className="rounded-full bg-danger/15 px-2.5 py-1 font-semibold text-danger">{tReason(r.reason)}</span>
-                <span className="rounded-full bg-white/10 px-2.5 py-1">{r.listing_id ? t("listing") : t("profile")}</span>
+                <span className="rounded-full bg-white/10 px-2.5 py-1">
+                  {r.listing_id ? t("listing") : r.conversation_id ? t("conversation") : t("profile")}
+                </span>
                 <span className="text-cream/50">
                   {t("reportedBy", {
                     nickname: r.reporter_nickname ?? "?",
@@ -77,6 +81,12 @@ export default async function ModerationPage({ params }: PageProps<"/[locale]/mo
                   {r.listing_status && r.listing_status !== "active" && (
                     <span className="ml-2 text-xs text-cream/60">({tStatus(r.listing_status)})</span>
                   )}
+                </p>
+              ) : r.conversation_id ? (
+                <p>
+                  <Link href={`/moderation/unterhaltung/${r.conversation_id}`} className="font-semibold hover:underline">
+                    {t("readConversation")}: {r.conversation_title}
+                  </Link>
                 </p>
               ) : (
                 <p>

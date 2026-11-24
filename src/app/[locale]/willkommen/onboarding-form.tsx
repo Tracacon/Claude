@@ -32,6 +32,27 @@ export function OnboardingForm() {
       </div>
 
       <div>
+        <label htmlFor="password" className="label">{t("password")}</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={8}
+          aria-describedby="password-hint"
+          className="input"
+        />
+        <p id="password-hint" className="hint">{t("passwordHint")}</p>
+        <FormError code={state.errors?.password} />
+      </div>
+      <div>
+        <label htmlFor="password2" className="label">{t("password2")}</label>
+        <input id="password2" name="password2" type="password" autoComplete="new-password" required className="input" />
+        <FormError code={state.errors?.password2} />
+      </div>
+
+      <div>
         <label className="flex items-start gap-3">
           <input type="checkbox" name="confirmAge" required className="mt-1 size-5 accent-amber" />
           <span>{t("confirmAge")}</span>

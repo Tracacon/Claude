@@ -7,7 +7,8 @@ import { Link } from "@/i18n/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { getListing } from "@/lib/listings";
 import { photoUrl } from "@/lib/marketplace";
-import { DeleteListing, ModerateListing, ReportForm, StatusSwitch } from "./listing-actions";
+import { createClient } from "@/lib/supabase/server";
+import { DeleteListing, ModerateListing, ReportForm, StartConversation, StatusSwitch } from "./listing-actions";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/marktplatz/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -37,6 +38,12 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
   const format = await getFormatter();
   const date = (d: string) => format.dateTime(new Date(d), { dateStyle: "medium" });
   const publicVisible = l.status === "active" || l.status === "reserved";
+  let existingConversation: string | null = null;
+  if (user && !isOwner) {
+    const supabase = await createClient();
+    const { data: conv } = await supabase.rpc("my_conversation_for_listing", { p_listing_id: l.id });
+    existingConversation = (conv as string | null) ?? null;
+  }
 
   const handover = [
     l.handover_event && t("handoverEvent"),
@@ -130,7 +137,16 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
       {!isOwner && publicVisible && (
         <section className="card space-y-2">
           <h2 className="font-semibold">{t("contactTitle")}</h2>
-          <p className="text-sm text-cream/80">{user ? t("contactSoon") : t("contactLogin")}</p>
+          {!user ? (
+            <>
+              <p className="text-sm text-cream/80">{t("contactLogin")}</p>
+              <Link href="/anmelden" className="btn-primary w-full">{t("contactLoginButton")}</Link>
+            </>
+          ) : existingConversation ? (
+            <Link href={`/nachrichten/${existingConversation}`} className="btn-primary w-full">{t("openConversation")}</Link>
+          ) : (
+            <StartConversation listingId={l.id} label={t("writeMessage")} />
+          )}
           <p className="text-xs text-cream/60">{t("safety")}</p>
         </section>
       )}

@@ -3,6 +3,7 @@ import {
   CARD_LANGUAGES,
   CONDITIONS,
   KINDS,
+  KINDS_NEEDING_BOTH_SIDES,
   MAX_PHOTOS,
   OFFERS,
   REPORT_REASONS,
@@ -36,13 +37,31 @@ export const otpSchema = z.object({
     .regex(/^\d{6,10}$/, { message: "invalid_code" }),
 });
 
+export const passwordSchema = z
+  .string()
+  .min(8, { message: "password_short" })
+  .max(72, { message: "password_long" });
+
+export const passwordLoginSchema = z.object({
+  email: z.string().trim().toLowerCase().email({ message: "invalid_email" }),
+  password: z.string().min(1, { message: "login_wrong" }).max(72, { message: "login_wrong" }),
+});
+
+export const newPasswordSchema = z
+  .object({ password: passwordSchema, password2: z.string() })
+  .refine((v) => v.password === v.password2, { path: ["password2"], message: "password_mismatch" });
+
 export const nicknameSchema = z.string().trim().regex(NICKNAME_PATTERN, { message: "invalid_nickname" });
 
-export const onboardingSchema = z.object({
-  nickname: nicknameSchema,
-  confirmAge: z.literal("on", { message: "age_required" }),
-  acceptTerms: z.literal("on", { message: "terms_required" }),
-});
+export const onboardingSchema = z
+  .object({
+    nickname: nicknameSchema,
+    password: passwordSchema,
+    password2: z.string(),
+    confirmAge: z.literal("on", { message: "age_required" }),
+    acceptTerms: z.literal("on", { message: "terms_required" }),
+  })
+  .refine((v) => v.password === v.password2, { path: ["password2"], message: "password_mismatch" });
 
 export const profileSchema = z.object({
   city: optionalText(80),
@@ -115,6 +134,10 @@ export const listingSchema = z
     }
     if (cents !== null && (cents < 0 || cents > 10_000_000)) {
       ctx.addIssue({ code: "custom", path: ["price"], message: "invalid_price" });
+      return z.NEVER;
+    }
+    if (KINDS_NEEDING_BOTH_SIDES.includes(v.kind) && v.photos.length < 2) {
+      ctx.addIssue({ code: "custom", path: ["photos"], message: "front_back_required" });
       return z.NEVER;
     }
     if (!v.handover_event && !v.handover_pickup && !v.handover_shipping) {

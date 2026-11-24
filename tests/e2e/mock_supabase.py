@@ -27,6 +27,27 @@ listings: dict[str, dict] = {}  # id -> listing
 photos: dict[str, dict] = {}  # id -> {listing_id, owner_id, position}
 reports: dict[str, dict] = {}
 files: dict[str, bytes] = {}  # storage path -> bytes
+conversations: dict[str, dict] = {}
+messages: list[dict] = []
+blocks: set[tuple[str, str]] = set()
+
+
+def blocked_between(a, b):
+    return (a, b) in blocks or (b, a) in blocks
+
+
+def conv_for(cid, uid):
+    c = conversations.get(cid)
+    return c if c and uid in (c["seller_id"], c["buyer_id"]) else None
+
+
+def unread_for(c, uid):
+    last = c["seller_last_read_at"] if c["seller_id"] == uid else c["buyer_last_read_at"]
+    return sum(1 for m in messages if m["conversation_id"] == c["id"] and m["sender_id"] != uid and (last is None or m["created_at"] > last))
+
+
+def hidden_for(c, uid):
+    return c["seller_hidden_at"] if c["seller_id"] == uid else c["buyer_hidden_at"]
 
 
 def now_iso():
@@ -144,7 +165,7 @@ class Handler(BaseHTTPRequestHandler):
         url = urlparse(self.path)
         if url.path == "/auth/v1/user":
             u = self.me()
-            return self.send(200, u) if u else self.send(401, {"code": "bad_jwt", "msg": "invalid"})
+            return self.send(200, {k: v for k, v in u.items() if k != "password"}) if u else self.send(401, {"error_code": "bad_jwt", "code": "bad_jwt", "msg": "invalid"})
         if url.path.endswith("jwks.json"):
             return self.send(200, {"keys": []})
         if url.path == "/rest/v1/profiles":
@@ -225,13 +246,32 @@ class Handler(BaseHTTPRequestHandler):
         if url.path == "/auth/v1/verify":
             user = users.get(data.get("email", "").lower())
             if not user or data.get("token") != CODE:
-                return self.send(403, {"code": "otp_expired", "msg": "Token has expired or is invalid"})
+                return self.send(403, {"error_code": "otp_expired", "code": "otp_expired", "msg": "Token has expired or is invalid"})
             return self.send(200, self.session(user))
+        if url.path == "/auth/v1/token" and "grant_type=password" in (url.query or ""):
+            user = users.get(data.get("email", "").lower())
+            if not user or not user.get("password") or user["password"] != data.get("password"):
+                return self.send(400, {"error_code": "invalid_credentials", "code": "invalid_credentials", "msg": "Invalid login credentials"})
+            return self.send(200, self.session({k: v for k, v in user.items() if k != "password"}))
         if url.path == "/auth/v1/logout":
             return self.send(204)
         if url.path.startswith("/rest/v1/rpc/"):
             return self.rpc(url.path.rsplit("/", 1)[1], data)
         return self.send(404, {"message": "not found"})
+
+    def do_PUT(self):
+        url = urlparse(self.path)
+        data = self.body()
+        u = self.me()
+        if url.path == "/auth/v1/user" and u:
+            if "password" in data:
+                if len(data["password"]) < 6:
+                    return self.send(422, {"error_code": "weak_password", "code": "weak_password", "msg": "weak"})
+                if users[u["email"]].get("password") == data["password"]:
+                    return self.send(422, {"error_code": "same_password", "code": "same_password", "msg": "same"})
+                users[u["email"]]["password"] = data["password"]
+            return self.send(200, {k: v for k, v in users[u["email"]].items() if k != "password"})
+        return self.send(401, {"message": "unauthorized"})
 
     def do_PATCH(self):
         url = urlparse(self.path)
@@ -343,6 +383,8 @@ class Handler(BaseHTTPRequestHandler):
             apply_payload(l, p)
             if len(p.get("photos") or []) > 6:
                 raise RpcError(400, "54000", "too_many_photos")
+            if (p.get("kind") or "single") in ("single", "slab") and len(p.get("photos") or []) < 2:
+                raise RpcError(400, "23514", "front_back_required")
             listings[lid] = l
             for i, pid in enumerate(p.get("photos") or []):
                 photos[pid] = {"listing_id": lid, "owner_id": u["id"], "position": i}
@@ -354,6 +396,8 @@ class Handler(BaseHTTPRequestHandler):
             if l["status"] == "removed":
                 raise RpcError(403, "42501", "listing_removed")
             p = data["p"]
+            if (p.get("kind") or "single") in ("single", "slab") and len(p.get("photos") or []) < 2:
+                raise RpcError(400, "23514", "front_back_required")
             apply_payload(l, p)
             keep = p.get("photos") or []
             removed = [pid for pid in listing_photos(l["id"]) if pid not in keep]
@@ -395,7 +439,7 @@ class Handler(BaseHTTPRequestHandler):
                    for r in reports.values()):
                 raise RpcError(409, "23505", "already_reported")
             rid = str(uuid.uuid4())
-            reports[rid] = {"id": rid, "reporter_id": u["id"], "listing_id": lid, "profile_id": pid, "reason": data["p_reason"],
+            reports[rid] = {"id": rid, "reporter_id": u["id"], "listing_id": lid, "profile_id": pid, "conversation_id": None, "reason": data["p_reason"],
                             "details": data.get("p_details"), "status": "open", "created_at": now_iso()}
             return self.send(204)
         if name == "open_report_count":
@@ -414,6 +458,8 @@ class Handler(BaseHTTPRequestHandler):
                              "listing_status": l["status"] if l else None,
                              "listing_owner_nickname": profiles[l["owner_id"]]["nickname"] if l else None,
                              "profile_id": pr["id"] if pr else None, "profile_nickname": pr["nickname"] if pr else None,
+                             "conversation_id": r.get("conversation_id"),
+                             "conversation_title": conversations[r["conversation_id"]]["listing_title"] if r.get("conversation_id") in conversations else None,
                              "total_count": len(open_r)})
             return self.send(200, rows)
         if name == "moderate_listing":
@@ -441,6 +487,120 @@ class Handler(BaseHTTPRequestHandler):
                 raise RpcError(404, "P0002", "not_found")
             r["status"] = data["p_status"]
             return self.send(204)
+        if name == "start_conversation":
+            l = listings.get(data["p_listing_id"])
+            if not me.get("nickname"):
+                raise RpcError(403, "42501", "profile_incomplete")
+            if not l or l["status"] not in ("active", "reserved"):
+                raise RpcError(404, "P0002", "not_found")
+            if l["owner_id"] == u["id"]:
+                raise RpcError(400, "22023", "cannot_message_self")
+            if blocked_between(u["id"], l["owner_id"]):
+                raise RpcError(403, "42501", "blocked")
+            for c in conversations.values():
+                if c["listing_id"] == l["id"] and c["buyer_id"] == u["id"]:
+                    c["buyer_hidden_at"] = None
+                    return self.send(200, c["id"])
+            cid = str(uuid.uuid4())
+            conversations[cid] = {"id": cid, "listing_id": l["id"], "listing_title": l["title"], "seller_id": l["owner_id"],
+                                  "buyer_id": u["id"], "created_at": now_iso(), "last_message_at": None,
+                                  "seller_last_read_at": None, "buyer_last_read_at": None,
+                                  "seller_hidden_at": None, "buyer_hidden_at": None}
+            return self.send(200, cid)
+        if name == "my_conversation_for_listing":
+            for c in conversations.values():
+                if c["listing_id"] == data["p_listing_id"] and c["buyer_id"] == u["id"]:
+                    return self.send(200, c["id"])
+            return self.send(200, None)
+        if name == "send_message":
+            c = conv_for(data["p_conversation_id"], u["id"])
+            if not c:
+                raise RpcError(404, "P0002", "not_found")
+            other = c["buyer_id"] if c["seller_id"] == u["id"] else c["seller_id"]
+            if blocked_between(u["id"], other):
+                raise RpcError(403, "42501", "blocked")
+            body = (data.get("p_body") or "").strip()
+            if not 1 <= len(body) <= 1000:
+                raise RpcError(400, "23514", 'violates check constraint "messages_body_length"')
+            m = {"id": str(uuid.uuid4()), "conversation_id": c["id"], "sender_id": u["id"], "body": body, "created_at": now_iso()}
+            messages.append(m)
+            c.update(last_message_at=m["created_at"], seller_hidden_at=None, buyer_hidden_at=None)
+            c["seller_last_read_at" if c["seller_id"] == u["id"] else "buyer_last_read_at"] = m["created_at"]
+            return self.send(200, m)
+        if name == "get_messages":
+            c = conv_for(data["p_conversation_id"], u["id"])
+            if not c:
+                return self.send(200, [])
+            after = data.get("p_after")
+            rows = [m for m in messages if m["conversation_id"] == c["id"] and (not after or m["created_at"] > after)]
+            return self.send(200, rows[-(data.get("p_limit") or 200):])
+        if name == "mark_conversation_read":
+            c = conv_for(data["p_conversation_id"], u["id"])
+            if c:
+                c["seller_last_read_at" if c["seller_id"] == u["id"] else "buyer_last_read_at"] = now_iso()
+            return self.send(204)
+        if name == "hide_conversation":
+            c = conv_for(data["p_conversation_id"], u["id"])
+            if c:
+                c["seller_hidden_at" if c["seller_id"] == u["id"] else "buyer_hidden_at"] = now_iso()
+            return self.send(204)
+        if name == "unread_message_count":
+            return self.send(200, sum(unread_for(c, u["id"]) for c in conversations.values()
+                                      if u["id"] in (c["seller_id"], c["buyer_id"]) and not hidden_for(c, u["id"])))
+        if name == "list_conversations":
+            rows = []
+            for c in conversations.values():
+                if u["id"] not in (c["seller_id"], c["buyer_id"]) or not c["last_message_at"] or hidden_for(c, u["id"]):
+                    continue
+                other = profiles[c["buyer_id"] if c["seller_id"] == u["id"] else c["seller_id"]]
+                l = listings.get(c["listing_id"] or "")
+                last = [m for m in messages if m["conversation_id"] == c["id"]][-1]
+                rows.append({"id": c["id"], "listing_id": c["listing_id"], "listing_title": c["listing_title"],
+                             "listing_status": l["status"] if l else None, "listing_owner_id": l["owner_id"] if l else None,
+                             "cover_photo_id": (listing_photos(l["id"]) or [None])[0] if l else None,
+                             "other_id": other["id"], "other_nickname": other["nickname"], "i_am_seller": c["seller_id"] == u["id"],
+                             "last_message_at": c["last_message_at"], "last_body": last["body"], "last_from_me": last["sender_id"] == u["id"],
+                             "unread": unread_for(c, u["id"]), "blocked": blocked_between(c["seller_id"], c["buyer_id"])})
+            rows.sort(key=lambda r: r["last_message_at"], reverse=True)
+            return self.send(200, rows)
+        if name == "get_conversation":
+            c = conv_for(data["p_conversation_id"], u["id"])
+            if not c:
+                return self.send(200, None)
+            other = profiles[c["buyer_id"] if c["seller_id"] == u["id"] else c["seller_id"]]
+            l = listings.get(c["listing_id"] or "")
+            return self.send(200, {"id": c["id"], "listing_id": c["listing_id"] if l else None, "listing_title": c["listing_title"],
+                                   "listing_status": l["status"] if l else None, "listing_owner_id": l["owner_id"] if l else None,
+                                   "cover_photo_id": (listing_photos(l["id"]) or [None])[0] if l else None,
+                                   "listing_price_cents": l["price_cents"] if l else None, "listing_offer": l["offer"] if l else None,
+                                   "other_id": other["id"], "other_nickname": other["nickname"], "i_am_seller": c["seller_id"] == u["id"],
+                                   "i_blocked": (u["id"], other["id"]) in blocks, "blocked_me": (other["id"], u["id"]) in blocks})
+        if name == "block_user":
+            blocks.add((u["id"], data["p_user_id"]))
+            return self.send(204)
+        if name == "unblock_user":
+            blocks.discard((u["id"], data["p_user_id"]))
+            return self.send(204)
+        if name == "report_conversation":
+            c = conv_for(data["p_conversation_id"], u["id"])
+            if not c:
+                raise RpcError(404, "P0002", "not_found")
+            if any(r["reporter_id"] == u["id"] and r["status"] == "open" and r.get("conversation_id") == c["id"] for r in reports.values()):
+                raise RpcError(409, "23505", "already_reported")
+            rid = str(uuid.uuid4())
+            reports[rid] = {"id": rid, "reporter_id": u["id"], "listing_id": None, "profile_id": None, "conversation_id": c["id"],
+                            "reason": data["p_reason"], "details": data.get("p_details"), "status": "open", "created_at": now_iso()}
+            return self.send(204)
+        if name == "moderation_conversation":
+            if not is_team(u["id"]):
+                raise RpcError(403, "42501", "forbidden")
+            c = conversations.get(data["p_conversation_id"])
+            if not c or not any(r.get("conversation_id") == c["id"] for r in reports.values()):
+                raise RpcError(404, "P0002", "not_found")
+            return self.send(200, {"listing_title": c["listing_title"], "seller": profiles[c["seller_id"]]["nickname"],
+                                   "buyer": profiles[c["buyer_id"]]["nickname"],
+                                   "messages": [{"from": profiles[m["sender_id"]]["nickname"], "body": m["body"], "created_at": m["created_at"]}
+                                                for m in messages if m["conversation_id"] == c["id"]]})
         if name == "delete_own_account":
             for lid in [l["id"] for l in listings.values() if l["owner_id"] == u["id"]]:
                 for pid in listing_photos(lid):

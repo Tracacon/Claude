@@ -3,17 +3,46 @@
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { emailSchema, otpSchema, toFieldErrors, type FieldErrors } from "@/lib/validation";
+import { emailSchema, otpSchema, passwordLoginSchema, toFieldErrors, type FieldErrors } from "@/lib/validation";
 
 export type LoginState =
   | { step: "email"; email?: string; errors?: FieldErrors }
   | { step: "code"; email: string; errors?: FieldErrors; resent?: boolean };
+
+export type PasswordLoginState = { email?: string; errors?: FieldErrors };
 
 function authErrorCode(status?: number, code?: string) {
   if (status === 429 || code === "over_email_send_rate_limit" || code === "over_request_rate_limit") {
     return "rate_limited";
   }
   return "generic";
+}
+
+/** Nach erfolgreicher Anmeldung: Profil oder Begrüßung, in der Sprache des Profils. */
+async function afterLogin(userId: string): Promise<never> {
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("nickname, locale")
+    .eq("id", userId)
+    .maybeSingle<{ nickname: string | null; locale: "de" | "en" }>();
+  const locale = profile?.locale ?? (await getLocale());
+  return redirect({ href: profile?.nickname ? "/profil" : "/willkommen", locale });
+}
+
+/** Anmeldung mit E-Mail und Passwort. */
+export async function signInWithPassword(_prev: PasswordLoginState, formData: FormData): Promise<PasswordLoginState> {
+  const email = String(formData.get("email") ?? "");
+  const parsed = passwordLoginSchema.safeParse({ email, password: String(formData.get("password") ?? "") });
+  if (!parsed.success) return { email, errors: toFieldErrors(parsed.error) };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
+  if (error || !data.user) {
+    const code = error?.status === 429 || error?.code === "over_request_rate_limit" ? "rate_limited" : "login_wrong";
+    return { email, errors: { _form: code } };
+  }
+  return afterLogin(data.user.id);
 }
 
 /** Schritt 1: Einmalcode per E-Mail anfordern. Legt bei Bedarf ein Konto an. */
@@ -59,14 +88,7 @@ export async function verifyCode(_prev: LoginState, formData: FormData): Promise
     return { step: "code", email: parsed.data.email, errors: { token: code } };
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("nickname, locale")
-    .eq("id", data.user.id)
-    .maybeSingle<{ nickname: string | null; locale: "de" | "en" }>();
-
-  const locale = profile?.locale ?? (await getLocale());
-  return redirect({ href: profile?.nickname ? "/profil" : "/willkommen", locale });
+  return afterLogin(data.user.id);
 }
 
 export async function signOut() {

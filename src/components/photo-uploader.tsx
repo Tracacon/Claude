@@ -16,10 +16,13 @@ type Photo = { id: string; preview: string; state: "ready" | "uploading" | "erro
 export function PhotoUploader({
   userId,
   initial,
+  requireBothSides = false,
   onPendingChange,
 }: {
   userId: string;
   initial: string[];
+  /** Erste zwei Plätze als Vorder- und Rückseite beschriften und als Pflicht markieren */
+  requireBothSides?: boolean;
   onPendingChange?: (pending: boolean) => void;
 }) {
   const t = useTranslations("Listing");
@@ -77,6 +80,11 @@ export function PhotoUploader({
         {photos.map((p, i) => (
           <li key={p.id} className="relative aspect-[3/4] overflow-hidden rounded-xl border border-white/15 bg-night-3">
             <img src={p.preview} alt="" className={`h-full w-full object-cover ${p.state !== "ready" ? "opacity-40" : ""}`} />
+            {requireBothSides && i < 2 && (
+              <span className="absolute left-1 top-1 rounded-md bg-night/85 px-1.5 py-0.5 text-[10px] font-semibold text-amber">
+                {i === 0 ? t("front") : t("back")}
+              </span>
+            )}
             {p.state === "uploading" && (
               <span className="absolute inset-0 flex items-center justify-center text-xs">{t("uploading")}</span>
             )}
@@ -111,10 +119,12 @@ export function PhotoUploader({
           <li>
             <label
               htmlFor={inputId}
-              className="flex aspect-[3/4] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-white/20 text-center text-xs text-cream/70 hover:border-amber hover:text-amber"
+              className={`flex aspect-[3/4] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-center text-xs hover:border-amber hover:text-amber ${
+                requireBothSides && photos.length < 2 ? "border-amber/60 text-amber" : "border-white/20 text-cream/70"
+              }`}
             >
               <span className="text-2xl leading-none">+</span>
-              {t("addPhotos")}
+              {requireBothSides && photos.length < 2 ? (photos.length === 0 ? t("front") : t("back")) : t("addPhotos")}
             </label>
             <input
               ref={inputRef}
@@ -122,9 +132,15 @@ export function PhotoUploader({
               type="file"
               accept="image/*"
               multiple
+              aria-label={t("addPhotos")}
               className="sr-only"
               onChange={(e) => handleFiles(e.target.files)}
             />
+          </li>
+        )}
+        {requireBothSides && photos.length === 0 && (
+          <li aria-hidden className="flex aspect-[3/4] flex-col items-center justify-center rounded-xl border-2 border-dashed border-white/10 text-center text-xs text-cream/40">
+            {t("back")}
           </li>
         )}
       </ul>

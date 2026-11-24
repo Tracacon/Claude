@@ -1,7 +1,9 @@
 // Gemeinsame Werte und Hilfen für den Marktplatz (Server und Browser).
 
 export const TCGS = ["pokemon", "one_piece", "yugioh", "magic", "sports", "riftbound", "dragon_ball", "lorcana", "other"] as const;
-export const KINDS = ["single", "sealed", "lot", "accessory", "other"] as const;
+export const KINDS = ["single", "slab", "sealed", "lot", "accessory", "other"] as const;
+/** Arten, bei denen Vorder- und Rückseite als Foto Pflicht sind. */
+export const KINDS_NEEDING_BOTH_SIDES: readonly string[] = ["single", "slab"];
 export const OFFERS = ["sell", "trade", "sell_or_trade"] as const;
 export const CONDITIONS = ["mint", "near_mint", "excellent", "good", "light_played", "played", "poor"] as const;
 export const CARD_LANGUAGES = ["de", "en", "ja", "fr", "it", "es", "pt", "ko", "zh", "other"] as const;
