@@ -4,8 +4,8 @@ Community-App der TRACACON Trade Card Conventions. *Collect. Connect. Trade.*
 
 Grundlage ist das [Entscheidungsdokument](https://claude.ai/artifact/2BZqtKyEzQiHVrAccM2YuY). Stand:
 
-- **Phase 1 (Fundament):** Anmeldung mit E-Mail-Einmalcode, Begrüßung mit Mindestalter 16, Profile, Rollen (Mitglied, Team, Admin), Verwaltung, Konto löschen, Deutsch und Englisch.
-- **Phase 2 (Marktplatz):** Inserate mit bis zu 6 Fotos anlegen, bearbeiten, Status (aktiv, reserviert, erledigt), löschen. Suche und Filter auf dem Server mit Seitenaufteilung. Melden von Inseraten und Profilen, Moderationsseite für das Team mit Begründung an den Anbieter.
+- **Phase 1 (Fundament):** Anmeldung mit E-Mail und Passwort (Registrierung und Passwort vergessen per E-Mail-Einmalcode), Begrüßung mit Mindestalter 16, Profile, Rollen (Mitglied, Team, Admin), Verwaltung, Konto löschen, Deutsch und Englisch.
+- **Phase 2 (Marktplatz):** Inserate mit bis zu 6 Fotos anlegen (Einzelkarten und Slabs: Vorder- und Rückseite Pflicht), bearbeiten, Status (aktiv, reserviert, erledigt), löschen. Suche und Filter auf dem Server mit Seitenaufteilung. Melden von Inseraten und Profilen, Moderationsseite für das Team mit Begründung an den Anbieter.
 
 ## Technik
 

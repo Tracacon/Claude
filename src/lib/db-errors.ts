@@ -14,6 +14,7 @@ const KNOWN = [
   "already_reported",
   "cannot_report_own",
   "reason_required",
+  "front_back_required",
 ] as const;
 
 const ALIASES: Record<string, string> = {

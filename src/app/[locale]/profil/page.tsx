@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { getSessionUser, requireProfile } from "@/lib/auth";
 import { signOut } from "@/lib/actions/auth";
 import { DeleteAccountForm } from "./delete-account-form";
+import { PasswordForm } from "./password-form";
 import { ProfileForm } from "./profile-form";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/profil">): Promise<Metadata> {
@@ -70,6 +71,8 @@ export default async function ProfilePage({ params }: PageProps<"/[locale]/profi
           locale: profile.locale,
         }}
       />
+
+      <PasswordForm />
 
       <DeleteAccountForm />
     </div>

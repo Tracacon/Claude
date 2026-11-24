@@ -7,7 +7,7 @@ import { requireProfile, requireUser } from "@/lib/auth";
 import { mapDbError } from "@/lib/db-errors";
 import { PHOTO_BUCKET } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/server";
-import { onboardingSchema, profileSchema, toFieldErrors, type FieldErrors } from "@/lib/validation";
+import { newPasswordSchema, onboardingSchema, profileSchema, toFieldErrors, type FieldErrors } from "@/lib/validation";
 
 export type FormState = { ok?: boolean; errors?: FieldErrors; values?: Record<string, string> };
 
@@ -18,12 +18,26 @@ export async function completeOnboarding(_prev: FormState, formData: FormData): 
   const values = { nickname: str(formData, "nickname") };
   const parsed = onboardingSchema.safeParse({
     nickname: values.nickname,
+    password: str(formData, "password"),
+    password2: str(formData, "password2"),
     confirmAge: formData.get("confirmAge") ?? undefined,
     acceptTerms: formData.get("acceptTerms") ?? undefined,
   });
-  if (!parsed.success) return { errors: toFieldErrors(parsed.error), values };
+  if (!parsed.success) {
+    const errors = toFieldErrors(parsed.error);
+    // Die Prüfung auf gleiche Passwörter läuft in zod erst, wenn alles andere stimmt; hier sofort melden.
+    if (!errors.password && !errors.password2 && str(formData, "password") !== str(formData, "password2")) {
+      errors.password2 = "password_mismatch";
+    }
+    return { errors, values };
+  }
 
   const supabase = await createClient();
+  const pw = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (pw.error && pw.error.code !== "same_password") {
+    return { errors: { password: passwordErrorCode(pw.error.code) }, values };
+  }
+
   const { error } = await supabase.rpc("complete_onboarding", {
     p_nickname: parsed.data.nickname,
     p_confirm_age: true,
@@ -37,6 +51,26 @@ export async function completeOnboarding(_prev: FormState, formData: FormData): 
   revalidatePath("/", "layout");
   const locale = await getLocale();
   return redirect({ href: "/profil", locale });
+}
+
+function passwordErrorCode(code?: string) {
+  if (code === "weak_password") return "password_weak";
+  if (code === "same_password") return "password_same";
+  if (code === "reauthentication_needed" || code === "reauth_nonce_missing") return "reauth_needed";
+  if (code === "over_request_rate_limit") return "rate_limited";
+  return "generic";
+}
+
+/** Passwort festlegen oder ändern (im Profil). */
+export async function setPassword(_prev: FormState, formData: FormData): Promise<FormState> {
+  await requireUser();
+  const parsed = newPasswordSchema.safeParse({ password: str(formData, "password"), password2: str(formData, "password2") });
+  if (!parsed.success) return { errors: toFieldErrors(parsed.error) };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (error) return { errors: { password: passwordErrorCode(error.code) } };
+  return { ok: true };
 }
 
 export async function updateProfile(_prev: FormState, formData: FormData): Promise<FormState> {

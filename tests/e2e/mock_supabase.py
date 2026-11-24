@@ -144,7 +144,7 @@ class Handler(BaseHTTPRequestHandler):
         url = urlparse(self.path)
         if url.path == "/auth/v1/user":
             u = self.me()
-            return self.send(200, u) if u else self.send(401, {"code": "bad_jwt", "msg": "invalid"})
+            return self.send(200, {k: v for k, v in u.items() if k != "password"}) if u else self.send(401, {"error_code": "bad_jwt", "code": "bad_jwt", "msg": "invalid"})
         if url.path.endswith("jwks.json"):
             return self.send(200, {"keys": []})
         if url.path == "/rest/v1/profiles":
@@ -225,13 +225,32 @@ class Handler(BaseHTTPRequestHandler):
         if url.path == "/auth/v1/verify":
             user = users.get(data.get("email", "").lower())
             if not user or data.get("token") != CODE:
-                return self.send(403, {"code": "otp_expired", "msg": "Token has expired or is invalid"})
+                return self.send(403, {"error_code": "otp_expired", "code": "otp_expired", "msg": "Token has expired or is invalid"})
             return self.send(200, self.session(user))
+        if url.path == "/auth/v1/token" and "grant_type=password" in (url.query or ""):
+            user = users.get(data.get("email", "").lower())
+            if not user or not user.get("password") or user["password"] != data.get("password"):
+                return self.send(400, {"error_code": "invalid_credentials", "code": "invalid_credentials", "msg": "Invalid login credentials"})
+            return self.send(200, self.session({k: v for k, v in user.items() if k != "password"}))
         if url.path == "/auth/v1/logout":
             return self.send(204)
         if url.path.startswith("/rest/v1/rpc/"):
             return self.rpc(url.path.rsplit("/", 1)[1], data)
         return self.send(404, {"message": "not found"})
+
+    def do_PUT(self):
+        url = urlparse(self.path)
+        data = self.body()
+        u = self.me()
+        if url.path == "/auth/v1/user" and u:
+            if "password" in data:
+                if len(data["password"]) < 6:
+                    return self.send(422, {"error_code": "weak_password", "code": "weak_password", "msg": "weak"})
+                if users[u["email"]].get("password") == data["password"]:
+                    return self.send(422, {"error_code": "same_password", "code": "same_password", "msg": "same"})
+                users[u["email"]]["password"] = data["password"]
+            return self.send(200, {k: v for k, v in users[u["email"]].items() if k != "password"})
+        return self.send(401, {"message": "unauthorized"})
 
     def do_PATCH(self):
         url = urlparse(self.path)
@@ -343,6 +362,8 @@ class Handler(BaseHTTPRequestHandler):
             apply_payload(l, p)
             if len(p.get("photos") or []) > 6:
                 raise RpcError(400, "54000", "too_many_photos")
+            if (p.get("kind") or "single") in ("single", "slab") and len(p.get("photos") or []) < 2:
+                raise RpcError(400, "23514", "front_back_required")
             listings[lid] = l
             for i, pid in enumerate(p.get("photos") or []):
                 photos[pid] = {"listing_id": lid, "owner_id": u["id"], "position": i}
@@ -354,6 +375,8 @@ class Handler(BaseHTTPRequestHandler):
             if l["status"] == "removed":
                 raise RpcError(403, "42501", "listing_removed")
             p = data["p"]
+            if (p.get("kind") or "single") in ("single", "slab") and len(p.get("photos") or []) < 2:
+                raise RpcError(400, "23514", "front_back_required")
             apply_payload(l, p)
             keep = p.get("photos") or []
             removed = [pid for pid in listing_photos(l["id"]) if pid not in keep]

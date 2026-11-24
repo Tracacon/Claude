@@ -32,8 +32,7 @@
     "sell": "Karte inserieren"
   },
   "Login": {
-    "title": "Anmelden oder registrieren",
-    "intro": "Gib deine E-Mail-Adresse ein. Wir schicken dir einen Einmalcode, ein Passwort brauchst du nicht.",
+    "title": "Anmelden",
     "email": "E-Mail-Adresse",
     "sendCode": "Code senden",
     "sending": "Wird gesendet …",
@@ -43,17 +42,30 @@
     "verifying": "Wird geprüft …",
     "otherEmail": "Andere E-Mail-Adresse verwenden",
     "resend": "Code erneut senden",
-    "hint": "Mit der Anmeldung legst du ein Konto an, falls du noch keins hast. Die App ist ab 16 Jahren."
+    "hint": "Du bleibst auf jedem Gerät angemeldet, bis du dich abmeldest. Die App ist ab 16 Jahren.",
+    "passwordIntro": "Melde dich mit E-Mail-Adresse und Passwort an.",
+    "password": "Passwort",
+    "verifyCode": "Code bestätigen",
+    "forgot": "Passwort vergessen oder noch keins? Mit Code per E-Mail anmelden",
+    "newHere": "Neu bei TRACACON?",
+    "newHereText": "Wir schicken dir einen Code an deine E-Mail-Adresse. Danach legst du Nickname und Passwort fest.",
+    "register": "Konto erstellen",
+    "codeTitle": "Anmelden mit Code",
+    "codeIntro": "Gib deine E-Mail-Adresse ein. Wir schicken dir einen Einmalcode. So registrierst du dich neu oder meldest dich ohne Passwort an.",
+    "withPassword": "← Mit Passwort anmelden"
   },
   "Onboarding": {
     "title": "Willkommen bei TRACACON",
-    "intro": "Noch zwei Schritte, dann bist du dabei.",
+    "intro": "Noch ein paar Angaben, dann bist du dabei.",
     "nickname": "Nickname",
     "nicknameHint": "3 bis 24 Zeichen: Buchstaben, Ziffern, Punkt, Unterstrich, Bindestrich. Andere sehen diesen Namen.",
     "confirmAge": "Ich bin mindestens 16 Jahre alt.",
     "acceptTerms": "Ich akzeptiere die <rules>Community-Regeln</rules> und habe die <privacy>Datenschutzerklärung</privacy> gelesen.",
     "submit": "Los geht's",
-    "saving": "Wird gespeichert …"
+    "saving": "Wird gespeichert …",
+    "password": "Passwort",
+    "passwordHint": "Mindestens 8 Zeichen. Damit meldest du dich künftig auf jedem Gerät an.",
+    "password2": "Passwort wiederholen"
   },
   "Profile": {
     "title": "Mein Profil",
@@ -79,7 +91,13 @@
     "delete": "Konto endgültig löschen",
     "deleting": "Wird gelöscht …",
     "areas": "Bereiche",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "passwordTitle": "Passwort",
+    "passwordIntro": "Lege ein Passwort fest oder ändere es. Damit meldest du dich auf jedem Gerät mit E-Mail-Adresse und Passwort an.",
+    "newPassword": "Neues Passwort",
+    "repeatPassword": "Passwort wiederholen",
+    "savePassword": "Passwort speichern",
+    "passwordSaved": "Passwort gespeichert. Du kannst dich jetzt auf jedem Gerät damit anmelden."
   },
   "Roles": {
     "member": "Mitglied",
@@ -151,7 +169,15 @@
     "cannot_report_own": "Eigene Inhalte kannst du nicht melden.",
     "reason_required": "Bitte gib eine Begründung an (mindestens 5 Zeichen).",
     "upload_failed": "Das Hochladen hat nicht geklappt. Bitte versuch es noch einmal.",
-    "photos_pending": "Bitte warte, bis alle Fotos hochgeladen sind."
+    "photos_pending": "Bitte warte, bis alle Fotos hochgeladen sind.",
+    "password_short": "Das Passwort braucht mindestens 8 Zeichen.",
+    "password_long": "Das Passwort darf höchstens 72 Zeichen haben.",
+    "password_mismatch": "Die beiden Passwörter stimmen nicht überein.",
+    "password_weak": "Dieses Passwort ist zu schwach. Bitte wähle ein längeres oder ein anderes.",
+    "password_same": "Das ist bereits dein aktuelles Passwort.",
+    "login_wrong": "E-Mail-Adresse oder Passwort ist falsch. Noch kein Passwort? Melde dich mit Code an.",
+    "reauth_needed": "Aus Sicherheitsgründen melde dich bitte einmal mit Code neu an und ändere das Passwort dann.",
+    "front_back_required": "Bitte lade für Einzelkarten und Slabs mindestens zwei Fotos hoch: Vorderseite und Rückseite."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -166,6 +192,7 @@
   },
   "Kind": {
     "single": "Einzelkarte",
+    "slab": "Slab (gegradet)",
     "sealed": "Sealed (OVP)",
     "lot": "Konvolut",
     "accessory": "Zubehör",
@@ -309,7 +336,11 @@
     "moderated": "Erledigt.",
     "mineTitle": "Meine Inserate",
     "mineEmpty": "Du hast noch keine Inserate.",
-    "mineNew": "Neues Inserat"
+    "mineNew": "Neues Inserat",
+    "front": "Vorderseite",
+    "back": "Rückseite",
+    "photosHintRequired": "Pflicht: ein Foto der Vorderseite und eins der Rückseite. Weitere Fotos sind freiwillig (bis zu 6 insgesamt).",
+    "missing": "fehlt"
   },
   "Moderation": {
     "title": "Moderation",

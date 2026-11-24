@@ -3,19 +3,43 @@
 import { useTranslations } from "next-intl";
 import { useActionState, useState } from "react";
 import { FormError } from "@/components/form-error";
-import { requestCode, verifyCode, type LoginState } from "@/lib/actions/auth";
+import {
+  requestCode,
+  signInWithPassword,
+  verifyCode,
+  type LoginState,
+  type PasswordLoginState,
+} from "@/lib/actions/auth";
 
-export function LoginForm() {
+type Mode = "password" | "code";
+
+/** Anmeldung: standardmäßig mit Passwort; mit Code für Registrierung, ohne Passwort oder bei vergessenem Passwort. */
+export function LoginForm({ initialMode = "password" }: { initialMode?: Mode }) {
   const t = useTranslations("Login");
-  const [requestState, requestAction, requesting] = useActionState<LoginState, FormData>(requestCode, { step: "email" });
-  const [verifyState, verifyAction, verifying] = useActionState<LoginState, FormData>(verifyCode, { step: "code", email: "" });
-  const [restart, setRestart] = useState(0);
+  const [mode, setMode] = useState<Mode>(initialMode);
+  const [email, setEmail] = useState("");
 
-  const onCodeStep = requestState.step === "code" && restart === 0;
+  return (
+    <div className="mx-auto max-w-md space-y-4">
+      <h1 className="text-2xl font-bold">{mode === "password" ? t("title") : t("codeTitle")}</h1>
+      <p className="text-cream/80">{mode === "password" ? t("passwordIntro") : t("codeIntro")}</p>
+      {mode === "password" ? (
+        <PasswordLogin email={email} onEmail={setEmail} onCode={() => setMode("code")} />
+      ) : (
+        <CodeLogin initialEmail={email} onPassword={() => setMode("password")} />
+      )}
+      <p className="text-xs text-cream/60">{t("hint")}</p>
+    </div>
+  );
+}
 
-  if (!onCodeStep) {
-    return (
-      <form action={(fd) => { setRestart(0); requestAction(fd); }} className="card space-y-4" noValidate>
+function PasswordLogin({ email, onEmail, onCode }: { email: string; onEmail: (v: string) => void; onCode: () => void }) {
+  const t = useTranslations("Login");
+  const [state, action, pending] = useActionState<PasswordLoginState, FormData>(signInWithPassword, {});
+
+  return (
+    <div className="space-y-4">
+      <form action={action} className="card space-y-4" noValidate>
         <div>
           <label htmlFor="email" className="label">{t("email")}</label>
           <input
@@ -23,20 +47,78 @@ export function LoginForm() {
             name="email"
             type="email"
             inputMode="email"
-            autoComplete="email"
+            autoComplete="username"
             required
-            defaultValue={requestState.email}
-            aria-invalid={Boolean(requestState.errors?.email)}
-            aria-describedby="email-error"
+            defaultValue={state.email ?? email}
+            onChange={(e) => onEmail(e.target.value)}
             className="input"
           />
-          <FormError id="email-error" code={requestState.errors?.email} />
+          <FormError code={state.errors?.email} />
         </div>
-        <FormError code={requestState.errors?._form} />
-        <button type="submit" className="btn-primary w-full" disabled={requesting}>
-          {requesting ? t("sending") : t("sendCode")}
+        <div>
+          <label htmlFor="password" className="label">{t("password")}</label>
+          <input id="password" name="password" type="password" autoComplete="current-password" required className="input" />
+          <FormError code={state.errors?.password} />
+        </div>
+        <FormError code={state.errors?._form} />
+        <button type="submit" className="btn-primary w-full" disabled={pending}>
+          {pending ? t("verifying") : t("verify")}
+        </button>
+        <button type="button" onClick={onCode} className="link block text-sm">
+          {t("forgot")}
         </button>
       </form>
+      <div className="card space-y-2 text-sm">
+        <p className="font-semibold">{t("newHere")}</p>
+        <p className="text-cream/70">{t("newHereText")}</p>
+        <button type="button" onClick={onCode} className="btn-ghost w-full">
+          {t("register")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CodeLogin({ initialEmail, onPassword }: { initialEmail: string; onPassword: () => void }) {
+  const t = useTranslations("Login");
+  const [requestState, requestAction, requesting] = useActionState<LoginState, FormData>(requestCode, {
+    step: "email",
+    email: initialEmail,
+  });
+  const [verifyState, verifyAction, verifying] = useActionState<LoginState, FormData>(verifyCode, { step: "code", email: "" });
+  const [restart, setRestart] = useState(0);
+
+  const onCodeStep = requestState.step === "code" && restart === 0;
+
+  if (!onCodeStep) {
+    return (
+      <div className="space-y-3">
+        <form action={(fd) => { setRestart(0); requestAction(fd); }} className="card space-y-4" noValidate>
+          <div>
+            <label htmlFor="email" className="label">{t("email")}</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              required
+              defaultValue={requestState.email}
+              aria-invalid={Boolean(requestState.errors?.email)}
+              aria-describedby="email-error"
+              className="input"
+            />
+            <FormError id="email-error" code={requestState.errors?.email} />
+          </div>
+          <FormError code={requestState.errors?._form} />
+          <button type="submit" className="btn-primary w-full" disabled={requesting}>
+            {requesting ? t("sending") : t("sendCode")}
+          </button>
+        </form>
+        <button type="button" onClick={onPassword} className="link text-sm">
+          {t("withPassword")}
+        </button>
+      </div>
     );
   }
 
@@ -64,7 +146,7 @@ export function LoginForm() {
           <FormError id="token-error" code={verifyState.errors?.token ?? verifyState.errors?._form} />
         </div>
         <button type="submit" className="btn-primary w-full" disabled={verifying}>
-          {verifying ? t("verifying") : t("verify")}
+          {verifying ? t("verifying") : t("verifyCode")}
         </button>
       </form>
       <div className="flex flex-wrap justify-between gap-2 text-sm">

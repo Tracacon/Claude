@@ -66,6 +66,7 @@ describe("Inserat anlegen", () => {
     luffyId = await create(seller, {
       title: "Suche Luffy Leader Alt Art",
       tcg: "one_piece",
+      kind: "sealed",
       offer: "trade",
       price_cents: 999,
       handover_event: true,
@@ -75,21 +76,49 @@ describe("Inserat anlegen", () => {
   });
 
   it("verlangt einen Preis beim Verkauf", async () => {
-    await expect(create(seller, { ...glurak, price_cents: null, photos: [] })).rejects.toThrow(/listings_price_for_sale/);
+    await expect(create(seller, { ...glurak, price_cents: null, photos: [photo(30), photo(31)] })).rejects.toThrow(
+      /listings_price_for_sale/,
+    );
   });
 
   it("verlangt mindestens eine Übergabeart", async () => {
     await expect(
-      create(seller, { ...glurak, handover_event: false, handover_pickup: false, handover_shipping: false, photos: [] }),
+      create(seller, { ...glurak, handover_event: false, handover_pickup: false, handover_shipping: false, photos: [photo(30), photo(31)] }),
     ).rejects.toThrow(/listings_handover/);
   });
 
   it("verlangt eine abgeschlossene Begrüßung", async () => {
-    await expect(create(newbie, { ...glurak, photos: [] })).rejects.toThrow(/profile_incomplete/);
+    await expect(create(newbie, { ...glurak, photos: [photo(30), photo(31)] })).rejects.toThrow(/profile_incomplete/);
   });
 
   it("verbietet Inserate ohne Anmeldung", async () => {
     await expect(create(null as unknown as string, { ...glurak, photos: [] })).rejects.toThrow(/permission denied/);
+  });
+
+  it("verlangt Vorder- und Rückseite bei Einzelkarten und Slabs", async () => {
+    await expect(create(seller, { ...glurak, photos: [] })).rejects.toThrow(/front_back_required/);
+    await expect(create(seller, { ...glurak, photos: [photo(30)] })).rejects.toThrow(/front_back_required/);
+    await expect(create(seller, { ...glurak, kind: "slab", grading: "PSA 10", photos: [photo(30)] })).rejects.toThrow(
+      /front_back_required/,
+    );
+    const left = await t.db.query("select 1 from public.listing_photos where id = $1", [photo(30)]);
+    expect(left.rows).toHaveLength(0); // abgelehnt heißt: nichts gespeichert
+  });
+
+  it("erlaubt Slabs mit zwei Fotos und Sealed ohne Fotos", async () => {
+    const slab = await create(seller, { ...glurak, kind: "slab", grading: "PSA 10", photos: [photo(32), photo(33)] });
+    await t.as(seller, "select public.delete_listing($1)", [slab]);
+    const sealed = await create(seller, { ...glurak, kind: "sealed", title: "Display 151", photos: [] });
+    await t.as(seller, "select public.delete_listing($1)", [sealed]);
+  });
+
+  it("verhindert, dass Pflichtfotos nachträglich gelöscht werden", async () => {
+    await expect(t.as(seller, "delete from public.listing_photos where id = $1", [photo(2)])).rejects.toThrow(
+      /front_back_required/,
+    );
+    await expect(
+      t.as(seller, "select public.update_listing($1, $2::jsonb)", [glurakId, JSON.stringify({ ...glurak, photos: [photo(1)] })]),
+    ).rejects.toThrow(/front_back_required/);
   });
 
   it("erlaubt höchstens 6 Fotos", async () => {
@@ -198,9 +227,9 @@ describe("Bearbeiten, Status, Löschen", () => {
   });
 
   it("löscht das eigene Inserat samt Fotos", async () => {
-    const id = await create(seller, { ...glurak, title: "Zum Löschen", photos: [photo(20)] });
+    const id = await create(seller, { ...glurak, title: "Zum Löschen", photos: [photo(20), photo(21)] });
     const r = await t.as<{ delete_listing: string[] }>(seller, "select public.delete_listing($1)", [id]);
-    expect(r.rows[0].delete_listing).toEqual([photo(20)]);
+    expect(r.rows[0].delete_listing).toEqual([photo(20), photo(21)]);
     const left = await t.db.query("select 1 from public.listing_photos where id = $1", [photo(20)]);
     expect(left.rows).toHaveLength(0);
     await expect(t.as(buyer, "select public.delete_listing($1)", [glurakId])).rejects.toThrow(/not_found/);
@@ -279,7 +308,7 @@ describe("Melden und Moderation", () => {
       /listing_removed/,
     );
     await expect(
-      t.as(seller, "select public.update_listing($1, $2::jsonb)", [glurakId, JSON.stringify({ ...glurak, photos: [] })]),
+      t.as(seller, "select public.update_listing($1, $2::jsonb)", [glurakId, JSON.stringify({ ...glurak, photos: [photo(2), photo(3)] })]),
     ).rejects.toThrow(/listing_removed/);
   });
 

@@ -6,7 +6,7 @@ import { FormError } from "@/components/form-error";
 import { PhotoUploader } from "@/components/photo-uploader";
 import { Link } from "@/i18n/navigation";
 import { createListing, updateListing, type ListingFormState } from "@/lib/actions/listings";
-import { CARD_LANGUAGES, CONDITIONS, KINDS, OFFERS, TCGS } from "@/lib/marketplace";
+import { CARD_LANGUAGES, CONDITIONS, KINDS, KINDS_NEEDING_BOTH_SIDES, OFFERS, TCGS } from "@/lib/marketplace";
 
 export type ListingFormValues = {
   title: string;
@@ -50,6 +50,8 @@ export function ListingForm({
   const val = (k: keyof ListingFormValues) => (v ? v[k] ?? "" : String(initial[k] ?? ""));
   const checked = (k: keyof ListingFormValues) => (v ? v[k] === "on" : Boolean(initial[k]));
   const [offer, setOffer] = useState(val("offer") || "sell");
+  const [kind, setKind] = useState(val("kind") || "single");
+  const bothSides = KINDS_NEEDING_BOTH_SIDES.includes(kind);
   const photos = v?.photos ? (JSON.parse(v.photos || "[]") as string[]) : initial.photos;
   const e = state.errors ?? {};
   // React setzt Formulare nach jeder Aktion zurück. Ein neuer Schlüssel baut das Formular
@@ -62,8 +64,15 @@ export function ListingForm({
 
       <section className="card space-y-2">
         <h2 className="font-semibold">{t("photos")}</h2>
-        <p className="hint mt-0">{t("photosHint")}</p>
-        <PhotoUploader key={photos.join(",")} userId={userId} initial={photos} onPendingChange={setUploading} />
+        <p className={`hint mt-0 ${bothSides ? "text-amber" : ""}`}>{bothSides ? t("photosHintRequired") : t("photosHint")}</p>
+        <PhotoUploader
+          key={photos.join(",")}
+          userId={userId}
+          initial={photos}
+          requireBothSides={bothSides}
+          onPendingChange={setUploading}
+        />
+        <FormError code={e.photos} />
       </section>
 
       <section className="card space-y-4">
@@ -85,7 +94,7 @@ export function ListingForm({
           </div>
           <div>
             <label htmlFor="kind" className="label">{t("kind")}</label>
-            <select id="kind" name="kind" defaultValue={val("kind") || "single"} className="input">
+            <select id="kind" name="kind" value={kind} onChange={(ev) => setKind(ev.target.value)} className="input">
               {KINDS.map((x) => <option key={x} value={x}>{tKind(x)}</option>)}
             </select>
           </div>
@@ -164,7 +173,7 @@ export function ListingForm({
         </fieldset>
       </section>
 
-      <FormError code={e._form ?? e.photos} />
+      <FormError code={e._form} />
       {uploading && <p className="text-sm text-cream/70">{tErr("photos_pending")}</p>}
       <div className="flex flex-wrap gap-3">
         <button type="submit" className="btn-primary" disabled={pending || uploading}>

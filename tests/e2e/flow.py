@@ -30,22 +30,27 @@ def shot(page, name):
         page.screenshot(path=os.path.join(SHOTS, f"{name}.png"), full_page=True)
 
 
+PASSWORD = "Sammeln-2026!"
+
+
 def login(page, email, *, wrong_code_first=False):
-    page.goto(f"{BASE}/de/anmelden")
+    page.goto(f"{BASE}/de/anmelden?mit=code")
     page.get_by_label("E-Mail-Adresse").fill(email)
     page.get_by_role("button", name="Code senden").click()
     expect(page.get_by_text(f"Wir haben dir einen Code an {email} geschickt")).to_be_visible()
     if wrong_code_first:
         page.get_by_label("Einmalcode").fill("000000")
-        page.get_by_role("button", name="Anmelden", exact=True).click()
+        page.get_by_role("button", name="Code bestätigen").click()
         expect(page.get_by_text("Der Code ist falsch oder abgelaufen")).to_be_visible()
     page.get_by_label("Einmalcode").fill("123456")
-    page.get_by_role("button", name="Anmelden", exact=True).click()
+    page.get_by_role("button", name="Code bestätigen").click()
 
 
 def onboard(page, nickname):
     expect(page).to_have_url(re.compile(r"/de/willkommen$"))
     page.get_by_label("Nickname").fill(nickname)
+    page.get_by_label("Passwort", exact=True).fill(PASSWORD)
+    page.get_by_label("Passwort wiederholen").fill(PASSWORD)
     page.get_by_label("Ich bin mindestens 16 Jahre alt.").check()
     page.get_by_role("checkbox", name=re.compile("Community-Regeln")).check()
     page.get_by_role("button", name="Los geht's").click()
@@ -64,7 +69,7 @@ with sync_playwright() as p:
     shot(a, "01-start")
     step("Startseite leitet auf /de und zeigt den Claim")
 
-    a.goto(f"{BASE}/de/anmelden")
+    a.goto(f"{BASE}/de/anmelden?mit=code")
     a.get_by_label("E-Mail-Adresse").fill("keine-mail")
     a.get_by_role("button", name="Code senden").click()
     expect(a.get_by_text("Bitte gib eine gültige E-Mail-Adresse ein.")).to_be_visible()
@@ -79,7 +84,20 @@ with sync_playwright() as p:
     expect(a.get_by_text("Die App ist ab 16 Jahren. Bitte bestätige dein Alter.")).to_be_visible()
     step("Begrüßung verlangt Altersbestätigung")
 
+    a.get_by_label("Passwort", exact=True).fill("kurz")
+    a.get_by_role("button", name="Los geht's").click()
+    # Nach der Prüfung leert die App die Passwortfelder (gewollt); darauf warten
+    expect(a.get_by_label("Passwort", exact=True)).to_have_value("")
+    expect(a.get_by_text("Das Passwort braucht mindestens 8 Zeichen.")).to_be_visible()
+    a.get_by_label("Passwort", exact=True).fill(PASSWORD)
+    a.get_by_label("Passwort wiederholen").fill("anders-12345")
+    a.get_by_role("button", name="Los geht's").click()
+    expect(a.get_by_text("Die beiden Passwörter stimmen nicht überein.")).to_be_visible()
+    step("Begrüßung prüft das Passwort")
+
     a.get_by_label("Nickname").fill("ab")
+    a.get_by_label("Passwort", exact=True).fill(PASSWORD)
+    a.get_by_label("Passwort wiederholen").fill(PASSWORD)
     a.get_by_label("Ich bin mindestens 16 Jahre alt.").check()
     a.get_by_role("checkbox", name=re.compile("Community-Regeln")).check()
     a.get_by_role("button", name="Los geht's").click()
@@ -95,13 +113,13 @@ with sync_playwright() as p:
     expect(a.get_by_role("heading", name="Mein Profil")).to_be_visible()
     step("Begrüßung abgeschlossen, Profilseite erreicht")
 
-    a.get_by_label("Ort").fill("Stuttgart")
+    a.get_by_label("Ort", exact=True).fill("Stuttgart")
     a.get_by_label("Über mich").fill("Sammle Pokémon und One Piece.")
     a.get_by_label("Link (z. B. Instagram)").fill("http://unsicher.de")
-    a.get_by_role("button", name="Speichern").click()
+    a.get_by_role("button", name="Speichern", exact=True).click()
     expect(a.get_by_text("Bitte gib einen vollständigen Link mit https:// ein.")).to_be_visible()
     a.get_by_label("Link (z. B. Instagram)").fill("https://instagram.com/tracacon")
-    a.get_by_role("button", name="Speichern").click()
+    a.get_by_role("button", name="Speichern", exact=True).click()
     expect(a.get_by_text("Gespeichert.")).to_be_visible()
     shot(a, "03-profil")
     step("Profil speichern mit Prüfung des Links")
@@ -111,6 +129,28 @@ with sync_playwright() as p:
     a.goto(f"{BASE}/de/anmelden")
     expect(a).to_have_url(re.compile(r"/de/profil$"))
     step("Angemeldete werden von Anmeldung und Begrüßung weitergeleitet")
+
+    # --- Zweites Gerät: Anmeldung mit Passwort ------------------------------
+    phone = browser.new_context(**mobile).new_page()
+    phone.goto(f"{BASE}/de/anmelden")
+    expect(phone.get_by_role("heading", name="Anmelden")).to_be_visible()
+    phone.get_by_label("E-Mail-Adresse").fill("dani@tracacon.de")
+    phone.get_by_label("Passwort", exact=True).fill("falsch-falsch")
+    phone.get_by_role("button", name="Anmelden", exact=True).click()
+    expect(phone.get_by_text("E-Mail-Adresse oder Passwort ist falsch.")).to_be_visible()
+    phone.get_by_label("Passwort", exact=True).fill(PASSWORD)
+    phone.get_by_role("button", name="Anmelden", exact=True).click()
+    expect(phone).to_have_url(re.compile(r"/de/profil$"))
+    expect(phone.get_by_role("heading", name="Mein Profil")).to_be_visible()
+    expect(phone.get_by_role("link", name="@Dani_TCG")).to_be_visible()
+    shot(phone, "07-zweites-geraet")
+    step("Anmeldung auf einem zweiten Gerät mit E-Mail und Passwort")
+
+    phone.get_by_label("Neues Passwort").fill("Neues-Passwort-1")
+    phone.get_by_label("Passwort wiederholen").fill("Neues-Passwort-1")
+    phone.get_by_role("button", name="Passwort speichern").click()
+    expect(phone.get_by_text("Passwort gespeichert.")).to_be_visible()
+    step("Passwort im Profil geändert")
 
     # --- Zweiter Nutzer (Mitglied) ------------------------------------------
     member_ctx = browser.new_context(**mobile)
