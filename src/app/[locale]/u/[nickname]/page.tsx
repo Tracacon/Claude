@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ProfileView } from "@/components/profile-view";
 import { redirect } from "@/i18n/navigation";
 import { getMyProfile } from "@/lib/auth";
-import { getProfileListings, getPublicProfile } from "@/lib/profiles";
+import { getProfileEvents, getProfileListings, getPublicProfile } from "@/lib/profiles";
 import { ReportForm } from "../../marktplatz/[id]/listing-actions";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/u/[nickname]">): Promise<Metadata> {
@@ -23,10 +23,11 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
 
   const tab = sp.tab === "abzeichen" ? "abzeichen" : "inserate";
   const listings = tab === "inserate" && profile.can_view ? await getProfileListings(profile.nickname) : [];
+  const events = tab === "abzeichen" && profile.can_view ? await getProfileEvents(profile.nickname) : [];
   const t = await getTranslations("Listing");
   return (
     <div className="space-y-6">
-      <ProfileView profile={profile} listings={listings} tab={tab} loggedIn={Boolean(me?.nickname)} basePath={`/u/${profile.nickname}`} />
+      <ProfileView profile={profile} listings={listings} events={events} tab={tab} loggedIn={Boolean(me?.nickname)} basePath={`/u/${profile.nickname}`} />
       {me?.nickname && <ReportForm profileId={profile.id} label={t("reportProfile")} />}
     </div>
   );

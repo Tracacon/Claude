@@ -26,3 +26,11 @@ export async function getFollowList(nickname: string, kind: "followers" | "follo
   const { data } = await supabase.rpc("list_follows", { p_nickname: nickname, p_kind: kind });
   return (data ?? []) as FollowListItem[];
 }
+
+export type VisitedEvent = { id: string; name: string; starts_at: string; city: string | null };
+
+export async function getProfileEvents(nickname: string): Promise<VisitedEvent[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("profile_events", { p_nickname: nickname });
+  return (data ?? []) as VisitedEvent[];
+}

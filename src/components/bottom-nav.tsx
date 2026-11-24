@@ -3,7 +3,7 @@
 import { Link, usePathname } from "@/i18n/navigation";
 import { UserMenu, type UserMenuData } from "./user-menu";
 
-type Labels = { home: string; market: string; sell: string; messages: string; profile: string; login: string };
+type Labels = { home: string; events: string; market: string; sell: string; messages: string; profile: string; login: string };
 
 /** Navigationsleiste am unteren Rand, nur auf schmalen Bildschirmen. */
 export function BottomNav({
@@ -45,6 +45,7 @@ export function BottomNav({
       className="fixed inset-x-0 bottom-0 z-20 flex border-t border-white/10 bg-night/95 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden"
     >
       {item("/", "⌂", labels.home, is("/"))}
+      {item("/termine", "📅", labels.events, is("/termine"))}
       {item("/marktplatz", "▦", labels.market, marketActive)}
       {onboarded && (
         <Link

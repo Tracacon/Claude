@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ListingForm } from "@/components/listing-form";
 import { requireProfile } from "@/lib/auth";
+import { ensureEventsFresh, getEvents } from "@/lib/events";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/marktplatz/neu">): Promise<Metadata> {
   const { locale } = await params;
@@ -9,10 +10,14 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/marktpla
   return { title: t("newTitle") };
 }
 
-export default async function NewListingPage({ params }: PageProps<"/[locale]/marktplatz/neu">) {
+export default async function NewListingPage({ params, searchParams }: PageProps<"/[locale]/marktplatz/neu">) {
   const { locale } = await params;
   setRequestLocale(locale);
   const profile = await requireProfile();
+  await ensureEventsFresh();
+  const events = await getEvents(false, 8);
+  const wanted = (await searchParams).termin;
+  const preset = events.filter((e) => e.id === wanted).map((e) => e.id);
   const t = await getTranslations("Listing");
 
   return (
@@ -36,7 +41,9 @@ export default async function NewListingPage({ params }: PageProps<"/[locale]/ma
           handover_pickup: false,
           handover_shipping: false,
           photos: [],
+          events: preset,
         }}
+        events={events}
       />
     </div>
   );

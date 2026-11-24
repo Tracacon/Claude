@@ -10,11 +10,19 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/anmelden
   return { title: t("title") };
 }
 
-export default async function LoginPage({ params }: PageProps<"/[locale]/anmelden">) {
+export default async function LoginPage({ params, searchParams }: PageProps<"/[locale]/anmelden">) {
   const { locale } = await params;
+  const checkin = (await searchParams).checkin === "1";
   setRequestLocale(locale);
   const profile = await getMyProfile();
   if (profile) redirect({ href: profile.nickname ? "/profil" : "/willkommen", locale });
 
-  return <LoginForm />;
+  if (!checkin) return <LoginForm />;
+  const t = await getTranslations("Events");
+  return (
+    <div className="space-y-4">
+      <p role="status" className="card border-amber/50 bg-amber/10 text-sm">📍 {t("checkinLoginHint")}</p>
+      <LoginForm />
+    </div>
+  );
 }

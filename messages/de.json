@@ -27,7 +27,9 @@
     "requests": "Follower-Anfragen",
     "badges": "Abzeichen",
     "settings": "Einstellungen",
-    "close": "Schließen"
+    "close": "Schließen",
+    "events": "Termine",
+    "teamEvents": "Termine & Check-in"
   },
   "Home": {
     "claim": "Collect. Connect. Trade.",
@@ -183,7 +185,17 @@
     "email_taken": "Für diese E-Mail-Adresse gibt es schon ein Konto.",
     "email_not_confirmed": "Deine E-Mail-Adresse ist noch nicht bestätigt. Registriere dich erneut, um einen neuen Code zu bekommen.",
     "photo_missing": "Das Foto konnte nicht gesendet werden. Bitte versuch es noch einmal.",
-    "not_an_image": "Diese Datei ist kein Bild, das sich verarbeiten lässt."
+    "not_an_image": "Diese Datei ist kein Bild, das sich verarbeiten lässt.",
+    "checkin_invalid": "Dieser Check-in-Code ist ungültig oder wurde erneuert. Scanne den aktuellen Aushang.",
+    "checkin_not_open": "Der Check-in öffnet 2 Stunden vor Beginn des Events.",
+    "checkin_closed": "Der Check-in für dieses Event ist geschlossen.",
+    "too_many_events": "Höchstens 10 Termine je Inserat.",
+    "sync_not_configured": "Der Abgleich mit Odoo ist noch nicht eingerichtet.",
+    "odoo_not_configured": "Der Abgleich mit Odoo ist noch nicht eingerichtet.",
+    "odoo_unauthorized": "Odoo lehnt den API-Schlüssel ab. Bitte Schlüssel prüfen.",
+    "odoo_unreachable": "Odoo ist gerade nicht erreichbar. Später noch einmal versuchen.",
+    "odoo_bad_response": "Odoo hat unerwartet geantwortet. Ist die App Veranstaltungen installiert?",
+    "sync_failed": "Die Termine konnten nicht gespeichert werden."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -348,7 +360,9 @@
     "missing": "fehlt",
     "writeMessage": "Nachricht schreiben",
     "openConversation": "Zur Unterhaltung",
-    "contactLoginButton": "Anmelden"
+    "contactLoginButton": "Anmelden",
+    "bringTo": "Zum Event mitbringen",
+    "bringToHint": "Kreuz an, zu welchen Terminen du die Karte dabeihast. Sie erscheint dann auf der Terminseite."
   },
   "Moderation": {
     "title": "Moderation",
@@ -465,7 +479,6 @@
     "privateTitle": "Dieses Profil ist privat",
     "privateText": "Folge @{nickname}, um Profilbild, Beschreibung und Inserate zu sehen.",
     "noBadges": "Noch keine Abzeichen.",
-    "eventBadgesSoon": "Abzeichen für besuchte TRACACON-Events kommen mit dem Check-in.",
     "noListings": "Noch keine aktiven Inserate.",
     "noListingsMe": "Du hast noch keine aktiven Inserate. Tipp auf „Inserieren“, um deine erste Karte einzustellen.",
     "back": "Zurück",
@@ -500,6 +513,18 @@
     "popular": {
       "title": "Beliebt",
       "text": "Mindestens 10 Follower"
+    },
+    "regular_3": {
+      "title": "Stammgast",
+      "text": "3 Events besucht"
+    },
+    "regular_10": {
+      "title": "Stammgast Silber",
+      "text": "10 Events besucht"
+    },
+    "regular_25": {
+      "title": "Stammgast Gold",
+      "text": "25 Events besucht"
     }
   },
   "Settings": {
@@ -539,5 +564,60 @@
     "cropFront": "Vorderseite zuschneiden",
     "cropBack": "Rückseite zuschneiden",
     "cropCard": "Foto zuschneiden"
+  },
+  "Events": {
+    "title": "Termine",
+    "intro": "Trade Night Shows und Messen von TRACACON. Sieh vorab, wer welche Karten mitbringt.",
+    "empty": "Gerade sind keine Termine geplant. Schau bald wieder vorbei.",
+    "past": "{count, plural, one {# vergangener Termin} other {# vergangene Termine}}",
+    "listingCount": "{count, plural, =0 {Noch keine Karten angekündigt} one {# Inserat wird mitgebracht} other {# Inserate werden mitgebracht}}",
+    "youWereThere": "Du warst dabei",
+    "checkinFailed": "Check-in hat nicht geklappt",
+    "checkedInTitle": "Du bist eingecheckt!",
+    "alreadyCheckedIn": "Du bist schon eingecheckt",
+    "checkedInText": "Willkommen bei {name}. Das ist dein {count}. Besuch.",
+    "newRegularBadge": "Neues Abzeichen: Stammgast mit {count} Besuchen",
+    "checkedInHint": "Das Event-Abzeichen findest du in deinem Profil unter Abzeichen.",
+    "tickets": "Tickets bei EVENTIM",
+    "website": "Mehr auf tracacon.de",
+    "poster": "Check-in-Aushang",
+    "checkinHowTo": "Check-in: QR-Code am Eingang mit der Handykamera scannen.",
+    "checkinOver": "Dieses Event ist vorbei.",
+    "checkinLater": "Check-in vor Ort: QR-Code am Eingang scannen.",
+    "checkinCount": "{count, plural, one {# Person eingecheckt} other {# Personen eingecheckt}}",
+    "bringing": "Das bringt die Community mit",
+    "bringingIntro": "Inserate, die zu diesem Termin mitgebracht werden. Schreib vorher, dann findet ihr euch vor Ort.",
+    "bringCard": "Karte mitbringen",
+    "bringingEmpty": "Noch hat niemand Karten angekündigt. Sei die oder der Erste!",
+    "bringingEmptyPast": "Zu diesem Termin wurden keine Karten angekündigt.",
+    "allEvents": "Alle Termine",
+    "next": "Nächste Termine",
+    "teamTitle": "Termine und Check-in",
+    "teamIntro": "Termine kommen aus Odoo (App Veranstaltungen). Hier holst du sie sofort ab und druckst den Check-in-Aushang.",
+    "syncTitle": "Abgleich mit Odoo",
+    "syncNotConfigured": "Der Abgleich ist noch nicht eingerichtet: Bei Cloudflare fehlen ODOO_API_KEY oder SUPABASE_SECRET_KEY.",
+    "syncLast": "Zuletzt abgeglichen: {when}",
+    "syncNever": "Noch nie abgeglichen.",
+    "syncError": "Letzter Fehler: {error}",
+    "hidden": "ausgeblendet",
+    "posterCreate": "Aushang erstellen",
+    "syncing": "Hole Termine …",
+    "syncNow": "Jetzt aus Odoo holen",
+    "syncDone": "{count, plural, one {# Termin übernommen} other {# Termine übernommen}}",
+    "print": "Drucken",
+    "renew": "Neuen Code erzeugen",
+    "renewConfirm": "Der bisherige Aushang funktioniert danach nicht mehr. Neuen Code erzeugen?",
+    "renewed": "Neuer Code erzeugt. Bitte den Aushang neu drucken.",
+    "posterIntro": "Druck den Aushang aus und häng ihn am Eingang auf. Der Code gilt nur von 2 Stunden vor Beginn bis 2 Stunden nach Ende.",
+    "posterHeadline": "Jetzt einchecken!",
+    "posterQr": "QR-Code zum Einchecken",
+    "posterStep1": "Handykamera öffnen und auf den Code richten",
+    "posterStep2": "In der TRACACON-App anmelden oder kostenlos registrieren",
+    "posterStep3": "Abzeichen sammeln und Stammgast werden",
+    "bringsTo": "Kommt mit zu",
+    "visitedTitle": "Besuchte Events",
+    "visitedEmptyMe": "Check beim nächsten Event am Eingang ein, dann erscheint es hier.",
+    "visitedEmpty": "Noch keine besuchten Events.",
+    "checkinLoginHint": "Melde dich an oder registriere dich kostenlos. Danach wirst du automatisch eingecheckt."
   }
 }

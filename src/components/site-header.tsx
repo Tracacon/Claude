@@ -58,6 +58,7 @@ export async function SiteHeader() {
             badges: t("badges"),
             settings: t("settings"),
             moderation: t("moderation"),
+            teamEvents: t("teamEvents"),
             admin: t("admin"),
             logout: t("logout"),
             profile: t("profile"),
@@ -74,6 +75,9 @@ export async function SiteHeader() {
             TRACACON
           </Link>
           <nav className="ml-auto flex items-center gap-1 text-sm sm:gap-2">
+            <Link href="/termine" className="hidden rounded-lg px-2 py-1.5 hover:bg-white/5 sm:inline">
+              {t("events")}
+            </Link>
             <Link href="/marktplatz" className="hidden rounded-lg px-2 py-1.5 hover:bg-white/5 sm:inline">
               {t("market")}
             </Link>
@@ -126,6 +130,7 @@ export async function SiteHeader() {
         menu={menu}
         labels={{
           home: t("home"),
+          events: t("events"),
           market: t("market"),
           sell: t("sell"),
           messages: t("messages"),

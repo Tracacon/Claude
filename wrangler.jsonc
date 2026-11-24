@@ -9,6 +9,12 @@
     "binding": "ASSETS"
   },
   "observability": { "enabled": true },
+  // Odoo (Termine). Die Geheimnisse ODOO_API_KEY und SUPABASE_SECRET_KEY werden nur im
+  // Cloudflare-Dashboard als "Secret" eingetragen, nie hier.
+  "vars": {
+    "ODOO_URL": "https://tracacon.odoo.com",
+    "ODOO_PUBLIC_URL": "https://www.tracacon.de"
+  },
   // Staging: eigener Worker und eigenes Supabase-Projekt
   "env": {
     "staging": {

@@ -1,11 +1,12 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useActionState, useState } from "react";
 import { FormError } from "@/components/form-error";
 import { PhotoUploader } from "@/components/photo-uploader";
 import { Link } from "@/i18n/navigation";
 import { createListing, updateListing, type ListingFormState } from "@/lib/actions/listings";
+import { eventDay } from "@/lib/event-format";
 import { CARD_LANGUAGES, CONDITIONS, KINDS, KINDS_NEEDING_BOTH_SIDES, OFFERS, TCGS } from "@/lib/marketplace";
 
 export type ListingFormValues = {
@@ -24,17 +25,24 @@ export type ListingFormValues = {
   handover_pickup: boolean;
   handover_shipping: boolean;
   photos: string[];
+  events: string[];
 };
+
+export type EventOption = { id: string; name: string; starts_at: string; ends_at: string; timezone: string | null; city: string | null };
 
 export function ListingForm({
   userId,
   listingId,
   initial,
+  events = [],
 }: {
   userId: string;
   listingId?: string;
   initial: ListingFormValues;
+  /** Kommende Termine zum Ankreuzen */
+  events?: EventOption[];
 }) {
+  const locale = useLocale();
   const t = useTranslations("Listing");
   const tTcg = useTranslations("Tcg");
   const tKind = useTranslations("Kind");
@@ -48,6 +56,7 @@ export function ListingForm({
   // Nach einem Fehler die eingegebenen Werte behalten
   const v = state.values;
   const val = (k: keyof ListingFormValues) => (v ? v[k] ?? "" : String(initial[k] ?? ""));
+  const chosenEvents = v ? (v.events ?? "").split(",").filter(Boolean) : initial.events;
   const checked = (k: keyof ListingFormValues) => (v ? v[k] === "on" : Boolean(initial[k]));
   const [offer, setOffer] = useState(val("offer") || "sell");
   const [kind, setKind] = useState(val("kind") || "single");
@@ -172,6 +181,29 @@ export function ListingForm({
           <FormError code={e.handover} />
         </fieldset>
       </section>
+
+      {events.length > 0 && (
+        <section className="card space-y-2">
+          <input type="hidden" name="events_field" value="1" />
+          <fieldset>
+            <legend className="font-semibold">{t("bringTo")}</legend>
+            <p className="hint mt-0 mb-3">{t("bringToHint")}</p>
+            <div className="space-y-2">
+              {events.map((ev) => (
+                <label key={ev.id} className="flex items-center gap-3 rounded-xl border border-white/10 px-3 py-2.5 has-[:checked]:border-amber has-[:checked]:bg-amber/10">
+                  <input type="checkbox" name="events" value={ev.id} defaultChecked={chosenEvents.includes(ev.id)} className="size-5 shrink-0 accent-amber" />
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium">{ev.name}</span>
+                    <span className="block text-xs text-cream/60">
+                      {eventDay(ev, locale)}{ev.city ? ` · ${ev.city}` : ""}
+                    </span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        </section>
+      )}
 
       <FormError code={e._form} />
       {uploading && <p className="text-sm text-cream/70">{tErr("photos_pending")}</p>}

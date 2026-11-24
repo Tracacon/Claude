@@ -20,6 +20,7 @@ const FIELDS = [
 function readForm(formData: FormData) {
   const values: Record<string, string> = {};
   for (const f of FIELDS) values[f] = String(formData.get(f) ?? "");
+  values.events = formData.getAll("events").map(String).join(",");
   return values;
 }
 
@@ -28,6 +29,15 @@ async function removePhotoFiles(ownerId: string, photoIds: string[]) {
   const supabase = await createClient();
   const { error } = await supabase.storage.from(PHOTO_BUCKET).remove(photoIds.flatMap((id) => photoPaths(ownerId, id)));
   if (error) console.error("Fotos konnten nicht gelöscht werden", error.message);
+}
+
+/** Termine, zu denen die Karte mitgebracht wird (Kästchen "events" im Formular) */
+async function saveListingEvents(listingId: string, formData: FormData) {
+  if (formData.get("events_field") !== "1") return;
+  const ids = [...new Set(formData.getAll("events").map(String).filter((x) => UUID_PATTERN.test(x)))].slice(0, 10);
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_listing_events", { p_listing: listingId, p_events: ids });
+  if (error) console.error("set_listing_events", error.message);
 }
 
 export async function createListing(_prev: ListingFormState, formData: FormData): Promise<ListingFormState> {
@@ -39,6 +49,7 @@ export async function createListing(_prev: ListingFormState, formData: FormData)
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("create_listing", { p: parsed.data });
   if (error || !data) return { errors: { _form: error ? mapDbError(error) : "generic" }, values };
+  await saveListingEvents(data as string, formData);
 
   revalidatePath("/", "layout");
   const locale = await getLocale();
@@ -58,6 +69,7 @@ export async function updateListing(_prev: ListingFormState, formData: FormData)
   if (error) return { errors: { _form: mapDbError(error) }, values };
 
   await removePhotoFiles(profile.id, (data as string[] | null) ?? []);
+  await saveListingEvents(id, formData);
   revalidatePath("/", "layout");
   const locale = await getLocale();
   return redirect({ href: `/marktplatz/${id}`, locale });
