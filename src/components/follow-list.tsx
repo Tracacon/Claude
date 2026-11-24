@@ -25,13 +25,13 @@ export async function FollowList({
         <Link href={profile.is_me ? "/profil" : base} className="rounded-lg px-2 py-1 text-cream/70 hover:bg-white/5" aria-label={t("back")}>←</Link>
         <h1 className="text-lg font-bold">@{profile.nickname}</h1>
       </div>
-      <nav className="flex border-b border-white/10 text-sm">
+      <nav className="flex border-b border-line text-sm">
         <Link href={`${base}/follower`} aria-current={kind === "followers" ? "page" : undefined}
-          className={`flex-1 border-b-2 py-2.5 text-center font-semibold ${kind === "followers" ? "border-amber text-amber" : "border-transparent text-cream/60"}`}>
+          className={`flex-1 border-b-2 py-2.5 text-center font-semibold ${kind === "followers" ? "border-brand text-brand" : "border-transparent text-cream/60"}`}>
           {profile.follower_count} {t("followers")}
         </Link>
         <Link href={`${base}/folgt`} aria-current={kind === "following" ? "page" : undefined}
-          className={`flex-1 border-b-2 py-2.5 text-center font-semibold ${kind === "following" ? "border-amber text-amber" : "border-transparent text-cream/60"}`}>
+          className={`flex-1 border-b-2 py-2.5 text-center font-semibold ${kind === "following" ? "border-brand text-brand" : "border-transparent text-cream/60"}`}>
           {profile.following_count} {t("followingCount")}
         </Link>
       </nav>
@@ -40,7 +40,7 @@ export async function FollowList({
       ) : items.length === 0 ? (
         <p className="card text-center text-sm text-cream/70">{kind === "followers" ? t("noFollowers") : t("noFollowing")}</p>
       ) : (
-        <ul className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-night-2">
+        <ul className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-line bg-night-2">
           {items.map((u) => (
             <li key={u.id} className="flex items-center gap-3 p-3">
               <Link href={`/u/${u.nickname}`} className="flex min-w-0 flex-1 items-center gap-3">

@@ -27,6 +27,8 @@ async function openReports(isTeam: boolean) {
   return Number(data ?? 0);
 }
 
+const LOGO_URL = "https://www.tracacon.de/web/image/website/1/logo/TRACACON";
+
 export async function SiteHeader() {
   const t = await getTranslations("Nav");
   const profile = await getMyProfile();
@@ -69,28 +71,30 @@ export async function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-night/90 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
-          <Link href="/" className="text-lg font-black tracking-wider text-amber">
-            TRACACON
+      <header className="sticky top-0 z-20 border-b border-line bg-black/90 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-2.5">
+          <Link href="/" className="shrink-0" aria-label="TRACACON">
+            {/* Logo direkt von der Homepage, damit es immer gleich aussieht */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={LOGO_URL} alt="TRACACON" width={112} height={32} className="h-8 w-auto" />
           </Link>
           <nav className="ml-auto flex items-center gap-1 text-sm sm:gap-2">
-            <Link href="/termine" className="hidden rounded-lg px-2 py-1.5 hover:bg-white/5 sm:inline">
+            <Link href="/termine" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
               {t("events")}
             </Link>
-            <Link href="/marktplatz" className="hidden rounded-lg px-2 py-1.5 hover:bg-white/5 sm:inline">
+            <Link href="/marktplatz" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
               {t("market")}
             </Link>
             {onboarded && (
-              <Link href="/marktplatz/neu" className="hidden rounded-lg px-2 py-1.5 hover:bg-white/5 sm:inline">
+              <Link href="/marktplatz/neu" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
                 {t("sell")}
               </Link>
             )}
             {onboarded && (
-              <Link href="/nachrichten" className="hidden rounded-lg px-2 py-1.5 hover:bg-white/5 sm:inline">
+              <Link href="/nachrichten" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
                 {t("messages")}
                 {unread > 0 && (
-                  <span className="ml-1 rounded-full bg-amber px-1.5 py-0.5 text-xs font-bold text-night">{unread}</span>
+                  <span className="ml-1 rounded-full bg-brand px-1.5 py-0.5 text-xs font-bold text-night">{unread}</span>
                 )}
               </Link>
             )}
@@ -111,7 +115,7 @@ export async function SiteHeader() {
               </Link>
             ) : (
               <>
-                <Link href="/registrieren" className="hidden rounded-lg px-2 py-1.5 hover:bg-white/5 sm:inline">
+                <Link href="/registrieren" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
                   {t("register")}
                 </Link>
                 <Link href="/anmelden" className="btn-primary px-3 py-1.5">

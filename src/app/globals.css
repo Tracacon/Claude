@@ -1,16 +1,22 @@
 @import "tailwindcss";
 
-/* TRACACON-Farben: Nachtblau, Creme, Bernstein */
+/* TRACACON-Design wie auf tracacon.de: fast Schwarz, Türkis, Schrift Chakra Petch und Inter */
 @theme {
-  --color-night: #111b2e;
-  --color-night-2: #1a2742;
-  --color-night-3: #243556;
-  --color-cream: #f5f3ee;
-  --color-amber: #f2a93b;
-  --color-amber-dark: #d98f1f;
-  --color-danger: #e5484d;
-  --color-ok: #3fb68b;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --color-night: #0a0d11;
+  --color-night-2: #151a20;
+  --color-night-3: #1c232b;
+  --color-cream: #eef7f8;
+  --color-brand: #22cdd7;
+  --color-brand-light: #7ae9f7;
+  --color-brand-dark: #1bb3bc;
+  --color-on-brand: #061215;
+  --color-line: rgb(122 233 247 / 0.14);
+  --color-danger: #ff5d6c;
+  --color-ok: #3ddc97;
+  --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: "Chakra Petch", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --shadow-glow: 0 0 0 1px rgb(34 205 215 / 0.35), 0 12px 40px -12px rgb(34 205 215 / 0.45);
+  --shadow-cta: 0 8px 28px -10px rgb(34 205 215 / 0.8);
 }
 
 :root {
@@ -22,9 +28,27 @@ body {
   color: var(--color-cream);
 }
 
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  h1 {
+    text-transform: uppercase;
+  }
+}
+
 /* Bausteine der Oberfläche */
 @utility card {
-  @apply rounded-2xl border border-white/10 bg-night-2 p-5 sm:p-6;
+  @apply rounded-2xl border border-line bg-night-2 p-5 sm:p-6;
+}
+
+/* Kleine Überzeile über Überschriften, wie "Trade · Card · Convention" */
+@utility kicker {
+  @apply inline-block font-display text-xs font-semibold uppercase tracking-[0.22em] text-brand;
 }
 
 @utility label {
@@ -36,19 +60,19 @@ body {
 }
 
 @utility input {
-  @apply w-full rounded-xl border border-white/15 bg-night-3 px-3 py-2.5 text-base text-cream placeholder:text-cream/40 focus:border-amber focus:outline-none focus:ring-2 focus:ring-amber/40;
+  @apply w-full rounded-lg border border-line bg-night-3 px-3 py-2.5 text-base text-cream placeholder:text-cream/40 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/40;
 }
 
 @utility btn {
-  @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60;
 }
 
 @utility btn-primary {
-  @apply btn bg-amber text-night hover:bg-amber-dark;
+  @apply btn bg-brand text-on-brand shadow-cta hover:bg-brand-light;
 }
 
 @utility btn-ghost {
-  @apply btn border border-white/15 text-cream hover:bg-white/5;
+  @apply btn border border-cream/35 text-cream hover:border-brand hover:bg-brand/5 hover:text-brand;
 }
 
 @utility btn-danger {
@@ -60,7 +84,12 @@ body {
 }
 
 @utility link {
-  @apply text-amber underline-offset-2 hover:underline;
+  @apply text-brand underline-offset-2 hover:underline;
+}
+
+/* Karte, die beim Darüberfahren leicht anhebt und leuchtet */
+@utility card-hover {
+  @apply transition duration-200 hover:-translate-y-1 hover:border-brand/50 hover:shadow-glow;
 }
 
 /* Drucken (z. B. Check-in-Aushang): nur der Inhalt, weißer Hintergrund */

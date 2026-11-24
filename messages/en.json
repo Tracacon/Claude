@@ -33,8 +33,7 @@
   },
   "Home": {
     "claim": "Collect. Connect. Trade.",
-    "intro": "The app of the TRACACON Trade Card Conventions in Stuttgart. Marketplace, chat, events and check-in for collectors are on their way.",
-    "status": "Under construction: marketplace and chat are live, events and check-in come next.",
+    "intro": "The TRACACON community app. Show what you want to trade or sell, chat with other collectors and meet them at the next Trade Night Show.",
     "ctaLogin": "Sign in now",
     "ctaProfile": "Go to my profile",
     "hello": "Hi {nickname}!",
@@ -42,7 +41,8 @@
     "latest": "New in the marketplace",
     "toMarket": "Go to marketplace",
     "sell": "List a card",
-    "ctaRegister": "Sign up"
+    "ctaRegister": "Sign up",
+    "latestKicker": "Marketplace"
   },
   "Login": {
     "title": "Sign in",
@@ -591,7 +591,7 @@
     "bringingEmpty": "Nobody has announced cards yet. Be the first!",
     "bringingEmptyPast": "No cards were announced for this event.",
     "allEvents": "All events",
-    "next": "Upcoming events",
+    "next": "The next dates",
     "teamTitle": "Events and check-in",
     "teamIntro": "Events come from Odoo (Events app). Fetch them right away here and print the check-in poster.",
     "syncTitle": "Sync with Odoo",
@@ -618,6 +618,7 @@
     "visitedTitle": "Events attended",
     "visitedEmptyMe": "Check in at the entrance of the next event and it shows up here.",
     "visitedEmpty": "No events attended yet.",
-    "checkinLoginHint": "Log in or sign up for free. You'll be checked in automatically afterwards."
+    "checkinLoginHint": "Log in or sign up for free. You'll be checked in automatically afterwards.",
+    "kicker": "Upcoming events"
   }
 }

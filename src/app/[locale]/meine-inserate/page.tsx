@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/meine-in
 
 const statusColor: Record<ListingStatus, string> = {
   active: "bg-ok/15 text-ok",
-  reserved: "bg-amber/15 text-amber",
+  reserved: "bg-brand/15 text-brand",
   done: "bg-white/10 text-cream/70",
   removed: "bg-danger/15 text-danger",
 };
@@ -57,7 +57,7 @@ export default async function MyListingsPage({ params }: PageProps<"/[locale]/me
         <ul className="space-y-2">
           {items.map((l) => (
             <li key={l.id}>
-              <Link href={`/marktplatz/${l.id}`} className="card flex gap-3 p-3 hover:border-amber/50 sm:p-3">
+              <Link href={`/marktplatz/${l.id}`} className="card flex gap-3 p-3 hover:border-brand/50 sm:p-3">
                 <div className="h-20 w-16 shrink-0 overflow-hidden rounded-lg bg-night-3">
                   {l.cover_photo_id && (
                     <img src={photoUrl(profile.id, l.cover_photo_id, "thumb")} alt="" loading="lazy" className="h-full w-full object-cover" />
@@ -68,7 +68,7 @@ export default async function MyListingsPage({ params }: PageProps<"/[locale]/me
                   <p className="text-xs text-cream/60">
                     {tTcg(l.tcg)} · {format.dateTime(new Date(l.created_at), { dateStyle: "short" })}
                   </p>
-                  <p className="text-sm font-bold text-amber">
+                  <p className="text-sm font-bold text-brand">
                     <PriceTag offer={l.offer} cents={l.price_cents} negotiable={false} />
                   </p>
                   {l.status === "removed" && l.removed_reason && (

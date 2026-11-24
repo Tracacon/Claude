@@ -21,7 +21,7 @@ export default async function LoginPage({ params, searchParams }: PageProps<"/[l
   const t = await getTranslations("Events");
   return (
     <div className="space-y-4">
-      <p role="status" className="card border-amber/50 bg-amber/10 text-sm">📍 {t("checkinLoginHint")}</p>
+      <p role="status" className="card border-brand/50 bg-brand/10 text-sm">📍 {t("checkinLoginHint")}</p>
       <LoginForm />
     </div>
   );

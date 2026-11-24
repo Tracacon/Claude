@@ -39,7 +39,7 @@ export function ConversationMenu({
         ⋯
       </button>
       {open && (
-        <div className="absolute right-0 top-10 z-30 w-72 space-y-3 rounded-2xl border border-white/15 bg-night-2 p-4 shadow-xl">
+        <div className="absolute right-0 top-10 z-30 w-72 space-y-3 rounded-2xl border border-line bg-night-2 p-4 shadow-xl">
           {open === "menu" && (
             <div className="flex flex-col items-stretch gap-2">
               <button type="button" className="btn-ghost justify-start" onClick={() => setOpen("report")}>⚑ {t("report")}</button>

@@ -25,7 +25,7 @@ export function Avatar({
     return <img src={avatarUrl(userId, avatarId)} alt="" loading="lazy" className={`${cls} bg-night-3 object-cover`} />;
   }
   return (
-    <span aria-hidden className={`${cls} flex items-center justify-center bg-amber font-black text-night`}>
+    <span aria-hidden className={`${cls} flex items-center justify-center bg-brand font-black text-night`}>
       {nickname.slice(0, 1).toUpperCase()}
     </span>
   );

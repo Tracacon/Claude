@@ -46,14 +46,14 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
           <p aria-hidden className="text-5xl">✓</p>
           <h2 className="mt-2 text-xl font-bold">{sp.eingecheckt === "neu" ? t("checkedInTitle") : t("alreadyCheckedIn")}</h2>
           <p className="text-cream/80">{t("checkedInText", { name: e.name, count: visits })}</p>
-          {newStep && <p className="mt-3 font-semibold text-amber">🎖️ {t("newRegularBadge", { count: newStep })}</p>}
+          {newStep && <p className="mt-3 font-semibold text-brand">🎖️ {t("newRegularBadge", { count: newStep })}</p>}
           <p className="mt-2 text-sm text-cream/70">{t("checkedInHint")}</p>
         </section>
       )}
 
       <section className="card space-y-4">
         <div className="flex items-start gap-4">
-          <span aria-hidden className="flex w-16 shrink-0 flex-col items-center rounded-xl bg-amber py-2 text-night">
+          <span aria-hidden className="flex w-16 shrink-0 flex-col items-center rounded-xl bg-brand py-2 font-display text-on-brand">
             <span className="text-xs font-bold uppercase">{sheet.month}</span>
             <span className="text-3xl font-black leading-none">{sheet.day}</span>
           </span>

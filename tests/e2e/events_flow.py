@@ -139,7 +139,7 @@ with sync_playwright() as p:
     expect(guest.get_by_role("status").filter(has_text=re.compile(r"^1 Inserat$"))).to_be_visible()
     shot(guest, "51-termin-mitbringen", full=True)
     guest.goto(f"{BASE}/de")
-    expect(guest.get_by_role("heading", name="Nächste Termine")).to_be_visible()
+    expect(guest.get_by_role("heading", name="Die nächsten Termine")).to_be_visible()
     expect(guest.get_by_text("1 Inserat wird mitgebracht").first).to_be_visible()
     step("Terminseite und Startseite zeigen, was mitgebracht wird")
 

@@ -238,7 +238,7 @@ export function ChatThread({
               <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-[15px] leading-snug ${
-                    mine ? "rounded-br-md bg-amber text-night" : "rounded-bl-md bg-night-3 text-cream"
+                    mine ? "rounded-br-md bg-brand text-night" : "rounded-bl-md bg-night-3 text-cream"
                   }`}
                 >
                   <span className="sr-only">{mine ? t("you") : otherNickname}: </span>
@@ -261,7 +261,7 @@ export function ChatThread({
 
       {canSend ? (
         <form
-          className="sticky bottom-20 z-10 -mx-4 border-t border-white/10 bg-night/95 px-4 py-3 backdrop-blur sm:bottom-0"
+          className="sticky bottom-20 z-10 -mx-4 border-t border-line bg-night/95 px-4 py-3 backdrop-blur sm:bottom-0"
           onSubmit={(e) => {
             e.preventDefault();
             void send();
@@ -316,7 +316,7 @@ export function ChatThread({
 
       {preview && (
         <div className="fixed inset-0 z-50 flex flex-col bg-night" role="dialog" aria-modal="true" aria-label={t("previewTitle")}>
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+          <div className="flex items-center justify-between border-b border-line px-4 py-3">
             <button type="button" onClick={closePreview} className="text-cream/80">{t("cancel")}</button>
             <p className="font-semibold">{t("previewTitle")}</p>
             <span className="w-16" />
@@ -326,7 +326,7 @@ export function ChatThread({
             <img src={preview.url} alt="" className="max-h-full max-w-full object-contain" />
           </div>
           <form
-            className="flex items-end gap-2 border-t border-white/10 px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]"
+            className="flex items-end gap-2 border-t border-line px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]"
             onSubmit={(e) => {
               e.preventDefault();
               const file = preview.file;

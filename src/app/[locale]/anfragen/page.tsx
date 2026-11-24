@@ -31,7 +31,7 @@ export default async function RequestsPage({ params }: PageProps<"/[locale]/anfr
       {items.length === 0 ? (
         <p className="card text-sm text-cream/70">{t("noRequests")}</p>
       ) : (
-        <ul className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-night-2">
+        <ul className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-line bg-night-2">
           {items.map((r) => (
             <li key={r.id} className="flex flex-wrap items-center gap-3 p-3">
               <Link href={`/u/${r.nickname}`} className="flex min-w-0 flex-1 items-center gap-3">

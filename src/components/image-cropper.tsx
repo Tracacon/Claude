@@ -129,10 +129,10 @@ export function ImageCropper({
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-night" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+      <div className="flex items-center justify-between border-b border-line px-4 py-3">
         <button type="button" onClick={onCancel} className="text-cream/80">{t("cancel")}</button>
         <p className="font-semibold">{title}</p>
-        <button type="button" onClick={confirm} className="font-bold text-amber">{confirmLabel ?? t("apply")}</button>
+        <button type="button" onClick={confirm} className="font-bold text-brand">{confirmLabel ?? t("apply")}</button>
       </div>
 
       <div
@@ -168,7 +168,7 @@ export function ImageCropper({
         )}
       </div>
 
-      <div className="flex items-center gap-3 border-t border-white/10 px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+      <div className="flex items-center gap-3 border-t border-line px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
         <span aria-hidden className="text-sm">−</span>
         <input
           type="range"
@@ -178,7 +178,7 @@ export function ImageCropper({
           value={view.zoom}
           onChange={(e) => update({ zoom: Number(e.target.value) })}
           aria-label={t("zoom")}
-          className="flex-1 accent-amber"
+          className="flex-1 accent-brand"
         />
         <span aria-hidden className="text-sm">+</span>
         {shape === "card" && (
