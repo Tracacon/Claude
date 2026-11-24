@@ -1,4 +1,15 @@
 import { z } from "zod";
+import {
+  CARD_LANGUAGES,
+  CONDITIONS,
+  KINDS,
+  MAX_PHOTOS,
+  OFFERS,
+  REPORT_REASONS,
+  TCGS,
+  UUID_PATTERN,
+  parseEuroToCents,
+} from "@/lib/marketplace";
 
 // Spiegelt die Prüfungen der Datenbank, damit Nutzer verständliche Meldungen bekommen.
 // Die Datenbank prüft trotzdem selbst; diese Regeln sind nur die erste Stufe.
@@ -61,3 +72,69 @@ export function toFieldErrors(error: z.ZodError): FieldErrors {
   }
   return out;
 }
+
+// --- Marktplatz ----------------------------------------------------------------
+
+const checkbox = z
+  .union([z.literal("on"), z.literal("true"), z.literal(""), z.undefined(), z.null()])
+  .transform((v) => v === "on" || v === "true");
+
+export const listingSchema = z
+  .object({
+    title: z.string().trim().min(3, { message: "title_short" }).max(100, { message: "too_long" }),
+    description: optionalText(2000),
+    tcg: z.enum(TCGS, { message: "tcg_required" }),
+    kind: z.enum(KINDS),
+    offer: z.enum(OFFERS),
+    price: z.string().trim().max(20, { message: "invalid_price" }),
+    negotiable: checkbox,
+    condition: z.union([z.enum(CONDITIONS), z.literal("")]).transform((v) => (v === "" ? null : v)),
+    card_language: z.union([z.enum(CARD_LANGUAGES), z.literal("")]).transform((v) => (v === "" ? null : v)),
+    grading: optionalText(40),
+    city: optionalText(80),
+    handover_event: checkbox,
+    handover_pickup: checkbox,
+    handover_shipping: checkbox,
+    photos: z
+      .string()
+      .transform((s, ctx) => {
+        try {
+          const arr = s ? JSON.parse(s) : [];
+          if (Array.isArray(arr) && arr.every((x) => typeof x === "string" && UUID_PATTERN.test(x))) return arr as string[];
+        } catch {}
+        ctx.addIssue({ code: "custom", message: "generic" });
+        return z.NEVER;
+      })
+      .pipe(z.array(z.string()).max(MAX_PHOTOS, { message: "too_many_photos" })),
+  })
+  .transform((v, ctx) => {
+    const cents = v.offer === "trade" ? null : parseEuroToCents(v.price);
+    if (v.offer !== "trade" && (cents === null || Number.isNaN(cents))) {
+      ctx.addIssue({ code: "custom", path: ["price"], message: cents === null ? "price_required" : "invalid_price" });
+      return z.NEVER;
+    }
+    if (cents !== null && (cents < 0 || cents > 10_000_000)) {
+      ctx.addIssue({ code: "custom", path: ["price"], message: "invalid_price" });
+      return z.NEVER;
+    }
+    if (!v.handover_event && !v.handover_pickup && !v.handover_shipping) {
+      ctx.addIssue({ code: "custom", path: ["handover"], message: "handover_required" });
+      return z.NEVER;
+    }
+    const { price: _price, ...rest } = v;
+    void _price;
+    return { ...rest, price_cents: cents, negotiable: v.offer === "trade" ? false : v.negotiable };
+  });
+
+export type ListingInput = z.output<typeof listingSchema>;
+
+export const reportSchema = z.object({
+  reason: z.enum(REPORT_REASONS, { message: "reason_required" }),
+  details: optionalText(1000),
+});
+
+export const moderationReasonSchema = z
+  .string()
+  .trim()
+  .min(5, { message: "reason_required" })
+  .max(1000, { message: "too_long" });

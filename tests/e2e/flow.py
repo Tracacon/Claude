@@ -131,6 +131,7 @@ with sync_playwright() as p:
     step("Öffentliches Profil für Mitglieder sichtbar, Rolle als Abzeichen")
 
     # --- Admin vergibt Rollen -----------------------------------------------
+    a.goto(f"{BASE}/de/profil")
     a.get_by_role("link", name="Verwaltung").click()
     expect(a.get_by_role("heading", name=re.compile("Verwaltung"))).to_be_visible()
     row = a.locator("li", has_text="sammler@example.com")
@@ -157,7 +158,7 @@ with sync_playwright() as p:
     # --- Abmelden -------------------------------------------------------------
     a.get_by_role("button", name="Sign out").click()
     expect(a).to_have_url(re.compile(r"/en$"))
-    expect(a.get_by_role("link", name="Sign in", exact=True)).to_be_visible()
+    expect(a.get_by_role("link", name="Sign in", exact=True).first).to_be_visible()
     a.goto(f"{BASE}/de/profil")
     expect(a).to_have_url(re.compile(r"/de/anmelden$"))
     step("Abmelden beendet die Sitzung")
@@ -171,7 +172,7 @@ with sync_playwright() as p:
     m.get_by_label("Zur Bestätigung LÖSCHEN eingeben").fill("löschen")
     m.get_by_role("button", name="Konto endgültig löschen").click()
     expect(m).to_have_url(re.compile(r"/de$"))
-    expect(m.get_by_role("link", name="Anmelden", exact=True)).to_be_visible()
+    expect(m.get_by_role("link", name="Anmelden", exact=True).first).to_be_visible()
     step("Konto löschen mit Bestätigung")
 
     browser.close()

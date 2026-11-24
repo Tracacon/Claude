@@ -2,7 +2,10 @@
 
 Community-App der TRACACON Trade Card Conventions. *Collect. Connect. Trade.*
 
-Grundlage ist das [Entscheidungsdokument](https://claude.ai/artifact/2BZqtKyEzQiHVrAccM2YuY). Dieser Stand ist **Phase 1 (Fundament)**: Anmeldung mit E-Mail-Einmalcode, Begrüßung mit Mindestalter 16, Profile, Rollen (Mitglied, Team, Admin), Verwaltung, Konto löschen, Deutsch und Englisch.
+Grundlage ist das [Entscheidungsdokument](https://claude.ai/artifact/2BZqtKyEzQiHVrAccM2YuY). Stand:
+
+- **Phase 1 (Fundament):** Anmeldung mit E-Mail-Einmalcode, Begrüßung mit Mindestalter 16, Profile, Rollen (Mitglied, Team, Admin), Verwaltung, Konto löschen, Deutsch und Englisch.
+- **Phase 2 (Marktplatz):** Inserate mit bis zu 6 Fotos anlegen, bearbeiten, Status (aktiv, reserviert, erledigt), löschen. Suche und Filter auf dem Server mit Seitenaufteilung. Melden von Inseraten und Profilen, Moderationsseite für das Team mit Begründung an den Anbieter.
 
 ## Technik
 
@@ -19,7 +22,8 @@ Alle Änderungen laufen über Server-Aktionen mit der Sitzung des Nutzers. Die D
 
 ```
 src/app/[locale]/        Seiten: Start, anmelden, willkommen, profil, u/[nickname], admin, impressum, datenschutz, regeln
-src/lib/actions/         Server-Aktionen (Anmeldung, Profil, Rollen)
+src/lib/actions/         Server-Aktionen (Anmeldung, Profil, Rollen, Inserate, Moderation)
+src/components/          Navigation, Inseratskarte, Inseratsformular, Foto-Upload
 src/lib/auth.ts          Zentrale Abfrage von Anmeldung, Profil und Rolle
 src/proxy.ts             Sprache erkennen, Supabase-Sitzung auffrischen
 messages/de.json, en.json  Alle Texte
@@ -33,7 +37,7 @@ tests/e2e/               Browsertest des ganzen Ablaufs
 ### 1. Supabase-Projekt
 
 1. In eurer Supabase-Organisation ein Projekt anlegen, Region **EU Central (Frankfurt)**.
-2. **SQL Editor** öffnen, den Inhalt von `supabase/migrations/20261124120000_phase1_profile_rollen.sql` einfügen und ausführen.
+2. **SQL Editor** öffnen und die Dateien aus `supabase/migrations/` **der Reihe nach** einzeln einfügen und ausführen (jede genau einmal). Phase 2 legt dabei auch den Foto-Speicher `listing-photos` an.
 3. **Authentication → Sign In / Providers → Email**: E-Mail aktiv lassen. „Confirm email“ kann an bleiben.
 4. **Authentication → Emails → Templates**: In den Vorlagen **Magic Link** und **Confirm signup** den Code einbauen, zum Beispiel:
    ```html
@@ -81,6 +85,9 @@ npm run cf:build   # Bau für Cloudflare
 Bei jedem Push prüft GitHub dasselbe automatisch (`.github/workflows/pruefung.yml`). Den Browsertest beschreibt `tests/e2e/README.md`.
 
 ## Bekannte Punkte
+
+- Fotos lädt der Browser direkt in den eigenen Ordner bei Supabase Storage hoch (Abweichung vom Entscheidungsdokument, das alle Schreibzugriffe über die API vorsah). Grund: keine Größengrenzen und keine Rechenzeit im Worker. Der Speicher erzwingt Ordner, Dateinamen, Typ (JPEG/WebP) und 2 MB je Datei. Der Browser verkleinert die Fotos vorher und entfernt dabei Metadaten wie den Aufnahmeort.
+- Fotos entfernter Inserate bleiben über ihre direkte Adresse erreichbar, bis der Anbieter das Inserat löscht.
 
 - Der Cloudflare-Adapter stuft den Proxy von Next.js 16 noch als experimentell ein. Der komplette Browsertest läuft im lokalen Cloudflare-Simulator (`wrangler dev`) durch.
 - `package.json` legt unter `overrides` für `@opennextjs/aws` das Paket `cookie@0.7.2` fest. Mit `cookie@1.x` stürzt der Adapter bei jeder Anfrage mit Cookie ab (`cookieParser.parse` ist dort undefiniert, Fehler 1101). Erst entfernen, wenn OpenNext das behoben hat, und dann den Browsertest im Simulator wiederholen.
