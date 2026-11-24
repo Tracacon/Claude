@@ -66,7 +66,9 @@ with sync_playwright() as p:
     step("Drei Konten angelegt")
 
     seller.goto(f"{BASE}/de/marktplatz/neu")
-    seller.locator('input[type="file"]').set_input_files(photos)
+    seller.locator("#listing-photo-gallery").set_input_files(photos)
+    for _ in photos:
+        seller.get_by_role("button", name="Übernehmen").click()
     expect(seller.get_by_text("Wird hochgeladen")).to_have_count(0, timeout=15000)
     seller.get_by_label("Titel").fill("Elsa Enchanted Lorcana")
     seller.get_by_label("Spiel").select_option("lorcana")

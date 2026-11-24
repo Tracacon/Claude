@@ -182,7 +182,8 @@
     "message_invalid": "Messages must be between 1 and 1,000 characters.",
     "email_taken": "There is already an account for this email address.",
     "email_not_confirmed": "Your email address is not confirmed yet. Sign up again to get a new code.",
-    "photo_missing": "The photo could not be sent. Please try again."
+    "photo_missing": "The photo could not be sent. Please try again.",
+    "not_an_image": "This file is not an image that can be processed."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -404,7 +405,11 @@
     "addPhoto": "Attach photo",
     "photo": "Photo",
     "photoSending": "Sending photo …",
-    "openPhoto": "Open photo in full size"
+    "openPhoto": "Open photo in full size",
+    "previewTitle": "Send photo",
+    "cancel": "Cancel",
+    "caption": "Caption",
+    "captionPlaceholder": "Add a caption …"
   },
   "Register": {
     "title": "Sign up",
@@ -518,6 +523,21 @@
     "approvalText": "People who want to follow you send a request. You decide whom to accept.",
     "marketNote": "Note: your listings stay visible to everyone in the marketplace so buyers can find them.",
     "save": "Save",
-    "saved": "Saved."
+    "saved": "Saved.",
+    "cropAvatar": "Choose crop"
+  },
+  "Photos": {
+    "camera": "Take photo",
+    "gallery": "Choose from gallery",
+    "galleryMany": "Choose from gallery (several possible)",
+    "remove": "Remove",
+    "cancel": "Cancel",
+    "apply": "Apply",
+    "zoom": "Zoom",
+    "rotate": "Rotate 90 degrees",
+    "cardHint": "Move the card into the frame · pinch to zoom",
+    "cropFront": "Crop front",
+    "cropBack": "Crop back",
+    "cropCard": "Crop photo"
   }
 }

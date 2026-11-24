@@ -7,7 +7,7 @@ const FULL_MAX = 1600;
 const THUMB_MAX = 480;
 const MAX_BYTES = 1_900_000; // Grenze des Speichers: 2 MB
 
-async function decode(file: File): Promise<ImageBitmap | HTMLImageElement> {
+export async function decode(file: File): Promise<ImageBitmap | HTMLImageElement> {
   if ("createImageBitmap" in window) {
     try {
       return await createImageBitmap(file, { imageOrientation: "from-image" });
@@ -76,5 +76,40 @@ export async function prepareAvatar(file: File): Promise<Blob> {
   if ("close" in source) source.close();
   return new Promise((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("encode"))), "image/jpeg", 0.85),
+  );
+}
+
+/** Bild als <img> laden (Browser drehen laut Kamera-Angabe automatisch). */
+export async function loadImage(file: File): Promise<{ img: HTMLImageElement; url: string }> {
+  if (!file.type.startsWith("image/") && !/\.(heic|heif)$/i.test(file.name)) {
+    throw new Error("not_an_image");
+  }
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.decoding = "async";
+  img.src = url;
+  try {
+    await img.decode();
+  } catch {
+    URL.revokeObjectURL(url);
+    throw new Error("not_an_image");
+  }
+  return { img, url };
+}
+
+/** Zeichenfläche als JPEG, längste Seite höchstens max Pixel. */
+export function canvasToJpeg(source: HTMLCanvasElement, max: number, quality: number): Promise<Blob> {
+  const scale = Math.min(1, max / Math.max(source.width, source.height));
+  let canvas = source;
+  if (scale < 1) {
+    canvas = document.createElement("canvas");
+    canvas.width = Math.round(source.width * scale);
+    canvas.height = Math.round(source.height * scale);
+    const ctx = canvas.getContext("2d")!;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+  }
+  return new Promise((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("encode"))), "image/jpeg", quality),
   );
 }

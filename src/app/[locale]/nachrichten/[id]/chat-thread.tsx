@@ -2,6 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { PhotoSourceSheet } from "@/components/photo-source-sheet";
 import { MESSAGE_MAX, type ChatMessage } from "@/lib/chat";
 import { prepareImage } from "@/lib/image";
 import { CHAT_PHOTO_BUCKET } from "@/lib/social";
@@ -78,7 +79,9 @@ export function ChatThread({
   const [error, setError] = useState<string | null>(null);
   const [live, setLive] = useState(false);
   const [photoSending, setPhotoSending] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [sheet, setSheet] = useState(false);
+  const [preview, setPreview] = useState<{ file: File; url: string } | null>(null);
+  const [caption, setCaption] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastAt = useRef<string | null>(initialMessages.at(-1)?.created_at ?? null);
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
@@ -161,7 +164,17 @@ export function ChatThread({
             : "generic";
   }
 
-  async function sendPhoto(file: File | undefined) {
+  function openPreview(file: File) {
+    setCaption(draft);
+    setPreview({ file, url: URL.createObjectURL(file) });
+  }
+
+  function closePreview() {
+    if (preview) URL.revokeObjectURL(preview.url);
+    setPreview(null);
+  }
+
+  async function sendPhoto(file: File | undefined, text: string) {
     if (!file || photoSending) return;
     setPhotoSending(true);
     setError(null);
@@ -175,18 +188,17 @@ export function ChatThread({
       if (upErr) throw new Error("upload_failed");
       const { data, error: err } = await client.rpc("send_message", {
         p_conversation_id: conversationId,
-        p_body: draft.trim(),
+        p_body: text.trim(),
         p_photo_id: id,
       });
       if (err) throw new Error(errorCode(err.message ?? ""));
-      setDraft("");
+      if (text.trim() === draft.trim()) setDraft("");
       if (data) add([data as ChatMessage]);
     } catch (e) {
       const code = e instanceof Error && e.message !== "not_an_image" ? e.message : "upload_failed";
       setError(tErr(tErr.has(code) ? code : "upload_failed"));
     } finally {
       setPhotoSending(false);
-      if (fileRef.current) fileRef.current.value = "";
     }
   }
 
@@ -256,18 +268,16 @@ export function ChatThread({
           }}
         >
           <div className="flex items-end gap-2">
-            <label className={`btn-ghost shrink-0 cursor-pointer px-3 ${photoSending ? "opacity-60" : ""}`} title={t("addPhoto")}>
+            <button
+              type="button"
+              onClick={() => setSheet(true)}
+              disabled={photoSending}
+              className="btn-ghost shrink-0 px-3"
+              aria-label={t("addPhoto")}
+              title={t("addPhoto")}
+            >
               <span aria-hidden>📷</span>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                className="sr-only"
-                aria-label={t("addPhoto")}
-                disabled={photoSending}
-                onChange={(e) => void sendPhoto(e.target.files?.[0])}
-              />
-            </label>
+            </button>
             <label htmlFor="message" className="sr-only">{t("message")}</label>
             <textarea
               id="message"
@@ -292,9 +302,52 @@ export function ChatThread({
             <p className="hint">{draft.length} / {MESSAGE_MAX}</p>
           )}
           {photoSending && <p role="status" className="hint">{t("photoSending")}</p>}
+          <PhotoSourceSheet
+            idPrefix="chat-photo"
+            open={sheet}
+            onClose={() => setSheet(false)}
+            onFiles={(files) => openPreview(files[0])}
+            facing="environment"
+            title={t("addPhoto")}
+          />
           {error && <p role="alert" className="error">{error}</p>}
         </form>
       ) : null}
+
+      {preview && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-night" role="dialog" aria-modal="true" aria-label={t("previewTitle")}>
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+            <button type="button" onClick={closePreview} className="text-cream/80">{t("cancel")}</button>
+            <p className="font-semibold">{t("previewTitle")}</p>
+            <span className="w-16" />
+          </div>
+          <div className="flex flex-1 items-center justify-center overflow-hidden bg-black p-3">
+            {/* eslint-disable-next-line @next/next/no-img-element -- lokale Vorschau */}
+            <img src={preview.url} alt="" className="max-h-full max-w-full object-contain" />
+          </div>
+          <form
+            className="flex items-end gap-2 border-t border-white/10 px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const file = preview.file;
+              closePreview();
+              void sendPhoto(file, caption);
+            }}
+          >
+            <label htmlFor="caption" className="sr-only">{t("caption")}</label>
+            <textarea
+              id="caption"
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              rows={Math.min(4, Math.max(2, caption.split("\n").length))}
+              maxLength={MESSAGE_MAX}
+              placeholder={t("captionPlaceholder")}
+              className="input resize-none"
+            />
+            <button type="submit" className="btn-primary shrink-0">{t("send")}</button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
