@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { requireProfile, type Profile } from "@/lib/auth";
+import { ReportForm } from "../../marktplatz/[id]/listing-actions";
 import { createClient } from "@/lib/supabase/server";
 import { NICKNAME_PATTERN } from "@/lib/validation";
 
@@ -14,7 +15,7 @@ export default async function PublicProfilePage({ params }: PageProps<"/[locale]
   const { locale, nickname: rawNickname } = await params;
   setRequestLocale(locale);
   // Profile sind nur für angemeldete Mitglieder sichtbar.
-  await requireProfile();
+  const me = await requireProfile();
 
   const nickname = decodeURIComponent(rawNickname);
   if (!NICKNAME_PATTERN.test(nickname)) notFound();
@@ -22,16 +23,18 @@ export default async function PublicProfilePage({ params }: PageProps<"/[locale]
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("nickname, city, bio, website, role, created_at")
+    .select("id, nickname, city, bio, website, role, created_at")
     .ilike("nickname", nickname.replace(/[%_\\]/g, (c) => `\\${c}`))
-    .maybeSingle<Pick<Profile, "nickname" | "city" | "bio" | "website" | "role" | "created_at">>();
+    .maybeSingle<Pick<Profile, "id" | "nickname" | "city" | "bio" | "website" | "role" | "created_at">>();
   if (!profile) notFound();
 
   const t = await getTranslations("Profile");
   const tr = await getTranslations("Roles");
   const format = await getFormatter();
 
+  const tListing = await getTranslations("Listing");
   return (
+    <div className="space-y-4">
     <article className="card space-y-4">
       <header className="flex flex-wrap items-center gap-3">
         <div
@@ -60,5 +63,7 @@ export default async function PublicProfilePage({ params }: PageProps<"/[locale]
         </a>
       )}
     </article>
+    {profile.id !== me.id && <ReportForm profileId={profile.id} label={tListing("reportProfile")} />}
+    </div>
   );
 }

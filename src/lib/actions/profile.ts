@@ -5,6 +5,7 @@ import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { requireProfile, requireUser } from "@/lib/auth";
 import { mapDbError } from "@/lib/db-errors";
+import { PHOTO_BUCKET } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/server";
 import { onboardingSchema, profileSchema, toFieldErrors, type FieldErrors } from "@/lib/validation";
 
@@ -68,6 +69,17 @@ export async function deleteAccount(_prev: FormState, formData: FormData): Promi
   }
 
   const supabase = await createClient();
+  const user = await requireUser();
+
+  // Fotos im Speicher zuerst löschen; die Datenbank entfernt danach Konto, Profil und Inserate.
+  const { data: files } = await supabase.storage.from(PHOTO_BUCKET).list(user.id, { limit: 1000 });
+  if (files && files.length > 0) {
+    const { error: storageError } = await supabase.storage
+      .from(PHOTO_BUCKET)
+      .remove(files.map((f) => `${user.id}/${f.name}`));
+    if (storageError) console.error("Fotos beim Kontolöschen nicht entfernt", storageError.message);
+  }
+
   const { error } = await supabase.rpc("delete_own_account");
   if (error) return { errors: { _form: mapDbError(error) } };
 

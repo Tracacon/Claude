@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getSessionUser, requireProfile } from "@/lib/auth";
+import { signOut } from "@/lib/actions/auth";
 import { DeleteAccountForm } from "./delete-account-form";
 import { ProfileForm } from "./profile-form";
 
@@ -18,6 +19,8 @@ export default async function ProfilePage({ params }: PageProps<"/[locale]/profi
   const user = await getSessionUser();
   const t = await getTranslations("Profile");
   const tr = await getTranslations("Roles");
+  const tNav = await getTranslations("Nav");
+  const isTeam = profile.role === "team" || profile.role === "admin";
   const format = await getFormatter();
 
   return (
@@ -48,6 +51,16 @@ export default async function ProfilePage({ params }: PageProps<"/[locale]/profi
           <dd>{tr(profile.role)}</dd>
         </div>
       </dl>
+
+      <nav aria-label={t("areas")} className="card flex flex-wrap gap-2">
+        <Link href="/meine-inserate" className="btn-ghost">{tNav("myListings")}</Link>
+        <Link href="/marktplatz/neu" className="btn-ghost">+ {tNav("sell")}</Link>
+        {isTeam && <Link href="/moderation" className="btn-ghost">{tNav("moderation")}</Link>}
+        {profile.role === "admin" && <Link href="/admin" className="btn-ghost">{tNav("admin")}</Link>}
+        <form action={signOut} className="ml-auto">
+          <button type="submit" className="btn-ghost text-cream/70">{t("logout")}</button>
+        </form>
+      </nav>
 
       <ProfileForm
         initial={{

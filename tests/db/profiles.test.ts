@@ -1,48 +1,23 @@
 // Prüft die Phase-1-Migration gegen eine echte Postgres-Instanz (PGlite).
-import { readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
-import { PGlite } from "@electric-sql/pglite";
+import type { PGlite } from "@electric-sql/pglite";
 import { beforeAll, describe, expect, it } from "vitest";
-
-const root = join(__dirname, "..", "..");
-const migrationsDir = join(root, "supabase", "migrations");
+import { createDb } from "./helpers";
 
 let db: PGlite;
+let as: Awaited<ReturnType<typeof createDb>>["as"];
 const ids = {
   admin: "00000000-0000-0000-0000-00000000000a",
   alice: "00000000-0000-0000-0000-0000000000a1",
   bob: "00000000-0000-0000-0000-0000000000b0",
 };
 
-/** Führt SQL als angemeldeter Nutzer aus (wie PostgREST mit JWT). */
-async function as<T = Record<string, unknown>>(userId: string | null, sql: string, params: unknown[] = []) {
-  await db.exec("reset role");
-  await db.query("select set_config('request.jwt.claim.sub', $1, false)", [userId ?? ""]);
-  await db.exec(userId ? "set role authenticated" : "set role anon");
-  try {
-    return await db.query<T>(sql, params);
-  } finally {
-    await db.exec("reset role");
-  }
-}
-
-async function signUp(id: string, email: string, locale?: string) {
-  await db.query("insert into auth.users (id, email, raw_user_meta_data) values ($1, $2, $3)", [
-    id,
-    email,
-    JSON.stringify(locale ? { locale } : {}),
-  ]);
-}
-
 beforeAll(async () => {
-  db = new PGlite();
-  await db.exec(readFileSync(join(__dirname, "supabase-stub.sql"), "utf8"));
-  for (const file of readdirSync(migrationsDir).sort()) {
-    await db.exec(readFileSync(join(migrationsDir, file), "utf8"));
-  }
-  await signUp(ids.admin, "admin@tracacon.de");
-  await signUp(ids.alice, "alice@example.com", "en");
-  await signUp(ids.bob, "bob@example.com", "xx");
+  const t = await createDb();
+  db = t.db;
+  as = t.as;
+  await t.signUp(ids.admin, "admin@tracacon.de");
+  await t.signUp(ids.alice, "alice@example.com", "en");
+  await t.signUp(ids.bob, "bob@example.com", "xx");
   // Erster Admin wird wie im Handbuch beschrieben direkt per SQL gesetzt.
   await db.query("update public.profiles set role = 'admin' where id = $1", [ids.admin]);
 });
