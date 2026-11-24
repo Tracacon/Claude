@@ -3,7 +3,43 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MESSAGE_MAX, type ChatMessage } from "@/lib/chat";
+import { prepareImage } from "@/lib/image";
+import { CHAT_PHOTO_BUCKET } from "@/lib/social";
 import { createClient } from "@/lib/supabase/client";
+
+// Signierte Adressen für Chat-Fotos (geschützter Speicher), pro Seite zwischengespeichert
+const signedCache = new Map<string, Promise<string | null>>();
+
+function signedUrl(client: ReturnType<typeof createClient>, path: string) {
+  if (!signedCache.has(path)) {
+    signedCache.set(
+      path,
+      client.storage
+        .from(CHAT_PHOTO_BUCKET)
+        .createSignedUrl(path, 60 * 60)
+        .then(({ data }) => data?.signedUrl ?? null),
+    );
+  }
+  return signedCache.get(path)!;
+}
+
+function ChatPhoto({ conversationId, photoId, label }: { conversationId: string; photoId: string; label: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    void signedUrl(createClient(), `${conversationId}/${photoId}.jpg`).then((u) => alive && setUrl(u));
+    return () => {
+      alive = false;
+    };
+  }, [conversationId, photoId]);
+  if (!url) return <div className="aspect-[3/4] w-48 animate-pulse rounded-xl bg-white/10" />;
+  return (
+    <a href={url} target="_blank" rel="noopener" aria-label={label} className="block">
+      {/* eslint-disable-next-line @next/next/no-img-element -- signierte Adresse aus Supabase Storage */}
+      <img src={url} alt="" className="max-h-72 w-auto max-w-full rounded-xl object-contain" />
+    </a>
+  );
+}
 
 const POLL_OFFLINE_MS = 4000; // ohne Echtzeit-Verbindung
 const POLL_ONLINE_MS = 30000; // Sicherheitsnetz, falls ein Ereignis verloren geht
@@ -41,6 +77,8 @@ export function ChatThread({
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [live, setLive] = useState(false);
+  const [photoSending, setPhotoSending] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastAt = useRef<string | null>(initialMessages.at(-1)?.created_at ?? null);
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
@@ -111,6 +149,47 @@ export function ChatThread({
     bottomRef.current?.scrollIntoView({ block: "end" });
   }, [messages.length]);
 
+  function errorCode(text: string) {
+    return text.includes("rate_limited")
+      ? "rate_limited"
+      : text.includes("blocked")
+        ? "blocked"
+        : text.includes("messages_body") || text.includes("messages_content")
+          ? "message_invalid"
+          : text.includes("photo_missing")
+            ? "photo_missing"
+            : "generic";
+  }
+
+  async function sendPhoto(file: File | undefined) {
+    if (!file || photoSending) return;
+    setPhotoSending(true);
+    setError(null);
+    try {
+      const { full } = await prepareImage(file);
+      const id = crypto.randomUUID();
+      const client = supabase();
+      const { error: upErr } = await client.storage
+        .from(CHAT_PHOTO_BUCKET)
+        .upload(`${conversationId}/${id}.jpg`, full, { contentType: "image/jpeg", upsert: false });
+      if (upErr) throw new Error("upload_failed");
+      const { data, error: err } = await client.rpc("send_message", {
+        p_conversation_id: conversationId,
+        p_body: draft.trim(),
+        p_photo_id: id,
+      });
+      if (err) throw new Error(errorCode(err.message ?? ""));
+      setDraft("");
+      if (data) add([data as ChatMessage]);
+    } catch (e) {
+      const code = e instanceof Error && e.message !== "not_an_image" ? e.message : "upload_failed";
+      setError(tErr(tErr.has(code) ? code : "upload_failed"));
+    } finally {
+      setPhotoSending(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
   async function send() {
     const body = draft.trim();
     if (!body || sending) return;
@@ -123,15 +202,7 @@ export function ChatThread({
     const { data, error: err } = await supabase().rpc("send_message", { p_conversation_id: conversationId, p_body: body });
     setSending(false);
     if (err) {
-      const text = `${err.message ?? ""}`;
-      const code = text.includes("rate_limited")
-        ? "rate_limited"
-        : text.includes("blocked")
-          ? "blocked"
-          : text.includes("messages_body")
-            ? "message_invalid"
-            : "generic";
-      setError(tErr(code));
+      setError(tErr(errorCode(err.message ?? "")));
       return;
     }
     setDraft("");
@@ -159,7 +230,12 @@ export function ChatThread({
                   }`}
                 >
                   <span className="sr-only">{mine ? t("you") : otherNickname}: </span>
-                  <p className="whitespace-pre-wrap break-words">{m.body}</p>
+                  {m.photo_id && (
+                    <div className="mb-1">
+                      <ChatPhoto conversationId={conversationId} photoId={m.photo_id} label={t("openPhoto")} />
+                    </div>
+                  )}
+                  {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
                   <p className={`mt-0.5 text-right text-[10px] ${mine ? "text-night/60" : "text-cream/50"}`}>
                     {format.dateTime(date, { timeStyle: "short" })}
                   </p>
@@ -180,6 +256,18 @@ export function ChatThread({
           }}
         >
           <div className="flex items-end gap-2">
+            <label className={`btn-ghost shrink-0 cursor-pointer px-3 ${photoSending ? "opacity-60" : ""}`} title={t("addPhoto")}>
+              <span aria-hidden>📷</span>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                aria-label={t("addPhoto")}
+                disabled={photoSending}
+                onChange={(e) => void sendPhoto(e.target.files?.[0])}
+              />
+            </label>
             <label htmlFor="message" className="sr-only">{t("message")}</label>
             <textarea
               id="message"
@@ -203,6 +291,7 @@ export function ChatThread({
           {draft.length > MESSAGE_MAX - 100 && (
             <p className="hint">{draft.length} / {MESSAGE_MAX}</p>
           )}
+          {photoSending && <p role="status" className="hint">{t("photoSending")}</p>}
           {error && <p role="alert" className="error">{error}</p>}
         </form>
       ) : null}

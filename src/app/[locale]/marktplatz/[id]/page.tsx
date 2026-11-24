@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { Avatar } from "@/components/avatar";
 import { PriceTag } from "@/components/listing-card";
 import { Link } from "@/i18n/navigation";
 import { getSessionUser } from "@/lib/auth";
@@ -117,16 +118,10 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
       </dl>
 
       <section className="card flex flex-wrap items-center gap-3">
-        <div aria-hidden className="flex size-11 items-center justify-center rounded-full bg-amber text-lg font-black text-night">
-          {owner.nickname.slice(0, 1).toUpperCase()}
-        </div>
+        <Avatar userId={l.owner_id} avatarId={owner.avatar_id} nickname={owner.nickname} size="md" />
         <div className="min-w-0 flex-1">
           <p className="text-xs text-cream/60">{t("seller")}</p>
-          {user ? (
-            <Link href={`/u/${owner.nickname}`} className="font-semibold hover:underline">@{owner.nickname}</Link>
-          ) : (
-            <p className="font-semibold">@{owner.nickname}</p>
-          )}
+          <Link href={`/u/${owner.nickname}`} className="font-semibold hover:underline">@{owner.nickname}</Link>
           <p className="text-xs text-cream/50">{t("memberSince", { date: date(owner.member_since) })}</p>
         </div>
         {owner.role !== "member" && (

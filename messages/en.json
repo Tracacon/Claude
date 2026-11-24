@@ -19,7 +19,15 @@
     "moderation": "Moderation",
     "more": "More",
     "messages": "Messages",
-    "register": "Sign up"
+    "register": "Sign up",
+    "menu": "Profile menu",
+    "myProfile": "View my profile",
+    "followers": "My followers",
+    "following": "Following",
+    "requests": "Follow requests",
+    "badges": "Badges",
+    "settings": "Settings",
+    "close": "Close"
   },
   "Home": {
     "claim": "Collect. Connect. Trade.",
@@ -173,7 +181,8 @@
     "blocked": "You can't message each other because of a block.",
     "message_invalid": "Messages must be between 1 and 1,000 characters.",
     "email_taken": "There is already an account for this email address.",
-    "email_not_confirmed": "Your email address is not confirmed yet. Sign up again to get a new code."
+    "email_not_confirmed": "Your email address is not confirmed yet. Sign up again to get a new code.",
+    "photo_missing": "The photo could not be sent. Please try again."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -391,7 +400,11 @@
     "hideHint": "It comes back as soon as a new message arrives.",
     "close": "Close",
     "youBlocked": "You blocked @{nickname}. You can undo this via ⋯.",
-    "blockedYou": "No more messages can be sent in this conversation."
+    "blockedYou": "No more messages can be sent in this conversation.",
+    "addPhoto": "Attach photo",
+    "photo": "Photo",
+    "photoSending": "Sending photo …",
+    "openPhoto": "Open photo in full size"
   },
   "Register": {
     "title": "Sign up",
@@ -428,5 +441,83 @@
     "newIntro": "Choose a new password. You'll be signed in afterwards.",
     "newPassword": "New password",
     "save": "Save password and sign in"
+  },
+  "Social": {
+    "follow": "Follow",
+    "following": "Following",
+    "requested": "Requested",
+    "unfollowHint": "Tap again to unfollow or withdraw",
+    "listings": "Listings",
+    "followers": "Followers",
+    "followingCount": "Following",
+    "memberSince": "Member since {date}",
+    "followsYou": "Follows you",
+    "editProfile": "Edit profile",
+    "newListing": "Sell",
+    "sections": "Sections",
+    "badges": "Badges",
+    "privateLabel": "Private profile",
+    "privateTitle": "This profile is private",
+    "privateText": "Follow @{nickname} to see their photo, bio and listings.",
+    "noBadges": "No badges yet.",
+    "eventBadgesSoon": "Badges for attending TRACACON events come with check-in.",
+    "noListings": "No active listings yet.",
+    "noListingsMe": "You don't have any active listings yet. Tap “Sell” to list your first card.",
+    "back": "Back",
+    "noFollowers": "No followers yet.",
+    "noFollowing": "Not following anyone yet.",
+    "remove": "Remove",
+    "removed": "Removed",
+    "done": "Done",
+    "accept": "Accept",
+    "decline": "Decline",
+    "requests": "Follow requests",
+    "noRequests": "No open requests.",
+    "requestsOff": "Note: anyone can follow you directly. Requests only appear if you turn on “Approve followers” in settings."
+  },
+  "Badges": {
+    "team": {
+      "title": "Team",
+      "text": "Part of the TRACACON team"
+    },
+    "founder": {
+      "title": "Founding member",
+      "text": "Here from the start"
+    },
+    "first_listing": {
+      "title": "First listing",
+      "text": "Listed their first card"
+    },
+    "seller_10": {
+      "title": "10 listings",
+      "text": "Active trader"
+    },
+    "popular": {
+      "title": "Popular",
+      "text": "At least 10 followers"
+    }
+  },
+  "Settings": {
+    "title": "Settings",
+    "back": "Back to profile",
+    "avatar": "Profile photo",
+    "addAvatar": "Add profile photo",
+    "changeAvatar": "Change profile photo",
+    "removeAvatar": "Remove",
+    "chooseAvatar": "Choose profile photo",
+    "uploading": "Uploading …",
+    "avatarHint": "Cropped to a square. Location and other photo data are removed.",
+    "privacy": "Privacy",
+    "privacyIntro": "Decide who can see your profile and follow you.",
+    "whoSees": "Who can see your photo, bio and listings on your profile?",
+    "public": "Everyone",
+    "publicText": "Anyone can see your full profile, even without signing in.",
+    "followersOnly": "Only my followers",
+    "followersOnlyText": "Others only see your nickname, counts and badges.",
+    "approval": "Approve followers",
+    "approvalText": "People who want to follow you send a request. You decide whom to accept.",
+    "marketNote": "Note: your listings stay visible to everyone in the marketplace so buyers can find them.",
+    "save": "Save",
+    "saved": "Saved."
   }
 }

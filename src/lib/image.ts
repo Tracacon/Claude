@@ -56,3 +56,25 @@ export async function prepareImage(file: File): Promise<{ full: Blob; thumb: Blo
   if ("close" in source) source.close();
   return { full, thumb };
 }
+
+/** Profilbild: mittig quadratisch zuschneiden, 512 × 512 Pixel, JPEG. */
+export async function prepareAvatar(file: File): Promise<Blob> {
+  if (!file.type.startsWith("image/") && !/\.(heic|heif)$/i.test(file.name)) {
+    throw new Error("not_an_image");
+  }
+  const source = await decode(file);
+  const w = "naturalWidth" in source ? source.naturalWidth : source.width;
+  const h = "naturalHeight" in source ? source.naturalHeight : source.height;
+  const side = Math.min(w, h);
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("canvas");
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(source, (w - side) / 2, (h - side) / 2, side, side, 0, 0, 512, 512);
+  if ("close" in source) source.close();
+  return new Promise((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("encode"))), "image/jpeg", 0.85),
+  );
+}

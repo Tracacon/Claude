@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Avatar } from "@/components/avatar";
 import { PriceTag } from "@/components/listing-card";
 import { Link } from "@/i18n/navigation";
 import { requireProfile } from "@/lib/auth";
@@ -40,7 +41,10 @@ export default async function ConversationPage({ params }: PageProps<"/[locale]/
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <Link href="/nachrichten" className="rounded-lg px-2 py-1 text-cream/70 hover:bg-white/5" aria-label={t("back")}>←</Link>
-        <h1 className="min-w-0 flex-1 truncate text-lg font-bold">@{c.other_nickname}</h1>
+        <Link href={`/u/${c.other_nickname}`} className="flex min-w-0 flex-1 items-center gap-2">
+          <Avatar userId={c.other_id} avatarId={c.other_avatar_id} nickname={c.other_nickname} size="xs" />
+          <h1 className="truncate text-lg font-bold">@{c.other_nickname}</h1>
+        </Link>
         <ConversationMenu conversationId={c.id} otherId={c.other_id} otherNickname={c.other_nickname} iBlocked={c.i_blocked} />
       </div>
 

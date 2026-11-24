@@ -24,4 +24,6 @@ python3 tests/e2e/flow.py http://127.0.0.1:8787
 python3 tests/e2e/marketplace_flow.py http://127.0.0.1:8787
 # Testserver neu starten, dann:
 python3 tests/e2e/chat_flow.py http://127.0.0.1:8787
+# Testserver neu starten, dann:
+python3 tests/e2e/social_flow.py http://127.0.0.1:8787
 ```

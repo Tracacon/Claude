@@ -1,15 +1,22 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getMyProfile } from "@/lib/auth";
-import { signOut } from "@/lib/actions/auth";
 import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "./bottom-nav";
 import { LanguageSwitch } from "./language-switch";
+import { UserMenu, type UserMenuData } from "./user-menu";
 
 async function unreadMessages(onboarded: boolean) {
   if (!onboarded) return 0;
   const supabase = await createClient();
   const { data } = await supabase.rpc("unread_message_count");
+  return Number(data ?? 0);
+}
+
+async function pendingRequests(onboarded: boolean) {
+  if (!onboarded) return 0;
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("pending_follow_request_count");
   return Number(data ?? 0);
 }
 
@@ -25,7 +32,39 @@ export async function SiteHeader() {
   const profile = await getMyProfile();
   const isTeam = profile?.role === "team" || profile?.role === "admin";
   const onboarded = Boolean(profile?.nickname);
-  const [reports, unread] = await Promise.all([openReports(isTeam), unreadMessages(onboarded)]);
+  const [reports, unread, requests] = await Promise.all([
+    openReports(isTeam),
+    unreadMessages(onboarded),
+    pendingRequests(onboarded),
+  ]);
+  const menu: UserMenuData | null =
+    profile && profile.nickname
+      ? {
+          id: profile.id,
+          nickname: profile.nickname,
+          avatarId: profile.avatar_id,
+          role: profile.role,
+          unread,
+          requests,
+          reports,
+          labels: {
+            menu: t("menu"),
+            myProfile: t("myProfile"),
+            myListings: t("myListings"),
+            messages: t("messages"),
+            followers: t("followers"),
+            following: t("following"),
+            requests: t("requests"),
+            badges: t("badges"),
+            settings: t("settings"),
+            moderation: t("moderation"),
+            admin: t("admin"),
+            logout: t("logout"),
+            profile: t("profile"),
+            close: t("close"),
+          },
+        }
+      : null;
 
   return (
     <>
@@ -60,25 +99,12 @@ export async function SiteHeader() {
                 )}
               </Link>
             )}
-            {profile?.role === "admin" && (
-              <Link href="/admin" className="hidden rounded-lg px-2 py-1.5 hover:bg-white/5 sm:inline">
-                {t("admin")}
+            {menu ? (
+              <UserMenu data={menu} variant="header" />
+            ) : profile ? (
+              <Link href="/willkommen" className="rounded-lg px-2 py-1.5 hover:bg-white/5">
+                {t("profile")}
               </Link>
-            )}
-            {profile ? (
-              <>
-                <Link
-                  href={onboarded ? "/profil" : "/willkommen"}
-                  className="hidden rounded-lg px-2 py-1.5 hover:bg-white/5 sm:inline"
-                >
-                  {profile.nickname ?? t("profile")}
-                </Link>
-                <form action={signOut} className="hidden sm:block">
-                  <button type="submit" className="rounded-lg px-2 py-1.5 text-cream/70 hover:bg-white/5">
-                    {t("logout")}
-                  </button>
-                </form>
-              </>
             ) : (
               <>
                 <Link href="/registrieren" className="hidden rounded-lg px-2 py-1.5 hover:bg-white/5 sm:inline">
@@ -97,6 +123,7 @@ export async function SiteHeader() {
         loggedIn={Boolean(profile)}
         onboarded={onboarded}
         unread={unread}
+        menu={menu}
         labels={{
           home: t("home"),
           market: t("market"),

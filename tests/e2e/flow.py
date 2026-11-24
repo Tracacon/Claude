@@ -95,18 +95,19 @@ with sync_playwright() as p:
     a.get_by_label("Bestätigungscode").fill("123456")
     a.get_by_role("button", name="Konto aktivieren").click()
     expect(a).to_have_url(re.compile(r"/de/profil$"))
-    expect(a.get_by_role("heading", name="Mein Profil")).to_be_visible()
-    expect(a.get_by_role("link", name="@Dani_TCG")).to_be_visible()
+    expect(a.get_by_role("heading", name="@Dani_TCG")).to_be_visible()
     step("Konto mit Bestätigungscode aktiviert, Profil direkt fertig")
 
+    a.get_by_role("link", name="Profil bearbeiten").click()
+    expect(a).to_have_url(re.compile(r"/de/einstellungen$"))
     a.get_by_label("Ort", exact=True).fill("Stuttgart")
     a.get_by_label("Über mich").fill("Sammle Pokémon und One Piece.")
     a.get_by_label("Link (z. B. Instagram)").fill("http://unsicher.de")
-    a.get_by_role("button", name="Speichern", exact=True).click()
+    a.get_by_role("button", name="Speichern", exact=True).first.click()
     expect(a.get_by_text("Bitte gib einen vollständigen Link mit https:// ein.")).to_be_visible()
     a.get_by_label("Link (z. B. Instagram)").fill("https://instagram.com/tracacon")
-    a.get_by_role("button", name="Speichern", exact=True).click()
-    expect(a.get_by_text("Gespeichert.")).to_be_visible()
+    a.get_by_role("button", name="Speichern", exact=True).first.click()
+    expect(a.get_by_text("Gespeichert.").first).to_be_visible()
     shot(a, "03-profil")
     step("Profil speichern mit Prüfung des Links")
 
@@ -135,11 +136,11 @@ with sync_playwright() as p:
     phone.get_by_label("Passwort", exact=True).fill(PASSWORD)
     phone.get_by_role("button", name="Anmelden", exact=True).click()
     expect(phone).to_have_url(re.compile(r"/de/profil$"))
-    expect(phone.get_by_role("heading", name="Mein Profil")).to_be_visible()
-    expect(phone.get_by_role("link", name="@Dani_TCG")).to_be_visible()
+    expect(phone.get_by_role("heading", name="@Dani_TCG")).to_be_visible()
     shot(phone, "07-zweites-geraet")
     step("Anmeldung auf einem zweiten Gerät mit E-Mail und Passwort")
 
+    phone.goto(f"{BASE}/de/einstellungen")
     phone.get_by_label("Neues Passwort").fill("Neues-Passwort-1")
     phone.get_by_label("Passwort wiederholen").fill("Neues-Passwort-1")
     phone.get_by_role("button", name="Passwort speichern").click()
@@ -189,7 +190,10 @@ with sync_playwright() as p:
     m.get_by_role("button", name="Los geht's").click()
     expect(m).to_have_url(re.compile(r"/de/profil$"))
     step("Inzwischen vergebener Nickname: neue Wahl auf der Begrüßungsseite")
+    m.get_by_role("button", name="Mein Profil").click()
+    expect(m.get_by_role("menu")).to_be_visible()
     expect(m.get_by_role("link", name="Verwaltung")).to_have_count(0)
+    m.keyboard.press("Escape")
     m.goto(f"{BASE}/de/admin")
     expect(m).to_have_url(re.compile(r"/de$"))
     step("Mitglied sieht keine Verwaltung und wird von /admin weggeleitet")
@@ -203,6 +207,7 @@ with sync_playwright() as p:
 
     # --- Admin vergibt Rollen -----------------------------------------------
     a.goto(f"{BASE}/de/profil")
+    a.get_by_role("button", name="Mein Profil").click()
     a.get_by_role("link", name="Verwaltung").click()
     expect(a.get_by_role("heading", name=re.compile("Verwaltung"))).to_be_visible()
     row = a.locator("li", has_text="sammler@example.com")
@@ -219,14 +224,15 @@ with sync_playwright() as p:
     step("Letzter Admin kann sich nicht selbst herabstufen")
 
     # --- Sprache -------------------------------------------------------------
-    a.goto(f"{BASE}/de/profil")
+    a.goto(f"{BASE}/de/einstellungen")
     a.get_by_label("Sprache", exact=True).select_option("en")
-    expect(a).to_have_url(re.compile(r"/en/profil$"))
-    expect(a.get_by_role("heading", name="My profile")).to_be_visible()
+    expect(a).to_have_url(re.compile(r"/en/einstellungen$"))
+    expect(a.get_by_role("heading", name="Settings")).to_be_visible()
     shot(a, "06-profil-englisch")
     step("Sprachumschaltung auf Englisch")
 
     # --- Abmelden -------------------------------------------------------------
+    a.get_by_role("button", name="My profile").click()
     a.get_by_role("button", name="Sign out").click()
     expect(a).to_have_url(re.compile(r"/en$"))
     expect(a.get_by_role("link", name="Sign in", exact=True).first).to_be_visible()
@@ -235,7 +241,7 @@ with sync_playwright() as p:
     step("Abmelden beendet die Sitzung")
 
     # --- Konto löschen ---------------------------------------------------------
-    m.goto(f"{BASE}/de/profil")
+    m.goto(f"{BASE}/de/einstellungen")
     m.get_by_text("Konto löschen").click()
     m.get_by_label("Zur Bestätigung LÖSCHEN eingeben").fill("nein")
     m.get_by_role("button", name="Konto endgültig löschen").click()

@@ -32,6 +32,49 @@ messages: list[dict] = []
 blocks: set[tuple[str, str]] = set()
 
 
+PUBLIC_BUCKETS = ("listing-photos", "avatars")
+follows: dict[tuple[str, str], str] = {}  # (follower, following) -> pending/accepted
+
+
+def can_view(viewer, owner):
+    p = profiles.get(owner)
+    return bool(p) and (viewer == owner or p["profile_visibility"] == "public"
+                        or follows.get((viewer, owner)) == "accepted" or is_team(viewer))
+
+
+def profile_by_nick(nick):
+    return next((p for p in profiles.values() if (p["nickname"] or "").lower() == (nick or "").lower()), None)
+file_owner: dict[str, str] = {}
+
+
+def sign_token(bucket, path):
+    return hmac.new(SECRET, f"{bucket}/{path}".encode(), hashlib.sha256).hexdigest()[:32]
+
+
+def can_write(u, bucket, path):
+    if not u:
+        return False
+    if bucket in ("listing-photos", "avatars"):
+        return path.startswith(u["id"] + "/")
+    if bucket == "chat-photos":
+        c = conversations.get(path.split("/", 1)[0])
+        return bool(c and u["id"] in (c["seller_id"], c["buyer_id"]))
+    return False
+
+
+def can_read(u, bucket, path):
+    if bucket in PUBLIC_BUCKETS:
+        return True
+    if not u or bucket != "chat-photos":
+        return False
+    c = conversations.get(path.split("/", 1)[0])
+    if not c:
+        return False
+    if u["id"] in (c["seller_id"], c["buyer_id"]):
+        return True
+    return is_team(u["id"]) and any(r.get("conversation_id") == c["id"] for r in reports.values())
+
+
 def blocked_between(a, b):
     return (a, b) in blocks or (b, a) in blocks
 
@@ -160,6 +203,7 @@ class Handler(BaseHTTPRequestHandler):
         profiles[uid] = {"id": uid, "nickname": None, "city": None, "bio": None, "website": None,
                          "locale": meta.get("locale", "de"), "role": "member",
                          "age_confirmed_at": None, "terms_accepted_at": None,
+                         "avatar_id": None, "profile_visibility": "public", "follow_approval": False,
                          "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ")}
         if len(users) == 1:
             profiles[uid]["role"] = "admin"  # erster Nutzer = Admin, wie per SQL im Handbuch
@@ -189,7 +233,7 @@ class Handler(BaseHTTPRequestHandler):
             if not u:
                 return self.send(401, {"message": "permission denied"})
             q = parse_qs(url.query)
-            rows = [p for p in profiles.values() if p["nickname"] or p["id"] == u["id"]]
+            rows = [p for p in profiles.values() if p["id"] == u["id"] or is_team(u["id"])]  # wie die Zugriffsregel
             if "id" in q:
                 rows = [p for p in rows if p["id"] == q["id"][0].removeprefix("eq.")]
             if "nickname" in q:
@@ -200,9 +244,14 @@ class Handler(BaseHTTPRequestHandler):
                     return self.send(406, {"code": "PGRST116", "message": "no rows"})
                 return self.send(200, rows[0])
             return self.send(200, rows)
-        if url.path.startswith("/storage/v1/object/public/listing-photos/"):
-            path = url.path.split("/listing-photos/", 1)[1]
-            data = files.get(path)
+        if url.path.startswith("/storage/v1/object/public/") or url.path.startswith("/storage/v1/object/sign/"):
+            public = url.path.startswith("/storage/v1/object/public/")
+            bucket, path = url.path.split("/object/", 1)[1].split("/", 1)[1].split("/", 1)
+            if public and bucket not in PUBLIC_BUCKETS:
+                return self.send(400, {"message": "bucket not public"})
+            if not public and parse_qs(url.query).get("token", [""])[0] != sign_token(bucket, path):
+                return self.send(400, {"message": "invalid signature"})
+            data = files.get(f"{bucket}/{path}")
             if data is None:
                 return self.send(404, {"message": "not found"})
             self.send_response(200)
@@ -218,17 +267,31 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         url = urlparse(self.path)
-        if url.path.startswith("/storage/v1/object/list/listing-photos"):
+        if url.path.startswith("/storage/v1/object/list/"):
             u = self.me()
+            bucket = url.path.split("/object/list/", 1)[1].strip("/")
             data = self.body()
             prefix = (data.get("prefix") or "").strip("/")
-            names = [k.split("/", 1)[1] for k in files if k.startswith(prefix + "/")] if u else []
+            names = [k.split("/", 2)[2] for k in files if k.startswith(f"{bucket}/{prefix}/")] if u else []
             return self.send(200, [{"name": n, "id": n} for n in names])
-        if url.path.startswith("/storage/v1/object/listing-photos/"):
+        if url.path.startswith("/storage/v1/object/sign/"):
             u = self.me()
-            path = url.path.split("/listing-photos/", 1)[1]
+            rest = url.path.split("/object/sign/", 1)[1]
+            data = self.body()
+            if "/" not in rest:  # mehrere Pfade auf einmal
+                out = [{"path": pth, "error": None if can_read(u, rest, pth) else "not found",
+                        "signedURL": f"/object/sign/{rest}/{pth}?token={sign_token(rest, pth)}" if can_read(u, rest, pth) else None}
+                       for pth in data.get("paths", [])]
+                return self.send(200, out)
+            bucket, path = rest.split("/", 1)
+            if not can_read(u, bucket, path) or f"{bucket}/{path}" not in files:
+                return self.send(400, {"statusCode": "404", "error": "not_found", "message": "Object not found"})
+            return self.send(200, {"signedURL": f"/object/sign/{bucket}/{path}?token={sign_token(bucket, path)}"})
+        if url.path.startswith("/storage/v1/object/"):
+            u = self.me()
+            bucket, path = url.path.split("/storage/v1/object/", 1)[1].split("/", 1)
             body = self.raw_body()
-            if not u or not path.startswith(u["id"] + "/"):
+            if not can_write(u, bucket, path):
                 return self.send(403, {"statusCode": "403", "error": "Unauthorized", "message": "new row violates row-level security policy"})
             if len(body) > 2097152:
                 return self.send(413, {"statusCode": "413", "error": "Payload too large", "message": "too large"})
@@ -241,8 +304,9 @@ class Handler(BaseHTTPRequestHandler):
                     if b"image/" in head.lower():
                         body = content.rsplit(b"\r\n", 1)[0]
                         break
-            files[path] = body
-            return self.send(200, {"Key": f"listing-photos/{path}", "Id": path})
+            files[f"{bucket}/{path}"] = body
+            file_owner[f"{bucket}/{path}"] = u["id"]
+            return self.send(200, {"Key": f"{bucket}/{path}", "Id": path})
         data = self.body()
         if url.path == "/auth/v1/otp":
             email = data["email"].lower()
@@ -313,13 +377,15 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_DELETE(self):
         url = urlparse(self.path)
-        if url.path.startswith("/storage/v1/object/listing-photos"):
+        if url.path.startswith("/storage/v1/object/"):
             u = self.me()
+            bucket = url.path.split("/storage/v1/object/", 1)[1].strip("/")
             data = self.body()
             removed = []
             for path in data.get("prefixes", []):
-                if u and path.startswith(u["id"] + "/") and path in files:
-                    files.pop(path)
+                key = f"{bucket}/{path}"
+                if u and bucket in ("listing-photos", "avatars") and path.startswith(u["id"] + "/") and key in files:
+                    files.pop(key)
                     removed.append({"name": path})
             return self.send(200, removed)
         return self.send(404, {"message": "not found"})
@@ -338,9 +404,47 @@ class Handler(BaseHTTPRequestHandler):
             if not l or not visible(l, uid):
                 return self.send(200, None)
             o = profiles[l["owner_id"]]
-            return self.send(200, {"listing": l, "owner": {"nickname": o["nickname"], "role": o["role"], "member_since": o["created_at"]},
+            return self.send(200, {"listing": l, "owner": {"nickname": o["nickname"], "role": o["role"], "member_since": o["created_at"],
+                                                           "avatar_id": o["avatar_id"] if can_view(uid, o["id"]) else None},
                                    "photos": listing_photos(l["id"]), "is_owner": l["owner_id"] == uid,
                                    "can_moderate": is_team(uid)})
+        if name == "get_profile":
+            p = profile_by_nick(data["p_nickname"])
+            if not p or not p["nickname"]:
+                return self.send(200, None)
+            cv = can_view(uid, p["id"])
+            return self.send(200, {
+                "id": p["id"], "nickname": p["nickname"], "role": p["role"], "member_since": p["created_at"],
+                "is_me": p["id"] == uid, "can_view": cv, "visibility": p["profile_visibility"],
+                "avatar_id": p["avatar_id"] if cv else None, "bio": p["bio"] if cv else None,
+                "city": p["city"] if cv else None, "website": p["website"] if cv else None,
+                "listing_count": sum(1 for l in listings.values() if l["owner_id"] == p["id"] and l["status"] in ("active", "reserved")),
+                "follower_count": sum(1 for (a, b), st in follows.items() if b == p["id"] and st == "accepted"),
+                "following_count": sum(1 for (a, b), st in follows.items() if a == p["id"] and st == "accepted"),
+                "my_follow": follows.get((uid, p["id"]), "none"), "follows_me": follows.get((p["id"], uid)) == "accepted",
+                "blocked": bool(uid) and blocked_between(uid, p["id"]),
+                "badges": [b for b, ok in (("team", p["role"] in ("team", "admin")), ("founder", True),
+                                           ("first_listing", any(l["owner_id"] == p["id"] for l in listings.values()))) if ok]})
+        if name == "profile_listings":
+            p = profile_by_nick(data["p_nickname"])
+            if not p or not can_view(uid, p["id"]):
+                return self.send(200, [])
+            rows = [l for l in listings.values() if l["owner_id"] == p["id"] and l["status"] in ("active", "reserved")]
+            rows.sort(key=lambda l: l["created_at"], reverse=True)
+            return self.send(200, [{**{k: l[k] for k in ("id", "title", "tcg", "kind", "offer", "price_cents", "negotiable", "condition",
+                                                         "city", "status", "created_at", "owner_id")},
+                                    "owner_nickname": p["nickname"], "cover_photo_id": (listing_photos(l["id"]) or [None])[0],
+                                    "total_count": len(rows)} for l in rows])
+        if name == "list_follows":
+            p = profile_by_nick(data["p_nickname"])
+            if not p or not can_view(uid, p["id"]):
+                return self.send(200, [])
+            kind = data["p_kind"]
+            ids = [a for (a, b), st in follows.items() if b == p["id"] and st == "accepted"] if kind == "followers" else \
+                  [b for (a, b), st in follows.items() if a == p["id"] and st == "accepted"]
+            return self.send(200, [{"id": i, "nickname": profiles[i]["nickname"],
+                                    "avatar_id": profiles[i]["avatar_id"] if can_view(uid, i) else None,
+                                    "my_follow": follows.get((uid, i), "none"), "is_me": i == uid} for i in ids])
         q = (data.get("p_query") or "").lower()
         rows = [l for l in listings.values() if l["status"] in ("active", "reserved")]
         if q:
@@ -368,7 +472,7 @@ class Handler(BaseHTTPRequestHandler):
         return self.send(200, out)
 
     def rpc_inner(self, name, data):
-        if name in ("search_listings", "get_listing"):
+        if name in ("search_listings", "get_listing", "get_profile", "profile_listings", "list_follows"):
             return self.public_rpc(name, data)
         return self.private_rpc(name, data)
 
@@ -547,9 +651,13 @@ class Handler(BaseHTTPRequestHandler):
             if blocked_between(u["id"], other):
                 raise RpcError(403, "42501", "blocked")
             body = (data.get("p_body") or "").strip()
-            if not 1 <= len(body) <= 1000:
-                raise RpcError(400, "23514", 'violates check constraint "messages_body_length"')
-            m = {"id": str(uuid.uuid4()), "conversation_id": c["id"], "sender_id": u["id"], "body": body, "created_at": now_iso()}
+            photo = data.get("p_photo_id")
+            if photo and file_owner.get(f"chat-photos/{c['id']}/{photo}.jpg") != u["id"]:
+                raise RpcError(400, "22023", "photo_missing")
+            if not (photo and len(body) <= 1000) and not 1 <= len(body) <= 1000:
+                raise RpcError(400, "23514", 'violates check constraint "messages_content"')
+            m = {"id": str(uuid.uuid4()), "conversation_id": c["id"], "sender_id": u["id"], "body": body,
+                 "photo_id": photo, "created_at": now_iso()}
             messages.append(m)
             c.update(last_message_at=m["created_at"], seller_hidden_at=None, buyer_hidden_at=None)
             c["seller_last_read_at" if c["seller_id"] == u["id"] else "buyer_last_read_at"] = m["created_at"]
@@ -585,8 +693,11 @@ class Handler(BaseHTTPRequestHandler):
                 rows.append({"id": c["id"], "listing_id": c["listing_id"], "listing_title": c["listing_title"],
                              "listing_status": l["status"] if l else None, "listing_owner_id": l["owner_id"] if l else None,
                              "cover_photo_id": (listing_photos(l["id"]) or [None])[0] if l else None,
-                             "other_id": other["id"], "other_nickname": other["nickname"], "i_am_seller": c["seller_id"] == u["id"],
-                             "last_message_at": c["last_message_at"], "last_body": last["body"], "last_from_me": last["sender_id"] == u["id"],
+                             "other_id": other["id"], "other_nickname": other["nickname"],
+                             "other_avatar_id": other["avatar_id"] if can_view(u["id"], other["id"]) else None,
+                             "i_am_seller": c["seller_id"] == u["id"],
+                             "last_message_at": c["last_message_at"], "last_body": last["body"], "last_has_photo": bool(last.get("photo_id")),
+                             "last_from_me": last["sender_id"] == u["id"],
                              "unread": unread_for(c, u["id"]), "blocked": blocked_between(c["seller_id"], c["buyer_id"])})
             rows.sort(key=lambda r: r["last_message_at"], reverse=True)
             return self.send(200, rows)
@@ -600,10 +711,14 @@ class Handler(BaseHTTPRequestHandler):
                                    "listing_status": l["status"] if l else None, "listing_owner_id": l["owner_id"] if l else None,
                                    "cover_photo_id": (listing_photos(l["id"]) or [None])[0] if l else None,
                                    "listing_price_cents": l["price_cents"] if l else None, "listing_offer": l["offer"] if l else None,
-                                   "other_id": other["id"], "other_nickname": other["nickname"], "i_am_seller": c["seller_id"] == u["id"],
+                                   "other_id": other["id"], "other_nickname": other["nickname"],
+                                   "other_avatar_id": other["avatar_id"] if can_view(u["id"], other["id"]) else None,
+                                   "i_am_seller": c["seller_id"] == u["id"],
                                    "i_blocked": (u["id"], other["id"]) in blocks, "blocked_me": (other["id"], u["id"]) in blocks})
         if name == "block_user":
             blocks.add((u["id"], data["p_user_id"]))
+            follows.pop((u["id"], data["p_user_id"]), None)
+            follows.pop((data["p_user_id"], u["id"]), None)
             return self.send(204)
         if name == "unblock_user":
             blocks.discard((u["id"], data["p_user_id"]))
@@ -624,10 +739,54 @@ class Handler(BaseHTTPRequestHandler):
             c = conversations.get(data["p_conversation_id"])
             if not c or not any(r.get("conversation_id") == c["id"] for r in reports.values()):
                 raise RpcError(404, "P0002", "not_found")
-            return self.send(200, {"listing_title": c["listing_title"], "seller": profiles[c["seller_id"]]["nickname"],
+            return self.send(200, {"id": c["id"], "listing_title": c["listing_title"], "seller": profiles[c["seller_id"]]["nickname"],
                                    "buyer": profiles[c["buyer_id"]]["nickname"],
-                                   "messages": [{"from": profiles[m["sender_id"]]["nickname"], "body": m["body"], "created_at": m["created_at"]}
+                                   "messages": [{"from": profiles[m["sender_id"]]["nickname"], "body": m["body"], "photo_id": m.get("photo_id"), "created_at": m["created_at"]}
                                                 for m in messages if m["conversation_id"] == c["id"]]})
+        if name == "pending_follow_request_count":
+            return self.send(200, sum(1 for (a, b), st in follows.items() if b == u["id"] and st == "pending"))
+        if name == "my_follow_requests":
+            rows = [{"id": a, "nickname": profiles[a]["nickname"], "avatar_id": profiles[a]["avatar_id"] if can_view(u["id"], a) else None,
+                     "created_at": now_iso()} for (a, b), st in follows.items() if b == u["id"] and st == "pending"]
+            return self.send(200, rows)
+        if name == "follow_user":
+            target = profiles.get(data["p_target"])
+            if not target or not target["nickname"]:
+                raise RpcError(404, "P0002", "not_found")
+            if target["id"] == u["id"]:
+                raise RpcError(400, "22023", "invalid_action")
+            if blocked_between(u["id"], target["id"]):
+                raise RpcError(403, "42501", "blocked")
+            key = (u["id"], target["id"])
+            if key not in follows:
+                follows[key] = "pending" if target["follow_approval"] else "accepted"
+            return self.send(200, follows[key])
+        if name == "unfollow_user":
+            follows.pop((u["id"], data["p_target"]), None)
+            return self.send(204)
+        if name == "respond_follow_request":
+            key = (data["p_follower"], u["id"])
+            if follows.get(key) != "pending":
+                raise RpcError(404, "P0002", "not_found")
+            if data["p_accept"]:
+                follows[key] = "accepted"
+            else:
+                follows.pop(key)
+            return self.send(204)
+        if name == "remove_follower":
+            follows.pop((data["p_follower"], u["id"]), None)
+            return self.send(204)
+        if name == "update_privacy":
+            me.update(profile_visibility=data["p_visibility"], follow_approval=bool(data["p_follow_approval"]))
+            if not data["p_follow_approval"]:
+                for k, st in list(follows.items()):
+                    if k[1] == u["id"] and st == "pending":
+                        follows[k] = "accepted"
+            return self.send(204)
+        if name == "set_avatar":
+            old = me["avatar_id"]
+            me["avatar_id"] = data.get("p_avatar_id")
+            return self.send(200, old)
         if name == "delete_own_account":
             for lid in [l["id"] for l in listings.values() if l["owner_id"] == u["id"]]:
                 for pid in listing_photos(lid):
