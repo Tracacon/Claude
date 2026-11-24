@@ -58,15 +58,15 @@ Weitere Rollen vergibt ihr danach in der App unter **Verwaltung**.
 ### 3. Lokal starten
 
 ```bash
-cp .env.example .env.local   # Werte aus Supabase → Project Settings → API Keys eintragen
-npm install
+npm install                  # Supabase-Adresse und öffentlicher Schlüssel stehen in .env.production
+cp .env.production .env.local
 npm run dev                  # http://localhost:3000/de
 ```
 
 ### 4. Auf Cloudflare veröffentlichen
 
 1. Bei Cloudflare anmelden: `npx wrangler login`
-2. Variablen setzen: Die beiden `NEXT_PUBLIC_…`-Werte müssen **beim Bauen** vorhanden sein (in `.env.local` oder als Umgebungsvariablen). Die `OPERATOR_…`-Werte im Cloudflare-Dashboard unter Workers → tracacon-app → Settings → Variables eintragen.
+2. Variablen setzen: Die beiden öffentlichen `NEXT_PUBLIC_…`-Werte stehen in `.env.production` und werden beim Bauen eingelesen. Die `OPERATOR_…`-Werte im Cloudflare-Dashboard unter Workers → tracacon-app → Settings → Variables eintragen.
 3. Staging: `npm run cf:deploy:staging`, Produktion: `npm run cf:deploy`. Für Staging ein eigenes Supabase-Projekt verwenden.
 
 Die Domain `app.tracacon.de` wird erst nach Abnahme und Pilot auf Produktion gelegt.
