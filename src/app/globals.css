@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+/* TRACACON-Farben: Nachtblau, Creme, Bernstein */
+@theme {
+  --color-night: #111b2e;
+  --color-night-2: #1a2742;
+  --color-night-3: #243556;
+  --color-cream: #f5f3ee;
+  --color-amber: #f2a93b;
+  --color-amber-dark: #d98f1f;
+  --color-danger: #e5484d;
+  --color-ok: #3fb68b;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-night);
+  color: var(--color-cream);
+}
+
+/* Bausteine der Oberfläche */
+@utility card {
+  @apply rounded-2xl border border-white/10 bg-night-2 p-5 sm:p-6;
+}
+
+@utility label {
+  @apply mb-1 block text-sm font-medium text-cream/90;
+}
+
+@utility hint {
+  @apply mt-1 text-xs text-cream/60;
+}
+
+@utility input {
+  @apply w-full rounded-xl border border-white/15 bg-night-3 px-3 py-2.5 text-base text-cream placeholder:text-cream/40 focus:border-amber focus:outline-none focus:ring-2 focus:ring-amber/40;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+@utility btn-primary {
+  @apply btn bg-amber text-night hover:bg-amber-dark;
+}
+
+@utility btn-ghost {
+  @apply btn border border-white/15 text-cream hover:bg-white/5;
+}
+
+@utility btn-danger {
+  @apply btn bg-danger text-white hover:bg-danger/85;
+}
+
+@utility error {
+  @apply mt-1 text-sm text-danger;
+}
+
+@utility link {
+  @apply text-amber underline-offset-2 hover:underline;
+}
