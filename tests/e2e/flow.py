@@ -33,27 +33,22 @@ def shot(page, name):
 PASSWORD = "Sammeln-2026!"
 
 
-def login(page, email, *, wrong_code_first=False):
-    page.goto(f"{BASE}/de/anmelden?mit=code")
+def fill_registration(page, email, nickname, password=PASSWORD, password2=None):
     page.get_by_label("E-Mail-Adresse").fill(email)
-    page.get_by_role("button", name="Code senden").click()
-    expect(page.get_by_text(f"Wir haben dir einen Code an {email} geschickt")).to_be_visible()
-    if wrong_code_first:
-        page.get_by_label("Einmalcode").fill("000000")
-        page.get_by_role("button", name="Code bestätigen").click()
-        expect(page.get_by_text("Der Code ist falsch oder abgelaufen")).to_be_visible()
-    page.get_by_label("Einmalcode").fill("123456")
-    page.get_by_role("button", name="Code bestätigen").click()
-
-
-def onboard(page, nickname):
-    expect(page).to_have_url(re.compile(r"/de/willkommen$"))
     page.get_by_label("Nickname").fill(nickname)
-    page.get_by_label("Passwort", exact=True).fill(PASSWORD)
-    page.get_by_label("Passwort wiederholen").fill(PASSWORD)
+    page.get_by_label("Passwort", exact=True).fill(password)
+    page.get_by_label("Passwort wiederholen").fill(password2 or password)
     page.get_by_label("Ich bin mindestens 16 Jahre alt.").check()
     page.get_by_role("checkbox", name=re.compile("Community-Regeln")).check()
-    page.get_by_role("button", name="Los geht's").click()
+    page.get_by_role("button", name="Konto erstellen").click()
+
+
+def register(page, email, nickname):
+    page.goto(f"{BASE}/de/registrieren")
+    fill_registration(page, email, nickname)
+    expect(page.get_by_role("heading", name="E-Mail-Adresse bestätigen")).to_be_visible()
+    page.get_by_label("Bestätigungscode").fill("123456")
+    page.get_by_role("button", name="Konto aktivieren").click()
 
 
 with sync_playwright() as p:
@@ -69,49 +64,40 @@ with sync_playwright() as p:
     shot(a, "01-start")
     step("Startseite leitet auf /de und zeigt den Claim")
 
-    a.goto(f"{BASE}/de/anmelden?mit=code")
-    a.get_by_label("E-Mail-Adresse").fill("keine-mail")
-    a.get_by_role("button", name="Code senden").click()
+    a.get_by_role("link", name="Anmelden", exact=True).first.click()
+    expect(a.get_by_role("heading", name="Anmelden")).to_be_visible()
+    expect(a.get_by_label("Passwort", exact=True)).to_be_visible()
+    expect(a.get_by_text("Code senden")).to_have_count(0)
+    shot(a, "02-anmelden")
+    a.get_by_role("link", name="Registrieren").click()
+    expect(a).to_have_url(re.compile(r"/de/registrieren$"))
+    step("Anmeldeseite nur mit E-Mail und Passwort, Registrierung auf eigener Seite")
+
+    a.get_by_role("button", name="Konto erstellen").click()
     expect(a.get_by_text("Bitte gib eine gültige E-Mail-Adresse ein.")).to_be_visible()
-    step("Ungültige E-Mail wird abgelehnt")
-
-    login(a, "dani@tracacon.de", wrong_code_first=True)
-    shot(a, "02-willkommen")
-    step("Falscher Code abgelehnt, richtiger Code meldet an")
-
-    a.get_by_label("Nickname").fill("Dani_TCG")
-    a.get_by_role("button", name="Los geht's").click()
-    expect(a.get_by_text("Die App ist ab 16 Jahren. Bitte bestätige dein Alter.")).to_be_visible()
-    step("Begrüßung verlangt Altersbestätigung")
-
-    a.get_by_label("Passwort", exact=True).fill("kurz")
-    a.get_by_role("button", name="Los geht's").click()
-    # Nach der Prüfung leert die App die Passwortfelder (gewollt); darauf warten
-    expect(a.get_by_label("Passwort", exact=True)).to_have_value("")
-    expect(a.get_by_text("Das Passwort braucht mindestens 8 Zeichen.")).to_be_visible()
-    a.get_by_label("Passwort", exact=True).fill(PASSWORD)
-    a.get_by_label("Passwort wiederholen").fill("anders-12345")
-    a.get_by_role("button", name="Los geht's").click()
-    expect(a.get_by_text("Die beiden Passwörter stimmen nicht überein.")).to_be_visible()
-    step("Begrüßung prüft das Passwort")
-
-    a.get_by_label("Nickname").fill("ab")
-    a.get_by_label("Passwort", exact=True).fill(PASSWORD)
-    a.get_by_label("Passwort wiederholen").fill(PASSWORD)
-    a.get_by_label("Ich bin mindestens 16 Jahre alt.").check()
-    a.get_by_role("checkbox", name=re.compile("Community-Regeln")).check()
-    a.get_by_role("button", name="Los geht's").click()
     expect(a.get_by_text("Der Nickname passt nicht")).to_be_visible()
-    step("Zu kurzer Nickname wird abgelehnt")
+    expect(a.get_by_text("Das Passwort braucht mindestens 8 Zeichen.")).to_be_visible()
+    expect(a.get_by_text("Die App ist ab 16 Jahren. Bitte bestätige dein Alter.")).to_be_visible()
+    expect(a.get_by_text("Bitte akzeptiere die Community-Regeln.")).to_be_visible()
+    step("Registrierung prüft alle Pflichtangaben")
 
-    onboard(a, "vergeben")
-    expect(a.get_by_text("Dieser Nickname ist schon vergeben.")).to_be_visible()
-    step("Vergebener Nickname wird gemeldet")
+    fill_registration(a, "dani@tracacon.de", "Dani_TCG", PASSWORD, "anders-12345")
+    expect(a.get_by_text("Die beiden Passwörter stimmen nicht überein.")).to_be_visible()
+    expect(a.get_by_label("Nickname")).to_have_value("Dani_TCG")
+    step("Ungleiche Passwörter werden gemeldet, Eingaben bleiben")
 
-    onboard(a, "Dani_TCG")
+    fill_registration(a, "dani@tracacon.de", "Dani_TCG")
+    expect(a.get_by_role("heading", name="E-Mail-Adresse bestätigen")).to_be_visible()
+    shot(a, "03-bestaetigen")
+    a.get_by_label("Bestätigungscode").fill("000000")
+    a.get_by_role("button", name="Konto aktivieren").click()
+    expect(a.get_by_text("Der Code ist falsch oder abgelaufen")).to_be_visible()
+    a.get_by_label("Bestätigungscode").fill("123456")
+    a.get_by_role("button", name="Konto aktivieren").click()
     expect(a).to_have_url(re.compile(r"/de/profil$"))
     expect(a.get_by_role("heading", name="Mein Profil")).to_be_visible()
-    step("Begrüßung abgeschlossen, Profilseite erreicht")
+    expect(a.get_by_role("link", name="@Dani_TCG")).to_be_visible()
+    step("Konto mit Bestätigungscode aktiviert, Profil direkt fertig")
 
     a.get_by_label("Ort", exact=True).fill("Stuttgart")
     a.get_by_label("Über mich").fill("Sammle Pokémon und One Piece.")
@@ -128,7 +114,15 @@ with sync_playwright() as p:
     expect(a).to_have_url(re.compile(r"/de/profil$"))
     a.goto(f"{BASE}/de/anmelden")
     expect(a).to_have_url(re.compile(r"/de/profil$"))
-    step("Angemeldete werden von Anmeldung und Begrüßung weitergeleitet")
+    a.goto(f"{BASE}/de/registrieren")
+    expect(a).to_have_url(re.compile(r"/de/profil$"))
+    step("Angemeldete werden von Anmeldung und Registrierung weitergeleitet")
+
+    dup = browser.new_context(**mobile).new_page()
+    dup.goto(f"{BASE}/de/registrieren")
+    fill_registration(dup, "dani@tracacon.de", "Andere_Person")
+    expect(dup.get_by_text("Für diese E-Mail-Adresse gibt es schon ein Konto.")).to_be_visible()
+    step("Doppelte Registrierung derselben E-Mail wird verhindert")
 
     # --- Zweites Gerät: Anmeldung mit Passwort ------------------------------
     phone = browser.new_context(**mobile).new_page()
@@ -152,12 +146,49 @@ with sync_playwright() as p:
     expect(phone.get_by_text("Passwort gespeichert.")).to_be_visible()
     step("Passwort im Profil geändert")
 
+    forgot = browser.new_context(**mobile).new_page()
+    forgot.goto(f"{BASE}/de/anmelden")
+    forgot.get_by_role("link", name="Passwort vergessen?").click()
+    expect(forgot.get_by_role("heading", name="Passwort vergessen")).to_be_visible()
+    forgot.get_by_label("E-Mail-Adresse").fill("dani@tracacon.de")
+    forgot.get_by_role("button", name="Code senden").click()
+    forgot.get_by_label("Code aus der E-Mail").fill("123456")
+    forgot.get_by_role("button", name="Weiter").click()
+    expect(forgot.get_by_role("heading", name="Neues Passwort festlegen")).to_be_visible()
+    forgot.get_by_label("Neues Passwort").fill("Drittes-Passwort-3")
+    forgot.get_by_label("Passwort wiederholen").fill("Drittes-Passwort-3")
+    forgot.get_by_role("button", name="Passwort speichern und anmelden").click()
+    expect(forgot).to_have_url(re.compile(r"/de/profil$"))
+    step("Passwort vergessen: Code, neues Passwort, angemeldet")
+
+    again = browser.new_context(**mobile).new_page()
+    again.goto(f"{BASE}/de/anmelden")
+    again.get_by_label("E-Mail-Adresse").fill("dani@tracacon.de")
+    again.get_by_label("Passwort", exact=True).fill("Drittes-Passwort-3")
+    again.get_by_role("button", name="Anmelden", exact=True).click()
+    expect(again).to_have_url(re.compile(r"/de/profil$"))
+    step("Anmeldung mit dem neuen Passwort")
+
+    ghost = browser.new_context(**mobile).new_page()
+    ghost.goto(f"{BASE}/de/passwort-vergessen")
+    ghost.get_by_label("E-Mail-Adresse").fill("gibtsnicht@example.com")
+    ghost.get_by_role("button", name="Code senden").click()
+    expect(ghost.get_by_text("Falls es ein Konto mit gibtsnicht@example.com gibt")).to_be_visible()
+    step("Passwort vergessen verrät nicht, ob ein Konto existiert, und legt keins an")
+
     # --- Zweiter Nutzer (Mitglied) ------------------------------------------
     member_ctx = browser.new_context(**mobile)
     m = member_ctx.new_page()
-    login(m, "sammler@example.com")
-    onboard(m, "Kartenfan")
+    register(m, "sammler@example.com", "vergeben")
+    expect(m).to_have_url(re.compile(r"/de/willkommen$"))
+    m.get_by_label("Nickname").fill("Kartenfan")
+    m.get_by_label("Passwort", exact=True).fill(PASSWORD)
+    m.get_by_label("Passwort wiederholen").fill(PASSWORD)
+    m.get_by_label("Ich bin mindestens 16 Jahre alt.").check()
+    m.get_by_role("checkbox", name=re.compile("Community-Regeln")).check()
+    m.get_by_role("button", name="Los geht's").click()
     expect(m).to_have_url(re.compile(r"/de/profil$"))
+    step("Inzwischen vergebener Nickname: neue Wahl auf der Begrüßungsseite")
     expect(m.get_by_role("link", name="Verwaltung")).to_have_count(0)
     m.goto(f"{BASE}/de/admin")
     expect(m).to_have_url(re.compile(r"/de$"))

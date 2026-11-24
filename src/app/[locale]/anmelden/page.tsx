@@ -10,12 +10,11 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/anmelden
   return { title: t("title") };
 }
 
-export default async function LoginPage({ params, searchParams }: PageProps<"/[locale]/anmelden">) {
+export default async function LoginPage({ params }: PageProps<"/[locale]/anmelden">) {
   const { locale } = await params;
-  const sp = await searchParams;
   setRequestLocale(locale);
   const profile = await getMyProfile();
   if (profile) redirect({ href: profile.nickname ? "/profil" : "/willkommen", locale });
 
-  return <LoginForm initialMode={sp.mit === "code" ? "code" : "password"} />;
+  return <LoginForm />;
 }

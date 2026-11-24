@@ -50,22 +50,17 @@ def file_exists(url):
         return False
 
 
-def login(page, email):
-    page.goto(f"{BASE}/de/anmelden?mit=code")
+def register(page, email, nickname):
+    page.goto(f"{BASE}/de/registrieren")
     page.get_by_label("E-Mail-Adresse").fill(email)
-    page.get_by_role("button", name="Code senden").click()
-    page.get_by_label("Einmalcode").fill("123456")
-    page.get_by_role("button", name="Code bestätigen").click()
-
-
-def onboard(page, nickname):
-    expect(page).to_have_url(re.compile(r"/de/willkommen$"))
     page.get_by_label("Nickname").fill(nickname)
     page.get_by_label("Passwort", exact=True).fill("Sammeln-2026!")
     page.get_by_label("Passwort wiederholen").fill("Sammeln-2026!")
     page.get_by_label("Ich bin mindestens 16 Jahre alt.").check()
     page.get_by_role("checkbox", name=re.compile("Community-Regeln")).check()
-    page.get_by_role("button", name="Los geht's").click()
+    page.get_by_role("button", name="Konto erstellen").click()
+    page.get_by_label("Bestätigungscode").fill("123456")
+    page.get_by_role("button", name="Konto aktivieren").click()
     expect(page).to_have_url(re.compile(r"/de/profil$"))
 
 
@@ -83,12 +78,10 @@ with sync_playwright() as p:
 
     # Admin zuerst (erster Nutzer im Testserver wird Admin)
     admin = browser.new_context(**mobile).new_page()
-    login(admin, "chefin@tracacon.de")
-    onboard(admin, "Chefin")
+    register(admin, "chefin@tracacon.de", "Chefin")
 
     seller = browser.new_context(**mobile).new_page()
-    login(seller, "sammlerin@example.com")
-    onboard(seller, "Sammlerin")
+    register(seller, "sammlerin@example.com", "Sammlerin")
     step("Admin und Verkäuferin angemeldet")
 
     # --- Inserat mit Fotos anlegen -------------------------------------------
@@ -181,8 +174,7 @@ with sync_playwright() as p:
 
     # --- Melden ----------------------------------------------------------------
     buyer = browser.new_context(**mobile).new_page()
-    login(buyer, "kaeufer@example.com")
-    onboard(buyer, "Kaeufer")
+    register(buyer, "kaeufer@example.com", "Kaeufer")
     buyer.goto(glurak_url)
     expect(buyer.get_by_role("button", name=re.compile("Nachricht schreiben"))).to_be_visible()
     buyer.get_by_text("Inserat melden").click()

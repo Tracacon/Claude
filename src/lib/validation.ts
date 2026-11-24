@@ -53,6 +53,17 @@ export const newPasswordSchema = z
 
 export const nicknameSchema = z.string().trim().regex(NICKNAME_PATTERN, { message: "invalid_nickname" });
 
+export const registerSchema = z
+  .object({
+    email: z.string().trim().toLowerCase().email({ message: "invalid_email" }).max(254, { message: "invalid_email" }),
+    nickname: z.string().trim().regex(NICKNAME_PATTERN, { message: "invalid_nickname" }),
+    password: passwordSchema,
+    password2: z.string(),
+    confirmAge: z.literal("on", { message: "age_required" }),
+    acceptTerms: z.literal("on", { message: "terms_required" }),
+  })
+  .refine((v) => v.password === v.password2, { path: ["password2"], message: "password_mismatch" });
+
 export const onboardingSchema = z
   .object({
     nickname: nicknameSchema,
