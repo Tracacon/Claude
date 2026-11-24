@@ -152,6 +152,22 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(payload)
 
+    def create_user(self, email, meta, confirmed):
+        uid = str(uuid.uuid4())
+        users[email] = {"id": uid, "email": email, "aud": "authenticated", "role": "authenticated",
+                        "app_metadata": {}, "user_metadata": meta, "confirmed": confirmed,
+                        "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ")}
+        profiles[uid] = {"id": uid, "nickname": None, "city": None, "bio": None, "website": None,
+                         "locale": meta.get("locale", "de"), "role": "member",
+                         "age_confirmed_at": None, "terms_accepted_at": None,
+                         "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ")}
+        if len(users) == 1:
+            profiles[uid]["role"] = "admin"  # erster Nutzer = Admin, wie per SQL im Handbuch
+
+    @staticmethod
+    def public_user(user):
+        return {k: v for k, v in user.items() if k not in ("password", "confirmed")}
+
     def me(self):
         auth = self.headers.get("Authorization", "")
         return user_from_token(auth.removeprefix("Bearer ").strip())
@@ -231,28 +247,39 @@ class Handler(BaseHTTPRequestHandler):
         if url.path == "/auth/v1/otp":
             email = data["email"].lower()
             if email not in users:
-                uid = str(uuid.uuid4())
-                users[email] = {"id": uid, "email": email, "aud": "authenticated", "role": "authenticated",
-                                "app_metadata": {}, "user_metadata": data.get("data") or {},
-                                "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ")}
-                profiles[uid] = {"id": uid, "nickname": None, "city": None, "bio": None, "website": None,
-                                 "locale": (data.get("data") or {}).get("locale", "de"), "role": "member",
-                                 "age_confirmed_at": None, "terms_accepted_at": None,
-                                 "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ")}
-                if len(users) == 1:
-                    profiles[uid]["role"] = "admin"  # erster Nutzer = Admin, wie per SQL im Handbuch
+                if data.get("create_user") is False:
+                    return self.send(422, {"error_code": "otp_disabled", "code": "otp_disabled", "msg": "Signups not allowed for otp"})
+                self.create_user(email, data.get("data") or {}, confirmed=True)
             sent_codes.append(email)
+            return self.send(200, {})
+        if url.path == "/auth/v1/signup":
+            email = data["email"].lower()
+            if email in users and users[email].get("confirmed", True):
+                # wie Supabase bei aktiver E-Mail-Bestätigung: Platzhalter ohne Identitäten
+                return self.send(200, {"id": str(uuid.uuid4()), "email": email, "aud": "authenticated", "identities": []})
+            if email not in users:
+                self.create_user(email, data.get("data") or {}, confirmed=False)
+            users[email]["password"] = data.get("password")
+            sent_codes.append(email)
+            u = self.public_user(users[email])
+            u["identities"] = [{"id": u["id"], "provider": "email"}]
+            return self.send(200, u)
+        if url.path == "/auth/v1/resend":
+            sent_codes.append(data.get("email", ""))
             return self.send(200, {})
         if url.path == "/auth/v1/verify":
             user = users.get(data.get("email", "").lower())
             if not user or data.get("token") != CODE:
                 return self.send(403, {"error_code": "otp_expired", "code": "otp_expired", "msg": "Token has expired or is invalid"})
-            return self.send(200, self.session(user))
+            user["confirmed"] = True
+            return self.send(200, self.session(self.public_user(user)))
         if url.path == "/auth/v1/token" and "grant_type=password" in (url.query or ""):
             user = users.get(data.get("email", "").lower())
             if not user or not user.get("password") or user["password"] != data.get("password"):
                 return self.send(400, {"error_code": "invalid_credentials", "code": "invalid_credentials", "msg": "Invalid login credentials"})
-            return self.send(200, self.session({k: v for k, v in user.items() if k != "password"}))
+            if not user.get("confirmed", True):
+                return self.send(400, {"error_code": "email_not_confirmed", "code": "email_not_confirmed", "msg": "Email not confirmed"})
+            return self.send(200, self.session(self.public_user(user)))
         if url.path == "/auth/v1/logout":
             return self.send(204)
         if url.path.startswith("/rest/v1/rpc/"):

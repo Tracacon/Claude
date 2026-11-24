@@ -80,9 +80,14 @@ export async function SiteHeader() {
                 </form>
               </>
             ) : (
-              <Link href="/anmelden" className="btn-primary px-3 py-1.5">
-                {t("login")}
-              </Link>
+              <>
+                <Link href="/registrieren" className="hidden rounded-lg px-2 py-1.5 hover:bg-white/5 sm:inline">
+                  {t("register")}
+                </Link>
+                <Link href="/anmelden" className="btn-primary px-3 py-1.5">
+                  {t("login")}
+                </Link>
+              </>
             )}
             <LanguageSwitch label={t("language")} />
           </nav>

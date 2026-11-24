@@ -18,7 +18,8 @@
     "myListings": "Meine Inserate",
     "moderation": "Moderation",
     "more": "Mehr",
-    "messages": "Nachrichten"
+    "messages": "Nachrichten",
+    "register": "Registrieren"
   },
   "Home": {
     "claim": "Collect. Connect. Trade.",
@@ -30,30 +31,19 @@
     "notConfigured": "Supabase ist noch nicht verbunden. Anmelden funktioniert erst, wenn die Zugangsdaten hinterlegt sind.",
     "latest": "Neu im Marktplatz",
     "toMarket": "Zum Marktplatz",
-    "sell": "Karte inserieren"
+    "sell": "Karte inserieren",
+    "ctaRegister": "Registrieren"
   },
   "Login": {
     "title": "Anmelden",
     "email": "E-Mail-Adresse",
-    "sendCode": "Code senden",
-    "sending": "Wird gesendet …",
-    "codeSent": "Wir haben dir einen Code an {email} geschickt. Er ist eine Stunde gültig.",
-    "code": "Einmalcode",
-    "verify": "Anmelden",
-    "verifying": "Wird geprüft …",
-    "otherEmail": "Andere E-Mail-Adresse verwenden",
-    "resend": "Code erneut senden",
-    "hint": "Du bleibst auf jedem Gerät angemeldet, bis du dich abmeldest. Die App ist ab 16 Jahren.",
-    "passwordIntro": "Melde dich mit E-Mail-Adresse und Passwort an.",
     "password": "Passwort",
-    "verifyCode": "Code bestätigen",
-    "forgot": "Passwort vergessen oder noch keins? Mit Code per E-Mail anmelden",
-    "newHere": "Neu bei TRACACON?",
-    "newHereText": "Wir schicken dir einen Code an deine E-Mail-Adresse. Danach legst du Nickname und Passwort fest.",
-    "register": "Konto erstellen",
-    "codeTitle": "Anmelden mit Code",
-    "codeIntro": "Gib deine E-Mail-Adresse ein. Wir schicken dir einen Einmalcode. So registrierst du dich neu oder meldest dich ohne Passwort an.",
-    "withPassword": "← Mit Passwort anmelden"
+    "forgot": "Passwort vergessen?",
+    "submit": "Anmelden",
+    "verifying": "Wird geprüft …",
+    "noAccount": "Noch kein Konto bei TRACACON?",
+    "register": "Registrieren",
+    "hint": "Du bleibst auf diesem Gerät angemeldet, bis du dich abmeldest."
   },
   "Onboarding": {
     "title": "Willkommen bei TRACACON",
@@ -176,12 +166,14 @@
     "password_mismatch": "Die beiden Passwörter stimmen nicht überein.",
     "password_weak": "Dieses Passwort ist zu schwach. Bitte wähle ein längeres oder ein anderes.",
     "password_same": "Das ist bereits dein aktuelles Passwort.",
-    "login_wrong": "E-Mail-Adresse oder Passwort ist falsch. Noch kein Passwort? Melde dich mit Code an.",
+    "login_wrong": "E-Mail-Adresse oder Passwort ist falsch.",
     "reauth_needed": "Aus Sicherheitsgründen melde dich bitte einmal mit Code neu an und ändere das Passwort dann.",
     "front_back_required": "Bitte lade für Einzelkarten und Slabs mindestens zwei Fotos hoch: Vorderseite und Rückseite.",
     "cannot_message_self": "Du kannst dir nicht selbst schreiben.",
     "blocked": "Ihr könnt euch keine Nachrichten schicken, weil eine Blockierung besteht.",
-    "message_invalid": "Die Nachricht muss zwischen 1 und 1.000 Zeichen lang sein."
+    "message_invalid": "Die Nachricht muss zwischen 1 und 1.000 Zeichen lang sein.",
+    "email_taken": "Für diese E-Mail-Adresse gibt es schon ein Konto.",
+    "email_not_confirmed": "Deine E-Mail-Adresse ist noch nicht bestätigt. Registriere dich erneut, um einen neuen Code zu bekommen."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -400,5 +392,41 @@
     "close": "Schließen",
     "youBlocked": "Du hast @{nickname} blockiert. Über ⋯ kannst du das aufheben.",
     "blockedYou": "In dieser Unterhaltung können keine Nachrichten mehr gesendet werden."
+  },
+  "Register": {
+    "title": "Registrieren",
+    "intro": "Lege dein TRACACON-Konto an. Die App ist ab 16 Jahren.",
+    "email": "E-Mail-Adresse",
+    "passwordHint": "Mindestens 8 Zeichen. Damit meldest du dich künftig an.",
+    "submit": "Konto erstellen",
+    "submitting": "Wird erstellt …",
+    "haveAccount": "Schon registriert?",
+    "toLoginShort": "Anmelden",
+    "toLogin": "Zur Anmeldung",
+    "toReset": "Passwort vergessen?",
+    "confirmTitle": "E-Mail-Adresse bestätigen",
+    "codeSent": "Fast geschafft! Wir haben dir einen Bestätigungscode an {email} geschickt. Gib ihn hier ein, um dein Konto zu aktivieren.",
+    "code": "Bestätigungscode",
+    "confirm": "Konto aktivieren",
+    "confirming": "Wird geprüft …",
+    "noMail": "Keine E-Mail bekommen? Schau auch im Spam-Ordner nach.",
+    "resend": "Code erneut senden",
+    "resent": "Neuer Code ist unterwegs."
+  },
+  "Reset": {
+    "title": "Passwort vergessen",
+    "intro": "Gib die E-Mail-Adresse deines Kontos ein. Wir schicken dir einen Code, mit dem du ein neues Passwort festlegst.",
+    "email": "E-Mail-Adresse",
+    "sendCode": "Code senden",
+    "backToLogin": "Zurück zur Anmeldung",
+    "codeSent": "Falls es ein Konto mit {email} gibt, haben wir dir einen Code geschickt. Er ist eine Stunde gültig.",
+    "code": "Code aus der E-Mail",
+    "confirm": "Weiter",
+    "otherEmail": "Andere E-Mail-Adresse",
+    "resend": "Code erneut senden",
+    "newTitle": "Neues Passwort festlegen",
+    "newIntro": "Wähle ein neues Passwort. Danach bist du angemeldet.",
+    "newPassword": "Neues Passwort",
+    "save": "Passwort speichern und anmelden"
   }
 }

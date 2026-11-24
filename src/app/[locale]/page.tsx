@@ -34,7 +34,10 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           ) : profile ? (
             <Link href="/willkommen" className="btn-ghost">{t("ctaProfile")}</Link>
           ) : (
-            <Link href="/anmelden" className="btn-ghost">{t("ctaLogin")}</Link>
+            <>
+              <Link href="/registrieren" className="btn-ghost">{t("ctaRegister")}</Link>
+              <Link href="/anmelden" className="btn-ghost">{t("ctaLogin")}</Link>
+            </>
           )}
         </div>
       </section>

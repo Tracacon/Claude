@@ -33,18 +33,16 @@ def shot(page, name):
 
 
 def register(page, email, nickname):
-    page.goto(f"{BASE}/de/anmelden?mit=code")
+    page.goto(f"{BASE}/de/registrieren")
     page.get_by_label("E-Mail-Adresse").fill(email)
-    page.get_by_role("button", name="Code senden").click()
-    page.get_by_label("Einmalcode").fill("123456")
-    page.get_by_role("button", name="Code bestätigen").click()
-    expect(page).to_have_url(re.compile(r"/de/willkommen$"))
     page.get_by_label("Nickname").fill(nickname)
-    page.get_by_label("Passwort", exact=True).fill(PASSWORD)
-    page.get_by_label("Passwort wiederholen").fill(PASSWORD)
+    page.get_by_label("Passwort", exact=True).fill("Sammeln-2026!")
+    page.get_by_label("Passwort wiederholen").fill("Sammeln-2026!")
     page.get_by_label("Ich bin mindestens 16 Jahre alt.").check()
     page.get_by_role("checkbox", name=re.compile("Community-Regeln")).check()
-    page.get_by_role("button", name="Los geht's").click()
+    page.get_by_role("button", name="Konto erstellen").click()
+    page.get_by_label("Bestätigungscode").fill("123456")
+    page.get_by_role("button", name="Konto aktivieren").click()
     expect(page).to_have_url(re.compile(r"/de/profil$"))
 
 

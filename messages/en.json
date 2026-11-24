@@ -18,7 +18,8 @@
     "myListings": "My listings",
     "moderation": "Moderation",
     "more": "More",
-    "messages": "Messages"
+    "messages": "Messages",
+    "register": "Sign up"
   },
   "Home": {
     "claim": "Collect. Connect. Trade.",
@@ -30,30 +31,19 @@
     "notConfigured": "Supabase is not connected yet. Sign-in works once the credentials are set.",
     "latest": "New in the marketplace",
     "toMarket": "Go to marketplace",
-    "sell": "List a card"
+    "sell": "List a card",
+    "ctaRegister": "Sign up"
   },
   "Login": {
     "title": "Sign in",
     "email": "Email address",
-    "sendCode": "Send code",
-    "sending": "Sending …",
-    "codeSent": "We sent a code to {email}. It is valid for one hour.",
-    "code": "One-time code",
-    "verify": "Sign in",
-    "verifying": "Checking …",
-    "otherEmail": "Use a different email address",
-    "resend": "Send code again",
-    "hint": "You stay signed in on each device until you sign out. The app is for ages 16 and up.",
-    "passwordIntro": "Sign in with your email address and password.",
     "password": "Password",
-    "verifyCode": "Confirm code",
-    "forgot": "Forgot your password or don't have one? Sign in with an email code",
-    "newHere": "New to TRACACON?",
-    "newHereText": "We'll send a code to your email address. Then you choose a nickname and password.",
-    "register": "Create account",
-    "codeTitle": "Sign in with a code",
-    "codeIntro": "Enter your email address and we'll send you a one-time code. Use this to sign up or to sign in without a password.",
-    "withPassword": "← Sign in with password"
+    "forgot": "Forgot password?",
+    "submit": "Sign in",
+    "verifying": "Checking …",
+    "noAccount": "No TRACACON account yet?",
+    "register": "Sign up",
+    "hint": "You stay signed in on this device until you sign out."
   },
   "Onboarding": {
     "title": "Welcome to TRACACON",
@@ -176,12 +166,14 @@
     "password_mismatch": "The two passwords don't match.",
     "password_weak": "This password is too weak. Please choose a longer or different one.",
     "password_same": "That's already your current password.",
-    "login_wrong": "Wrong email address or password. No password yet? Sign in with a code.",
+    "login_wrong": "Wrong email address or password.",
     "reauth_needed": "For security reasons, please sign in again with a code, then change your password.",
     "front_back_required": "Single cards and slabs need at least two photos: front and back.",
     "cannot_message_self": "You can't message yourself.",
     "blocked": "You can't message each other because of a block.",
-    "message_invalid": "Messages must be between 1 and 1,000 characters."
+    "message_invalid": "Messages must be between 1 and 1,000 characters.",
+    "email_taken": "There is already an account for this email address.",
+    "email_not_confirmed": "Your email address is not confirmed yet. Sign up again to get a new code."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -400,5 +392,41 @@
     "close": "Close",
     "youBlocked": "You blocked @{nickname}. You can undo this via ⋯.",
     "blockedYou": "No more messages can be sent in this conversation."
+  },
+  "Register": {
+    "title": "Sign up",
+    "intro": "Create your TRACACON account. The app is for ages 16 and up.",
+    "email": "Email address",
+    "passwordHint": "At least 8 characters. You'll use it to sign in.",
+    "submit": "Create account",
+    "submitting": "Creating …",
+    "haveAccount": "Already registered?",
+    "toLoginShort": "Sign in",
+    "toLogin": "Go to sign in",
+    "toReset": "Forgot password?",
+    "confirmTitle": "Confirm your email address",
+    "codeSent": "Almost done! We sent a confirmation code to {email}. Enter it here to activate your account.",
+    "code": "Confirmation code",
+    "confirm": "Activate account",
+    "confirming": "Checking …",
+    "noMail": "No email? Check your spam folder too.",
+    "resend": "Send code again",
+    "resent": "A new code is on its way."
+  },
+  "Reset": {
+    "title": "Forgot password",
+    "intro": "Enter your account's email address. We'll send you a code to set a new password.",
+    "email": "Email address",
+    "sendCode": "Send code",
+    "backToLogin": "Back to sign in",
+    "codeSent": "If there is an account for {email}, we sent you a code. It is valid for one hour.",
+    "code": "Code from the email",
+    "confirm": "Continue",
+    "otherEmail": "Use a different email",
+    "resend": "Send code again",
+    "newTitle": "Set a new password",
+    "newIntro": "Choose a new password. You'll be signed in afterwards.",
+    "newPassword": "New password",
+    "save": "Save password and sign in"
   }
 }
