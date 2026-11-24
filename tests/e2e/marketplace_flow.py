@@ -74,7 +74,7 @@ back = make_photo(os.path.join(tmp, "rueckseite.jpg"), (30, 60, 160), "GLURAK HI
 
 with sync_playwright() as p:
     browser = p.chromium.launch(executable_path=CHROME, args=["--no-sandbox"])
-    mobile = {"viewport": {"width": 390, "height": 844}, "locale": "de-DE"}
+    mobile = {"viewport": {"width": 390, "height": 844}, "locale": "de-DE", "has_touch": True}
 
     # Admin zuerst (erster Nutzer im Testserver wird Admin)
     admin = browser.new_context(**mobile).new_page()
@@ -88,8 +88,26 @@ with sync_playwright() as p:
     seller.get_by_role("link", name="Inserieren", exact=True).click()
     expect(seller).to_have_url(re.compile(r"/de/marktplatz/neu$"))
     expect(seller.get_by_text("Pflicht: ein Foto der Vorderseite und eins der Rückseite.")).to_be_visible()
-    seller.locator('input[type="file"]').set_input_files([front])
+    seller.get_by_role("button", name=re.compile("Vorderseite")).click()
+    sheet = seller.get_by_role("dialog", name="Vorderseite")
+    expect(sheet.get_by_text("Foto aufnehmen")).to_be_visible()
+    expect(sheet.get_by_text(re.compile("Aus Galerie wählen"))).to_be_visible()
+    assert seller.locator("#listing-photo-camera").get_attribute("capture") == "environment"
+    step("Foto-Menü mit Kamera (Rückkamera) und Galerie")
+    sheet.get_by_role("button", name="Abbrechen").click()
+    seller.locator("#listing-photo-gallery").set_input_files([front])
+    cropper = seller.get_by_role("dialog", name="Vorderseite zuschneiden")
+    expect(cropper).to_be_visible()
+    expect(cropper.get_by_text("Karte in den Rahmen schieben")).to_be_visible()
+    cropper.get_by_label("Zoomen").fill("1.4")
+    shot(seller, "08-zuschneiden")
+    cropper.get_by_role("button", name="Um 90 Grad drehen").click()
+    cropper.get_by_role("button", name="Um 90 Grad drehen").click()
+    cropper.get_by_role("button", name="Um 90 Grad drehen").click()
+    cropper.get_by_role("button", name="Um 90 Grad drehen").click()
+    cropper.get_by_role("button", name="Übernehmen").click()
     wait_uploads(seller)
+    step("Kartenfoto im Kartenformat zugeschnitten, gezoomt und gedreht")
     expect(seller.get_by_text("Vorderseite", exact=True)).to_be_visible()
     seller.get_by_label("Titel").fill("Nur ein Foto")
     seller.get_by_label("Spiel").select_option("pokemon")
@@ -100,7 +118,8 @@ with sync_playwright() as p:
 
     seller.get_by_label("Titel").fill("")
     seller.get_by_label("Preis (€)").fill("")
-    seller.locator('input[type="file"]').set_input_files([back])
+    seller.locator("#listing-photo-gallery").set_input_files([back])
+    seller.get_by_role("dialog", name="Rückseite zuschneiden").get_by_role("button", name="Übernehmen").click()
     wait_uploads(seller)
     expect(seller.locator("li img")).to_have_count(2)
     expect(seller.get_by_text("Rückseite", exact=True)).to_be_visible()
@@ -203,7 +222,8 @@ with sync_playwright() as p:
     step("Bearbeiten: Rückseite kann nicht einfach entfernt werden")
 
     third = make_photo(os.path.join(tmp, "rueckseite2.jpg"), (20, 120, 60), "NEUE RUECKSEITE")
-    seller.locator('input[type="file"]').set_input_files([third])
+    seller.locator("#listing-photo-gallery").set_input_files([third])
+    seller.get_by_role("dialog", name="Rückseite zuschneiden").get_by_role("button", name="Übernehmen").click()
     wait_uploads(seller)
     seller.get_by_label("Preis (€)").fill("110")
     seller.get_by_role("button", name="Änderungen speichern").click()

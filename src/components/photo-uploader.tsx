@@ -2,16 +2,19 @@
 /* eslint-disable @next/next/no-img-element -- Vorschau aus dem Speicher bzw. lokal */
 
 import { useTranslations } from "next-intl";
-import { useEffect, useId, useRef, useState } from "react";
-import { prepareImage } from "@/lib/image";
+import { useEffect, useState } from "react";
+import { ImageCropper } from "@/components/image-cropper";
+import { PhotoSourceSheet } from "@/components/photo-source-sheet";
+import { canvasToJpeg, loadImage, prepareImage } from "@/lib/image";
 import { MAX_PHOTOS, PHOTO_BUCKET, photoUrl } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/client";
 
 type Photo = { id: string; preview: string; state: "ready" | "uploading" | "error" };
 
 /**
- * Fotos auswählen, im Browser verkleinern und direkt in den eigenen Ordner bei Supabase hochladen.
- * Das Formular bekommt nur die Foto-IDs (verstecktes Feld "photos").
+ * Fotos aufnehmen oder aus der Galerie wählen, im Browser verkleinern und direkt in den eigenen Ordner
+ * bei Supabase hochladen. Bei Einzelkarten und Slabs wird jedes Foto im Kartenformat zugeschnitten
+ * (verschieben, zoomen, drehen). Das Formular bekommt nur die Foto-IDs (verstecktes Feld "photos").
  */
 export function PhotoUploader({
   userId,
@@ -26,8 +29,10 @@ export function PhotoUploader({
   onPendingChange?: (pending: boolean) => void;
 }) {
   const t = useTranslations("Listing");
-  const inputId = useId();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const tP = useTranslations("Photos");
+  const [sheet, setSheet] = useState(false);
+  const [queue, setQueue] = useState<File[]>([]);
+  const [crop, setCrop] = useState<{ img: HTMLImageElement; url: string } | null>(null);
   const [photos, setPhotos] = useState<Photo[]>(() =>
     initial.map((id) => ({ id, preview: photoUrl(userId, id, "thumb"), state: "ready" })),
   );
@@ -42,34 +47,60 @@ export function PhotoUploader({
     setPhotos(next);
   }
 
-  async function handleFiles(files: FileList | null) {
-    if (!files) return;
-    setError(null);
-    const free = MAX_PHOTOS - photos.length;
-    const selected = Array.from(files).slice(0, Math.max(0, free));
-    const supabase = createClient();
-
-    for (const file of selected) {
-      const id = crypto.randomUUID();
-      const localPreview = URL.createObjectURL(file);
-      update((p) => [...p, { id, preview: localPreview, state: "uploading" }]);
-      try {
-        const { full, thumb } = await prepareImage(file);
-        const opts = { contentType: "image/jpeg", cacheControl: "31536000", upsert: false };
-        const [a, b] = await Promise.all([
-          supabase.storage.from(PHOTO_BUCKET).upload(`${userId}/${id}.jpg`, full, opts),
-          supabase.storage.from(PHOTO_BUCKET).upload(`${userId}/${id}_t.jpg`, thumb, opts),
-        ]);
-        if (a.error || b.error) throw a.error ?? b.error;
-        update((p) => p.map((x) => (x.id === id ? { ...x, state: "ready" } : x)));
-      } catch (e) {
-        console.error("Foto-Upload", e);
-        setError(e instanceof Error && e.message === "not_an_image" ? t("photoError") : null);
-        update((p) => p.map((x) => (x.id === id ? { ...x, state: "error" } : x)));
-      }
+  async function upload(make: () => Promise<{ full: Blob; thumb: Blob }>, preview: string) {
+    const id = crypto.randomUUID();
+    update((p) => [...p, { id, preview, state: "uploading" }]);
+    try {
+      const { full, thumb } = await make();
+      const supabase = createClient();
+      const opts = { contentType: "image/jpeg", cacheControl: "31536000", upsert: false };
+      const [a, b] = await Promise.all([
+        supabase.storage.from(PHOTO_BUCKET).upload(`${userId}/${id}.jpg`, full, opts),
+        supabase.storage.from(PHOTO_BUCKET).upload(`${userId}/${id}_t.jpg`, thumb, opts),
+      ]);
+      if (a.error || b.error) throw a.error ?? b.error;
+      update((p) => p.map((x) => (x.id === id ? { ...x, state: "ready" } : x)));
+    } catch (e) {
+      console.error("Foto-Upload", e);
+      setError(e instanceof Error && e.message === "not_an_image" ? t("photoError") : null);
+      update((p) => p.map((x) => (x.id === id ? { ...x, state: "error" } : x)));
     }
-    if (inputRef.current) inputRef.current.value = "";
   }
+
+  // Nächstes Foto aus der Warteschlange zum Zuschneiden öffnen
+  async function openNext(list: File[]) {
+    setQueue(list);
+    if (list.length === 0) return setCrop(null);
+    try {
+      setCrop(await loadImage(list[0]));
+    } catch {
+      setError(t("photoError"));
+      void openNext(list.slice(1));
+    }
+  }
+
+  function handleFiles(files: File[]) {
+    setError(null);
+    const selected = files.slice(0, Math.max(0, MAX_PHOTOS - photos.length));
+    if (requireBothSides) {
+      void openNext(selected);
+      return;
+    }
+    for (const file of selected) void upload(() => prepareImage(file), URL.createObjectURL(file));
+  }
+
+  function finishCrop(canvas: HTMLCanvasElement | null) {
+    if (crop) URL.revokeObjectURL(crop.url);
+    if (canvas) {
+      const preview = canvas.toDataURL("image/jpeg", 0.6);
+      void upload(async () => ({ full: await canvasToJpeg(canvas, 1600, 0.85), thumb: await canvasToJpeg(canvas, 480, 0.8) }), preview);
+    }
+    void openNext(queue.slice(1));
+  }
+
+  const nextIndex = photos.length;
+  const cropTitle =
+    nextIndex === 0 ? tP("cropFront") : nextIndex === 1 ? tP("cropBack") : tP("cropCard");
 
   const ready = photos.filter((p) => p.state === "ready");
 
@@ -117,25 +148,16 @@ export function PhotoUploader({
         ))}
         {photos.length < MAX_PHOTOS && (
           <li>
-            <label
-              htmlFor={inputId}
-              className={`flex aspect-[3/4] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-center text-xs hover:border-amber hover:text-amber ${
+            <button
+              type="button"
+              onClick={() => setSheet(true)}
+              className={`flex aspect-[3/4] w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-center text-xs hover:border-amber hover:text-amber ${
                 requireBothSides && photos.length < 2 ? "border-amber/60 text-amber" : "border-white/20 text-cream/70"
               }`}
             >
-              <span className="text-2xl leading-none">+</span>
+              <span className="text-2xl leading-none">📷</span>
               {requireBothSides && photos.length < 2 ? (photos.length === 0 ? t("front") : t("back")) : t("addPhotos")}
-            </label>
-            <input
-              ref={inputRef}
-              id={inputId}
-              type="file"
-              accept="image/*"
-              multiple
-              aria-label={t("addPhotos")}
-              className="sr-only"
-              onChange={(e) => handleFiles(e.target.files)}
-            />
+            </button>
           </li>
         )}
         {requireBothSides && photos.length === 0 && (
@@ -144,6 +166,27 @@ export function PhotoUploader({
           </li>
         )}
       </ul>
+      <PhotoSourceSheet
+        idPrefix="listing-photo"
+        open={sheet}
+        onClose={() => setSheet(false)}
+        onFiles={handleFiles}
+        facing="environment"
+        multiple
+        title={requireBothSides && photos.length < 2 ? (photos.length === 0 ? t("front") : t("back")) : t("addPhotos")}
+      />
+      {crop && (
+        <ImageCropper
+          key={crop.url}
+          src={crop.url}
+          img={crop.img}
+          shape="card"
+          output={{ width: 1146, height: 1600 }}
+          title={cropTitle}
+          onCancel={() => finishCrop(null)}
+          onDone={(canvas) => finishCrop(canvas)}
+        />
+      )}
       {error && <p role="alert" className="error">{error}</p>}
       {photos.some((p) => p.state === "error") && !error && (
         <p role="alert" className="error">{t("photoError")}</p>

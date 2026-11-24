@@ -182,7 +182,8 @@
     "message_invalid": "Die Nachricht muss zwischen 1 und 1.000 Zeichen lang sein.",
     "email_taken": "Für diese E-Mail-Adresse gibt es schon ein Konto.",
     "email_not_confirmed": "Deine E-Mail-Adresse ist noch nicht bestätigt. Registriere dich erneut, um einen neuen Code zu bekommen.",
-    "photo_missing": "Das Foto konnte nicht gesendet werden. Bitte versuch es noch einmal."
+    "photo_missing": "Das Foto konnte nicht gesendet werden. Bitte versuch es noch einmal.",
+    "not_an_image": "Diese Datei ist kein Bild, das sich verarbeiten lässt."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -404,7 +405,11 @@
     "addPhoto": "Foto anhängen",
     "photo": "Foto",
     "photoSending": "Foto wird gesendet …",
-    "openPhoto": "Foto in voller Größe öffnen"
+    "openPhoto": "Foto in voller Größe öffnen",
+    "previewTitle": "Foto senden",
+    "cancel": "Abbrechen",
+    "caption": "Text zum Foto",
+    "captionPlaceholder": "Text hinzufügen …"
   },
   "Register": {
     "title": "Registrieren",
@@ -518,6 +523,21 @@
     "approvalText": "Wer dir folgen will, schickt eine Anfrage. Du entscheidest, wen du annimmst.",
     "marketNote": "Hinweis: Deine Inserate bleiben im Marktplatz für alle sichtbar, damit Interessenten sie finden.",
     "save": "Speichern",
-    "saved": "Gespeichert."
+    "saved": "Gespeichert.",
+    "cropAvatar": "Ausschnitt wählen"
+  },
+  "Photos": {
+    "camera": "Foto aufnehmen",
+    "gallery": "Aus Galerie wählen",
+    "galleryMany": "Aus Galerie wählen (mehrere möglich)",
+    "remove": "Entfernen",
+    "cancel": "Abbrechen",
+    "apply": "Übernehmen",
+    "zoom": "Zoomen",
+    "rotate": "Um 90 Grad drehen",
+    "cardHint": "Karte in den Rahmen schieben · mit zwei Fingern zoomen",
+    "cropFront": "Vorderseite zuschneiden",
+    "cropBack": "Rückseite zuschneiden",
+    "cropCard": "Foto zuschneiden"
   }
 }

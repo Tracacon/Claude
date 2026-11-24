@@ -69,7 +69,7 @@ def picture(name, color, size=(1000, 800)):
 
 with sync_playwright() as p:
     browser = p.chromium.launch(executable_path=CHROME, args=["--no-sandbox"])
-    mobile = {"viewport": {"width": 390, "height": 844}, "locale": "de-DE"}
+    mobile = {"viewport": {"width": 390, "height": 844}, "locale": "de-DE", "has_touch": True}
 
     admin = browser.new_context(**mobile).new_page()
     register(admin, "chefin@tracacon.de", "Chefin")
@@ -94,15 +94,31 @@ with sync_playwright() as p:
 
     # --- Profilbild und Angaben ---------------------------------------------------
     seller.goto(f"{BASE}/de/einstellungen")
-    seller.get_by_label("Profilbild auswählen").set_input_files(picture("ich.jpg", (200, 60, 90)))
-    expect(seller.get_by_role("button", name="Entfernen")).to_be_visible(timeout=15000)
+    seller.get_by_role("button", name="Profilbild hinzufügen").first.click()
+    sheet = seller.get_by_role("dialog", name="Profilbild")
+    expect(sheet.get_by_text("Foto aufnehmen")).to_be_visible()
+    assert seller.locator("#avatar-camera").get_attribute("capture") == "user"
+    sheet.get_by_role("button", name="Abbrechen").click()
+    seller.locator("#avatar-gallery").set_input_files(picture("ich.jpg", (200, 60, 90)))
+    cropper = seller.get_by_role("dialog", name="Ausschnitt wählen")
+    expect(cropper).to_be_visible()
+    box = cropper.locator("div.touch-none")
+    bb = box.bounding_box()
+    seller.mouse.move(bb["x"] + bb["width"] / 2, bb["y"] + bb["height"] / 2)
+    seller.mouse.down()
+    seller.mouse.move(bb["x"] + bb["width"] / 2 + 40, bb["y"] + bb["height"] / 2 + 10, steps=5)
+    seller.mouse.up()
+    cropper.get_by_label("Zoomen").fill("1.5")
+    shot(seller, "29-profilbild-ausschnitt")
+    cropper.get_by_role("button", name="Übernehmen").click()
+    expect(seller.get_by_role("button", name="Profilbild ändern").first).to_be_visible(timeout=15000)
     seller.get_by_label("Über mich").fill("Sammle Vintage-Pokémon und tausche gern.")
     seller.get_by_role("button", name="Speichern", exact=True).first.click()
     expect(seller.get_by_text("Gespeichert.").first).to_be_visible()
     seller.goto(f"{BASE}/de/profil")
     images_loaded(seller, "header img")
     expect(seller.get_by_text("Sammle Vintage-Pokémon und tausche gern.")).to_be_visible()
-    step("Profilbild hochgeladen und auf dem Profil sichtbar")
+    step("Profilbild: Menü mit Frontkamera, Ausschnitt verschoben und gezoomt, hochgeladen")
 
     # --- Inserat, damit es etwas zu sehen gibt ----------------------------------------
     seller.goto(f"{BASE}/de/marktplatz/neu")
@@ -191,11 +207,21 @@ with sync_playwright() as p:
     expect(fan).to_have_url(re.compile(r"/de/nachrichten/[0-9a-f-]{36}$"))
     conv_url = fan.url
     fan.get_by_label("Nachricht", exact=True).fill("So sieht meine Tauschkarte aus:")
-    fan.get_by_label("Foto anhängen").set_input_files(picture("karte.jpg", (30, 120, 200), (900, 1260)))
+    fan.get_by_role("button", name="Foto anhängen").click()
+    expect(fan.get_by_role("dialog", name="Foto anhängen").get_by_text("Foto aufnehmen")).to_be_visible()
+    fan.get_by_role("dialog", name="Foto anhängen").get_by_role("button", name="Abbrechen").click()
+    fan.locator("#chat-photo-gallery").set_input_files(picture("karte.jpg", (30, 120, 200), (900, 1260)))
+    preview = fan.get_by_role("dialog", name="Foto senden")
+    expect(preview).to_be_visible()
+    expect(preview.get_by_label("Text zum Foto")).to_have_value("So sieht meine Tauschkarte aus:")
+    shot(fan, "37-foto-vorschau")
+    expect(fan.locator("ol img")).to_have_count(0)  # vor dem Bestätigen wird nichts gesendet
+    preview.get_by_role("button", name="Senden").click()
     expect(fan.get_by_text("Foto wird gesendet")).to_have_count(0, timeout=15000)
     expect(fan.locator("li").get_by_text("So sieht meine Tauschkarte aus:")).to_be_visible()
     images_loaded(fan, "ol img")
-    step("Foto mit Text im Chat gesendet")
+    expect(fan.get_by_label("Nachricht", exact=True)).to_have_value("")
+    step("Chat-Foto: Vorschau mit Text, erst nach Bestätigen gesendet")
 
     seller.goto(conv_url)
     images_loaded(seller, "ol img")
