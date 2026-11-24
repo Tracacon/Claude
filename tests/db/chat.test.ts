@@ -91,8 +91,8 @@ describe("Nachrichten", () => {
   });
 
   it("lehnt leere und zu lange Nachrichten ab", async () => {
-    await expect(send(buyer, convId, "   ")).rejects.toThrow(/messages_body_length/);
-    await expect(send(buyer, convId, "x".repeat(1001))).rejects.toThrow(/messages_body_length/);
+    await expect(send(buyer, convId, "   ")).rejects.toThrow(/messages_body_length|messages_content/);
+    await expect(send(buyer, convId, "x".repeat(1001))).rejects.toThrow(/messages_body_length|messages_content/);
   });
 
   it("zählt Ungelesenes und markiert als gelesen", async () => {

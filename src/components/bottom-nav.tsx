@@ -1,6 +1,7 @@
 "use client";
 
 import { Link, usePathname } from "@/i18n/navigation";
+import { UserMenu, type UserMenuData } from "./user-menu";
 
 type Labels = { home: string; market: string; sell: string; messages: string; profile: string; login: string };
 
@@ -9,11 +10,13 @@ export function BottomNav({
   loggedIn,
   onboarded,
   unread,
+  menu,
   labels,
 }: {
   loggedIn: boolean;
   onboarded: boolean;
   unread: number;
+  menu: UserMenuData | null;
   labels: Labels;
 }) {
   const pathname = usePathname();
@@ -54,9 +57,13 @@ export function BottomNav({
         </Link>
       )}
       {onboarded && item("/nachrichten", "✉", labels.messages, is("/nachrichten"), unread)}
-      {loggedIn
-        ? item(onboarded ? "/profil" : "/willkommen", "◉", labels.profile, is("/profil") || is("/willkommen"))
-        : item("/anmelden", "→", labels.login, is("/anmelden"))}
+      {menu ? (
+        <UserMenu data={menu} variant="bottom" />
+      ) : loggedIn ? (
+        item("/willkommen", "◉", labels.profile, is("/willkommen"))
+      ) : (
+        item("/anmelden", "→", labels.login, is("/anmelden"))
+      )}
     </nav>
   );
 }

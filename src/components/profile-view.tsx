@@ -1,0 +1,150 @@
+/* eslint-disable @next/next/no-img-element -- Bilder kommen direkt aus Supabase Storage */
+import { getFormatter, getTranslations } from "next-intl/server";
+import { Avatar } from "@/components/avatar";
+import { FollowButton } from "@/components/follow-button";
+import { PriceTag } from "@/components/listing-card";
+import { Link } from "@/i18n/navigation";
+import { photoUrl, type ListingSummary } from "@/lib/marketplace";
+import { BADGE_ICONS, type PublicProfile } from "@/lib/social";
+
+/**
+ * Profilansicht wie in sozialen Netzwerken: Bild, Zahlen, Beschreibung,
+ * darunter Inserate als Bildraster oder Abzeichen.
+ */
+export async function ProfileView({
+  profile: p,
+  listings,
+  tab,
+  loggedIn,
+  basePath,
+}: {
+  profile: PublicProfile;
+  listings: ListingSummary[];
+  tab: "inserate" | "abzeichen";
+  loggedIn: boolean;
+  basePath: string;
+}) {
+  const t = await getTranslations("Social");
+  const tRoles = await getTranslations("Roles");
+  const tBadges = await getTranslations("Badges");
+  const format = await getFormatter();
+  const userPath = `/u/${p.nickname}`;
+
+  const stat = (count: number, label: string, href?: string) => {
+    const inner = (
+      <>
+        <span className="block text-lg font-bold leading-tight">{format.number(count)}</span>
+        <span className="text-xs text-cream/70">{label}</span>
+      </>
+    );
+    return href && p.can_view ? (
+      <Link href={href} className="rounded-lg px-2 py-1 text-center hover:bg-white/5">{inner}</Link>
+    ) : (
+      <div className="px-2 py-1 text-center">{inner}</div>
+    );
+  };
+
+  return (
+    <div className="space-y-5">
+      <header className="space-y-4">
+        <div className="flex items-center gap-4 sm:gap-6">
+          <Avatar userId={p.id} avatarId={p.avatar_id} nickname={p.nickname} size="lg" />
+          <div className="flex flex-1 justify-around">
+            {stat(p.listing_count, t("listings"), `${basePath}?tab=inserate`)}
+            {stat(p.follower_count, t("followers"), `${userPath}/follower`)}
+            {stat(p.following_count, t("followingCount"), `${userPath}/folgt`)}
+          </div>
+        </div>
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl font-bold">@{p.nickname}</h1>
+            {p.role !== "member" && (
+              <span className="rounded-full bg-amber/15 px-2 py-0.5 text-xs font-semibold text-amber">{tRoles(p.role)}</span>
+            )}
+            {p.visibility === "followers" && <span className="text-xs text-cream/60" title={t("privateLabel")}>🔒</span>}
+          </div>
+          {p.can_view && p.city && <p className="text-sm text-cream/70">📍 {p.city}</p>}
+          {p.can_view && p.bio && <p className="whitespace-pre-line text-[15px]">{p.bio}</p>}
+          {p.can_view && p.website && (
+            <a href={p.website} target="_blank" rel="noopener noreferrer nofollow ugc" className="link break-all text-sm">
+              {p.website.replace(/^https:\/\//, "")}
+            </a>
+          )}
+          <p className="text-xs text-cream/50">
+            {t("memberSince", { date: format.dateTime(new Date(p.member_since), { month: "long", year: "numeric" }) })}
+            {p.follows_me && !p.is_me && <span className="ml-2 rounded bg-white/10 px-1.5 py-0.5">{t("followsYou")}</span>}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {p.is_me ? (
+            <>
+              <Link href="/einstellungen" className="btn-ghost flex-1">{t("editProfile")}</Link>
+              <Link href="/marktplatz/neu" className="btn-ghost flex-1">+ {t("newListing")}</Link>
+            </>
+          ) : loggedIn && !p.blocked ? (
+            <FollowButton userId={p.id} initial={p.my_follow} />
+          ) : !loggedIn ? (
+            <Link href="/anmelden" className="btn-primary">{t("follow")}</Link>
+          ) : null}
+        </div>
+      </header>
+
+      <nav className="flex border-b border-white/10 text-sm" aria-label={t("sections")}>
+        {(["inserate", "abzeichen"] as const).map((x) => (
+          <Link
+            key={x}
+            href={x === "inserate" ? basePath : `${basePath}?tab=abzeichen`}
+            aria-current={tab === x ? "page" : undefined}
+            className={`flex-1 border-b-2 py-2.5 text-center font-semibold ${tab === x ? "border-amber text-amber" : "border-transparent text-cream/60"}`}
+          >
+            {x === "inserate" ? `▦ ${t("listings")}` : `🏅 ${t("badges")}`}
+          </Link>
+        ))}
+      </nav>
+
+      {!p.can_view ? (
+        <div className="card space-y-2 py-10 text-center">
+          <p className="text-3xl">🔒</p>
+          <p className="font-semibold">{t("privateTitle")}</p>
+          <p className="text-sm text-cream/70">{t("privateText", { nickname: p.nickname })}</p>
+        </div>
+      ) : tab === "abzeichen" ? (
+        <div className="space-y-3">
+          {p.badges.length === 0 ? (
+            <p className="card text-sm text-cream/70">{t("noBadges")}</p>
+          ) : (
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {p.badges.map((b) => (
+                <li key={b} className="card flex flex-col items-center gap-1 p-4 text-center sm:p-4">
+                  <span className="text-3xl" aria-hidden>{BADGE_ICONS[b] ?? "🏅"}</span>
+                  <span className="text-sm font-semibold">{tBadges.has(`${b}.title`) ? tBadges(`${b}.title`) : b}</span>
+                  {tBadges.has(`${b}.text`) && <span className="text-xs text-cream/60">{tBadges(`${b}.text`)}</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="text-xs text-cream/50">{t("eventBadgesSoon")}</p>
+        </div>
+      ) : listings.length === 0 ? (
+        <p className="card py-8 text-center text-sm text-cream/70">{p.is_me ? t("noListingsMe") : t("noListings")}</p>
+      ) : (
+        <ul className="grid grid-cols-3 gap-1 sm:gap-2">
+          {listings.map((l) => (
+            <li key={l.id}>
+              <Link href={`/marktplatz/${l.id}`} className="group relative block aspect-[3/4] overflow-hidden rounded-md bg-night-3 sm:rounded-xl">
+                {l.cover_photo_id ? (
+                  <img src={photoUrl(l.owner_id, l.cover_photo_id, "thumb")} alt={l.title} loading="lazy" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="flex h-full items-center justify-center p-2 text-center text-xs text-cream/60">{l.title}</span>
+                )}
+                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/90 to-transparent px-1.5 pb-1 pt-4 text-[11px] font-bold text-amber">
+                  <PriceTag offer={l.offer} cents={l.price_cents} negotiable={l.negotiable} />
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}

@@ -5,6 +5,7 @@ Community-App der TRACACON Trade Card Conventions. *Collect. Connect. Trade.*
 Grundlage ist das [Entscheidungsdokument](https://claude.ai/artifact/2BZqtKyEzQiHVrAccM2YuY). Stand:
 
 - **Phase 1 (Fundament):** Klassische Anmeldung mit E-Mail und Passwort; eigene Seiten für Registrierung (einmaliger Bestätigungscode per E-Mail) und „Passwort vergessen“, Begrüßung mit Mindestalter 16, Profile, Rollen (Mitglied, Team, Admin), Verwaltung, Konto löschen, Deutsch und Englisch.
+- **Social:** Profilseite wie in sozialen Netzwerken (Profilbild, Zahlen, Inserate als Raster, Abzeichen), Profilmenü, Folgen mit optionaler Bestätigung, Privatsphäre (öffentlich oder nur Follower), Einstellungsseite, Fotos im Chat (geschützter Speicher, signierte Adressen).
 - **Phase 3 (App-Chat):** Unterhaltung je Inserat und Interessent, Echtzeit über Supabase Realtime (mit Nachladen als Rückfallebene), Ungelesen-Zähler, Blockieren, Ausblenden, Melden (das Team sieht nur gemeldete Unterhaltungen), Grenzen gegen Spam.
 - **Phase 2 (Marktplatz):** Inserate mit bis zu 6 Fotos anlegen (Einzelkarten und Slabs: Vorder- und Rückseite Pflicht), bearbeiten, Status (aktiv, reserviert, erledigt), löschen. Suche und Filter auf dem Server mit Seitenaufteilung. Melden von Inseraten und Profilen, Moderationsseite für das Team mit Begründung an den Anbieter.
 

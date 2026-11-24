@@ -6,6 +6,7 @@ import { redirect } from "@/i18n/navigation";
 import { requireProfile, requireUser } from "@/lib/auth";
 import { mapDbError } from "@/lib/db-errors";
 import { PHOTO_BUCKET } from "@/lib/marketplace";
+import { AVATAR_BUCKET } from "@/lib/social";
 import { createClient } from "@/lib/supabase/server";
 import { newPasswordSchema, onboardingSchema, profileSchema, toFieldErrors, type FieldErrors } from "@/lib/validation";
 
@@ -90,7 +91,7 @@ export async function updateProfile(_prev: FormState, formData: FormData): Promi
 
   revalidatePath("/", "layout");
   if (parsed.data.locale !== profile.locale) {
-    return redirect({ href: "/profil", locale: parsed.data.locale });
+    return redirect({ href: "/einstellungen", locale: parsed.data.locale });
   }
   return { ok: true, values };
 }
@@ -112,6 +113,11 @@ export async function deleteAccount(_prev: FormState, formData: FormData): Promi
       .from(PHOTO_BUCKET)
       .remove(files.map((f) => `${user.id}/${f.name}`));
     if (storageError) console.error("Fotos beim Kontolöschen nicht entfernt", storageError.message);
+  }
+
+  const { data: avatars } = await supabase.storage.from(AVATAR_BUCKET).list(user.id, { limit: 100 });
+  if (avatars && avatars.length > 0) {
+    await supabase.storage.from(AVATAR_BUCKET).remove(avatars.map((f) => `${user.id}/${f.name}`));
   }
 
   const { error } = await supabase.rpc("delete_own_account");

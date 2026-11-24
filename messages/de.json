@@ -19,7 +19,15 @@
     "moderation": "Moderation",
     "more": "Mehr",
     "messages": "Nachrichten",
-    "register": "Registrieren"
+    "register": "Registrieren",
+    "menu": "Profilmenü",
+    "myProfile": "Mein Profil ansehen",
+    "followers": "Meine Follower",
+    "following": "Folge ich",
+    "requests": "Follower-Anfragen",
+    "badges": "Abzeichen",
+    "settings": "Einstellungen",
+    "close": "Schließen"
   },
   "Home": {
     "claim": "Collect. Connect. Trade.",
@@ -173,7 +181,8 @@
     "blocked": "Ihr könnt euch keine Nachrichten schicken, weil eine Blockierung besteht.",
     "message_invalid": "Die Nachricht muss zwischen 1 und 1.000 Zeichen lang sein.",
     "email_taken": "Für diese E-Mail-Adresse gibt es schon ein Konto.",
-    "email_not_confirmed": "Deine E-Mail-Adresse ist noch nicht bestätigt. Registriere dich erneut, um einen neuen Code zu bekommen."
+    "email_not_confirmed": "Deine E-Mail-Adresse ist noch nicht bestätigt. Registriere dich erneut, um einen neuen Code zu bekommen.",
+    "photo_missing": "Das Foto konnte nicht gesendet werden. Bitte versuch es noch einmal."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -391,7 +400,11 @@
     "hideHint": "Kommt zurück, sobald eine neue Nachricht eintrifft.",
     "close": "Schließen",
     "youBlocked": "Du hast @{nickname} blockiert. Über ⋯ kannst du das aufheben.",
-    "blockedYou": "In dieser Unterhaltung können keine Nachrichten mehr gesendet werden."
+    "blockedYou": "In dieser Unterhaltung können keine Nachrichten mehr gesendet werden.",
+    "addPhoto": "Foto anhängen",
+    "photo": "Foto",
+    "photoSending": "Foto wird gesendet …",
+    "openPhoto": "Foto in voller Größe öffnen"
   },
   "Register": {
     "title": "Registrieren",
@@ -428,5 +441,83 @@
     "newIntro": "Wähle ein neues Passwort. Danach bist du angemeldet.",
     "newPassword": "Neues Passwort",
     "save": "Passwort speichern und anmelden"
+  },
+  "Social": {
+    "follow": "Folgen",
+    "following": "Folge ich",
+    "requested": "Angefragt",
+    "unfollowHint": "Erneut tippen zum Entfolgen bzw. Zurückziehen",
+    "listings": "Inserate",
+    "followers": "Follower",
+    "followingCount": "Folgt",
+    "memberSince": "Dabei seit {date}",
+    "followsYou": "Folgt dir",
+    "editProfile": "Profil bearbeiten",
+    "newListing": "Inserieren",
+    "sections": "Bereiche",
+    "badges": "Abzeichen",
+    "privateLabel": "Privates Profil",
+    "privateTitle": "Dieses Profil ist privat",
+    "privateText": "Folge @{nickname}, um Profilbild, Beschreibung und Inserate zu sehen.",
+    "noBadges": "Noch keine Abzeichen.",
+    "eventBadgesSoon": "Abzeichen für besuchte TRACACON-Events kommen mit dem Check-in.",
+    "noListings": "Noch keine aktiven Inserate.",
+    "noListingsMe": "Du hast noch keine aktiven Inserate. Tipp auf „Inserieren“, um deine erste Karte einzustellen.",
+    "back": "Zurück",
+    "noFollowers": "Noch keine Follower.",
+    "noFollowing": "Folgt noch niemandem.",
+    "remove": "Entfernen",
+    "removed": "Entfernt",
+    "done": "Erledigt",
+    "accept": "Annehmen",
+    "decline": "Ablehnen",
+    "requests": "Follower-Anfragen",
+    "noRequests": "Keine offenen Anfragen.",
+    "requestsOff": "Hinweis: Bei dir kann jeder direkt folgen. Anfragen gibt es nur, wenn du in den Einstellungen „Follower bestätigen“ einschaltest."
+  },
+  "Badges": {
+    "team": {
+      "title": "Team",
+      "text": "Gehört zum TRACACON-Team"
+    },
+    "founder": {
+      "title": "Gründungsmitglied",
+      "text": "Von Anfang an dabei"
+    },
+    "first_listing": {
+      "title": "Erstes Inserat",
+      "text": "Hat die erste Karte eingestellt"
+    },
+    "seller_10": {
+      "title": "10 Inserate",
+      "text": "Aktiver Händler"
+    },
+    "popular": {
+      "title": "Beliebt",
+      "text": "Mindestens 10 Follower"
+    }
+  },
+  "Settings": {
+    "title": "Einstellungen",
+    "back": "Zurück zum Profil",
+    "avatar": "Profilbild",
+    "addAvatar": "Profilbild hinzufügen",
+    "changeAvatar": "Profilbild ändern",
+    "removeAvatar": "Entfernen",
+    "chooseAvatar": "Profilbild auswählen",
+    "uploading": "Wird hochgeladen …",
+    "avatarHint": "Wird quadratisch zugeschnitten. Aufnahmeort und andere Bilddaten werden entfernt.",
+    "privacy": "Privatsphäre",
+    "privacyIntro": "Lege fest, wer dein Profil sehen und dir folgen kann.",
+    "whoSees": "Wer sieht dein Profilbild, deine Beschreibung und deine Inserate auf deinem Profil?",
+    "public": "Alle",
+    "publicText": "Jeder kann dein Profil vollständig sehen, auch ohne Anmeldung.",
+    "followersOnly": "Nur meine Follower",
+    "followersOnlyText": "Andere sehen nur Nickname, Zahlen und Abzeichen.",
+    "approval": "Follower bestätigen",
+    "approvalText": "Wer dir folgen will, schickt eine Anfrage. Du entscheidest, wen du annimmst.",
+    "marketNote": "Hinweis: Deine Inserate bleiben im Marktplatz für alle sichtbar, damit Interessenten sie finden.",
+    "save": "Speichern",
+    "saved": "Gespeichert."
   }
 }

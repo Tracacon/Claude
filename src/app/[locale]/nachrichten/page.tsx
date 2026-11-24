@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- Bilder kommen direkt aus Supabase Storage */
 import type { Metadata } from "next";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { Avatar } from "@/components/avatar";
 import { Link } from "@/i18n/navigation";
 import { requireProfile } from "@/lib/auth";
 import type { ConversationSummary } from "@/lib/chat";
@@ -51,7 +52,8 @@ export default async function InboxPage({ params }: PageProps<"/[locale]/nachric
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline gap-2">
+                    <div className="flex items-center gap-2">
+                      <Avatar userId={c.other_id} avatarId={c.other_avatar_id} nickname={c.other_nickname} size="xs" />
                       <p className={`truncate ${c.unread > 0 ? "font-bold" : "font-semibold"}`}>@{c.other_nickname}</p>
                       <span className="ml-auto shrink-0 text-xs text-cream/50">{when}</span>
                     </div>
@@ -60,7 +62,7 @@ export default async function InboxPage({ params }: PageProps<"/[locale]/nachric
                     </p>
                     <p className={`truncate text-sm ${c.unread > 0 ? "text-cream" : "text-cream/70"}`}>
                       {c.last_from_me ? `${t("you")}: ` : ""}
-                      {c.last_body}
+                      {c.last_has_photo ? `📷 ${c.last_body || t("photo")}` : c.last_body}
                     </p>
                   </div>
                   {c.unread > 0 && (

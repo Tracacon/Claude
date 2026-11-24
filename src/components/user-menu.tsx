@@ -1,0 +1,158 @@
+"use client";
+/* eslint-disable @next/next/no-img-element -- Profilbild aus Supabase Storage */
+
+import { useEffect, useRef, useState } from "react";
+import { Link, usePathname } from "@/i18n/navigation";
+import { signOut } from "@/lib/actions/auth";
+import { avatarUrl } from "@/lib/social";
+
+export type UserMenuData = {
+  id: string;
+  nickname: string;
+  avatarId: string | null;
+  role: "member" | "team" | "admin";
+  unread: number;
+  requests: number;
+  reports: number;
+  labels: Record<
+    | "menu" | "myProfile" | "myListings" | "messages" | "followers" | "following" | "requests"
+    | "badges" | "settings" | "moderation" | "admin" | "logout" | "profile" | "close",
+    string
+  >;
+};
+
+function Face({ data, size }: { data: UserMenuData; size: string }) {
+  return data.avatarId ? (
+    <img src={avatarUrl(data.id, data.avatarId)} alt="" className={`${size} rounded-full bg-night-3 object-cover`} />
+  ) : (
+    <span aria-hidden className={`${size} flex items-center justify-center rounded-full bg-amber text-sm font-black text-night`}>
+      {data.nickname.slice(0, 1).toUpperCase()}
+    </span>
+  );
+}
+
+/**
+ * Profilmenü: Auf breiten Bildschirmen als Aufklappmenü in der Kopfzeile,
+ * auf dem Handy als Blatt von unten (aus der Leiste am unteren Rand).
+ */
+export function UserMenu({ data, variant }: { data: UserMenuData; variant: "header" | "bottom" }) {
+  const pathname = usePathname();
+  // Menü merkt sich die Seite, auf der es geöffnet wurde; nach einem Seitenwechsel ist es zu.
+  const [openOn, setOpenOn] = useState<string | null>(null);
+  const open = openOn === pathname;
+  const setOpen = (value: boolean | ((o: boolean) => boolean)) => {
+    const next = typeof value === "function" ? value(open) : value;
+    setOpenOn(next ? pathname : null);
+  };
+  const panelRef = useRef<HTMLDivElement>(null);
+  const L = data.labels;
+  const badgeCount = data.unread + data.requests;
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpenOn(null);
+    document.addEventListener("keydown", onKey);
+    panelRef.current?.querySelector<HTMLElement>("a,button")?.focus();
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  const item = (href: string, icon: string, label: string, count = 0) => (
+    <Link href={href} className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white/5">
+      <span aria-hidden className="w-6 text-center text-lg">{icon}</span>
+      <span className="flex-1">{label}</span>
+      {count > 0 && <span className="rounded-full bg-amber px-2 py-0.5 text-xs font-bold text-night">{count}</span>}
+    </Link>
+  );
+
+  const panel = (
+    <div
+      ref={panelRef}
+      role="menu"
+      aria-label={L.menu}
+      className={
+        variant === "header"
+          ? "absolute right-0 top-12 z-40 w-72 rounded-2xl border border-white/15 bg-night-2 p-2 shadow-2xl"
+          : "fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-white/15 bg-night-2 p-3 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl"
+      }
+    >
+      {variant === "bottom" && <div aria-hidden className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-white/20" />}
+      <Link href="/profil" className="mb-1 flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-white/5">
+        <Face data={data} size="size-11" />
+        <span className="min-w-0">
+          <span className="block truncate font-bold">@{data.nickname}</span>
+          <span className="text-xs text-cream/60">{L.myProfile}</span>
+        </span>
+      </Link>
+      <div className="my-1 border-t border-white/10" />
+      {item("/meine-inserate", "▦", L.myListings)}
+      {item("/nachrichten", "✉", L.messages, data.unread)}
+      {item(`/u/${data.nickname}/follower`, "👥", L.followers)}
+      {item(`/u/${data.nickname}/folgt`, "➜", L.following)}
+      {item("/anfragen", "🔔", L.requests, data.requests)}
+      {item("/profil?tab=abzeichen", "🏅", L.badges)}
+      <div className="my-1 border-t border-white/10" />
+      {item("/einstellungen", "⚙", L.settings)}
+      {(data.role === "team" || data.role === "admin") && item("/moderation", "⚑", L.moderation, data.reports)}
+      {data.role === "admin" && item("/admin", "🛡", L.admin)}
+      <form action={signOut}>
+        <button type="submit" className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-cream/70 hover:bg-white/5">
+          <span aria-hidden className="w-6 text-center text-lg">⎋</span>
+          {L.logout}
+        </button>
+      </form>
+    </div>
+  );
+
+  if (variant === "header") {
+    return (
+      <div className="relative hidden sm:block">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          aria-haspopup="menu"
+          className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 hover:bg-white/5"
+        >
+          <span className="relative">
+            <Face data={data} size="size-8" />
+            {badgeCount > 0 && <span className="absolute -right-1 -top-1 size-3 rounded-full border-2 border-night bg-amber" />}
+          </span>
+          <span className="max-w-32 truncate text-sm font-semibold">{data.nickname}</span>
+          <span aria-hidden className="text-xs">▾</span>
+        </button>
+        {open && (
+          <>
+            <button type="button" aria-label={L.close} className="fixed inset-0 z-30 cursor-default" onClick={() => setOpen(false)} />
+            {panel}
+          </>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className={`relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] ${
+          pathname.startsWith("/profil") || pathname.startsWith("/einstellungen") ? "text-amber" : "text-cream/70"
+        }`}
+      >
+        <span className="relative">
+          <Face data={data} size="size-6" />
+          {data.requests > 0 && <span className="absolute -right-1 -top-1 size-2.5 rounded-full bg-amber" />}
+        </span>
+        {L.profile}
+      </button>
+      {open && (
+        <>
+          <button type="button" aria-label={L.close} className="fixed inset-0 z-40 bg-night/70" onClick={() => setOpen(false)} />
+          {panel}
+        </>
+      )}
+    </>
+  );
+}

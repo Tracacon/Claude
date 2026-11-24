@@ -7,10 +7,11 @@ import { UUID_PATTERN } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/server";
 
 type ModConversation = {
+  id: string;
   listing_title: string;
   seller: string;
   buyer: string;
-  messages: { from: string; body: string; created_at: string }[];
+  messages: { from: string; body: string; photo_id: string | null; created_at: string }[];
 };
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/moderation/unterhaltung/[id]">): Promise<Metadata> {
@@ -30,6 +31,12 @@ export default async function ModerationConversationPage({ params }: PageProps<"
   const { data, error } = await supabase.rpc("moderation_conversation", { p_conversation_id: id });
   if (error || !data) notFound();
   const c = data as ModConversation;
+  // Fotos liegen im geschützten Speicher; das Team darf sie nach einer Meldung lesen
+  const photoIds = c.messages.flatMap((m) => (m.photo_id ? [m.photo_id] : []));
+  const signed = photoIds.length
+    ? (await supabase.storage.from("chat-photos").createSignedUrls(photoIds.map((p) => `${c.id}/${p}.jpg`), 3600)).data ?? []
+    : [];
+  const photoUrl = new Map(signed.map((s, i) => [photoIds[i], s.signedUrl]));
   const t = await getTranslations("Moderation");
   const format = await getFormatter();
 
@@ -45,7 +52,11 @@ export default async function ModerationConversationPage({ params }: PageProps<"
             <p className="text-xs text-cream/60">
               @{m.from} · {format.dateTime(new Date(m.created_at), { dateStyle: "short", timeStyle: "short" })}
             </p>
-            <p className="whitespace-pre-wrap break-words">{m.body}</p>
+            {m.photo_id && photoUrl.get(m.photo_id) && (
+              // eslint-disable-next-line @next/next/no-img-element -- signierte Adresse aus Supabase Storage
+              <img src={photoUrl.get(m.photo_id)!} alt="" className="my-1 max-h-72 rounded-xl" />
+            )}
+            {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
           </li>
         ))}
       </ol>

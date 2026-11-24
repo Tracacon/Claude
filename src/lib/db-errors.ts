@@ -17,6 +17,7 @@ const KNOWN = [
   "front_back_required",
   "cannot_message_self",
   "blocked",
+  "photo_missing",
 ] as const;
 
 const ALIASES: Record<string, string> = {
@@ -35,7 +36,7 @@ export function mapDbError(error: DbError): string {
   if (error.code === "23514" && text.includes("listings_handover")) return "handover_required";
   if (error.code === "23514" && text.includes("listings_price")) return "invalid_price";
   if (error.code === "23514" && text.includes("listings_title")) return "title_short";
-  if (error.code === "23514" && text.includes("messages_body")) return "message_invalid";
+  if (error.code === "23514" && (text.includes("messages_body") || text.includes("messages_content"))) return "message_invalid";
   if (error.code === "23514") return "too_long";
   if (error.code === "42501") return "forbidden";
   console.error("Unerwarteter Datenbankfehler", error.code, error.message);

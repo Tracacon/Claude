@@ -82,12 +82,11 @@ describe("Zugriffsregeln", () => {
     await expect(as(null, "select * from public.profiles")).rejects.toThrow(/permission denied/);
   });
 
-  it("zeigt angemeldeten Nutzern das eigene und alle fertigen Profile", async () => {
+  it("zeigt angemeldeten Nutzern direkt nur das eigene Profil (fremde nur über get_profile)", async () => {
     const r = await as<{ id: string }>(ids.bob, "select id from public.profiles order by id");
-    const seen = r.rows.map((p) => p.id);
-    expect(seen).toContain(ids.bob); // eigenes, noch unfertiges Profil
-    expect(seen).toContain(ids.alice); // fertiges Profil
-    expect(seen).not.toContain(ids.admin); // fremdes, unfertiges Profil
+    expect(r.rows.map((p) => p.id)).toEqual([ids.bob]);
+    const viaFunction = await as<{ get_profile: { nickname: string } }>(ids.bob, "select public.get_profile('alice_tcg')");
+    expect(viaFunction.rows[0].get_profile.nickname).toBe("Alice_TCG");
   });
 
   it("erlaubt das Bearbeiten des eigenen Profils", async () => {

@@ -6,6 +6,7 @@ export type ChatMessage = {
   conversation_id: string;
   sender_id: string;
   body: string;
+  photo_id: string | null;
   created_at: string;
 };
 
@@ -18,9 +19,11 @@ export type ConversationSummary = {
   cover_photo_id: string | null;
   other_id: string;
   other_nickname: string;
+  other_avatar_id: string | null;
   i_am_seller: boolean;
   last_message_at: string;
   last_body: string | null;
+  last_has_photo: boolean;
   last_from_me: boolean;
   unread: number;
   blocked: boolean;
@@ -37,6 +40,7 @@ export type ConversationHead = {
   listing_offer: Offer | null;
   other_id: string;
   other_nickname: string;
+  other_avatar_id: string | null;
   i_am_seller: boolean;
   i_blocked: boolean;
   blocked_me: boolean;

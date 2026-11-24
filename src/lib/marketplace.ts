@@ -89,7 +89,7 @@ export type ListingDetail = {
     created_at: string;
     updated_at: string;
   };
-  owner: { nickname: string; role: "member" | "team" | "admin"; member_since: string };
+  owner: { nickname: string; role: "member" | "team" | "admin"; member_since: string; avatar_id: string | null };
   photos: string[];
   is_owner: boolean;
   can_moderate: boolean;
