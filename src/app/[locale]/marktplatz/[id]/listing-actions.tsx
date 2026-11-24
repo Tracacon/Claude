@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useActionState, useState } from "react";
 import { FormError } from "@/components/form-error";
 import { deleteListing, reportContent, setListingStatus, type SimpleState } from "@/lib/actions/listings";
+import { startConversation, type ChatActionState } from "@/lib/actions/chat";
 import { moderateListing, type ModerationState } from "@/lib/actions/moderation";
 import { REPORT_REASONS, type ListingStatus } from "@/lib/marketplace";
 
@@ -120,5 +121,16 @@ export function ModerateListing({ id, removed }: { id: string; removed: boolean 
         <FormError code={state.error} />
       </form>
     </section>
+  );
+}
+
+export function StartConversation({ listingId, label }: { listingId: string; label: string }) {
+  const [state, action, pending] = useActionState<ChatActionState, FormData>(startConversation, {});
+  return (
+    <form action={action} className="space-y-2">
+      <input type="hidden" name="listingId" value={listingId} />
+      <button type="submit" className="btn-primary w-full" disabled={pending}>✉ {label}</button>
+      <FormError code={state.error} />
+    </form>
   );
 }

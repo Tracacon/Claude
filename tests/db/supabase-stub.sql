@@ -42,3 +42,4 @@ create function auth.uid() returns uuid
 language sql stable
 as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
 grant execute on function auth.uid() to anon, authenticated, service_role;
+create publication supabase_realtime;

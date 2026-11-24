@@ -6,6 +6,13 @@ import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "./bottom-nav";
 import { LanguageSwitch } from "./language-switch";
 
+async function unreadMessages(onboarded: boolean) {
+  if (!onboarded) return 0;
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("unread_message_count");
+  return Number(data ?? 0);
+}
+
 async function openReports(isTeam: boolean) {
   if (!isTeam) return 0;
   const supabase = await createClient();
@@ -17,8 +24,8 @@ export async function SiteHeader() {
   const t = await getTranslations("Nav");
   const profile = await getMyProfile();
   const isTeam = profile?.role === "team" || profile?.role === "admin";
-  const reports = await openReports(isTeam);
   const onboarded = Boolean(profile?.nickname);
+  const [reports, unread] = await Promise.all([openReports(isTeam), unreadMessages(onboarded)]);
 
   return (
     <>
@@ -34,6 +41,14 @@ export async function SiteHeader() {
             {onboarded && (
               <Link href="/marktplatz/neu" className="hidden rounded-lg px-2 py-1.5 hover:bg-white/5 sm:inline">
                 {t("sell")}
+              </Link>
+            )}
+            {onboarded && (
+              <Link href="/nachrichten" className="hidden rounded-lg px-2 py-1.5 hover:bg-white/5 sm:inline">
+                {t("messages")}
+                {unread > 0 && (
+                  <span className="ml-1 rounded-full bg-amber px-1.5 py-0.5 text-xs font-bold text-night">{unread}</span>
+                )}
               </Link>
             )}
             {isTeam && (
@@ -76,11 +91,12 @@ export async function SiteHeader() {
       <BottomNav
         loggedIn={Boolean(profile)}
         onboarded={onboarded}
+        unread={unread}
         labels={{
           home: t("home"),
           market: t("market"),
           sell: t("sell"),
-          mine: t("myListings"),
+          messages: t("messages"),
           profile: t("profile"),
           login: t("login"),
         }}

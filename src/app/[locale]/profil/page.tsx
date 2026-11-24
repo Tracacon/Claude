@@ -55,6 +55,7 @@ export default async function ProfilePage({ params }: PageProps<"/[locale]/profi
 
       <nav aria-label={t("areas")} className="card flex flex-wrap gap-2">
         <Link href="/meine-inserate" className="btn-ghost">{tNav("myListings")}</Link>
+        <Link href="/nachrichten" className="btn-ghost">{tNav("messages")}</Link>
         <Link href="/marktplatz/neu" className="btn-ghost">+ {tNav("sell")}</Link>
         {isTeam && <Link href="/moderation" className="btn-ghost">{tNav("moderation")}</Link>}
         {profile.role === "admin" && <Link href="/admin" className="btn-ghost">{tNav("admin")}</Link>}

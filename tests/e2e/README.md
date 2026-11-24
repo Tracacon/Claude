@@ -1,6 +1,6 @@
 # Oberflächentest (Browser)
 
-`flow.py` testet Phase 1 in Chrome (Anmeldung, Begrüßung, Profil, Verwaltung, Sprache, Abmelden, Konto löschen). `marketplace_flow.py` testet Phase 2 (Inserate mit Fotos, Suche, Melden, Moderation, Bearbeiten, Löschen). `marketplace_flow.py` braucht Pillow (`pip install pillow`).
+`flow.py` testet Phase 1 in Chrome (Anmeldung, Begrüßung, Profil, Verwaltung, Sprache, Abmelden, Konto löschen). `marketplace_flow.py` testet Phase 2 (Inserate mit Fotos, Suche, Melden, Moderation, Bearbeiten, Löschen). `chat_flow.py` testet Phase 3 mit zwei Personen (Nachrichten, Ungelesen, Melden, Blockieren, Ausblenden). `marketplace_flow.py` und `chat_flow.py` brauchen Pillow (`pip install pillow`).
 
 Supabase wird dabei durch `mock_supabase.py` ersetzt (gültiger Code: `123456`, erster Nutzer wird Admin). Die echten Zugriffsregeln der Datenbank prüft `tests/db` gegen Postgres.
 
@@ -22,4 +22,6 @@ npx wrangler dev -c wrangler.local.jsonc --port 8787 &
 python3 tests/e2e/flow.py http://127.0.0.1:8787
 # Testserver neu starten, dann:
 python3 tests/e2e/marketplace_flow.py http://127.0.0.1:8787
+# Testserver neu starten, dann:
+python3 tests/e2e/chat_flow.py http://127.0.0.1:8787
 ```

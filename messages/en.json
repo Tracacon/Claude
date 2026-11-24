@@ -17,12 +17,13 @@
     "sell": "Sell",
     "myListings": "My listings",
     "moderation": "Moderation",
-    "more": "More"
+    "more": "More",
+    "messages": "Messages"
   },
   "Home": {
     "claim": "Collect. Connect. Trade.",
     "intro": "The app of the TRACACON Trade Card Conventions in Stuttgart. Marketplace, chat, events and check-in for collectors are on their way.",
-    "status": "Under construction: the marketplace is live, in-app chat comes next.",
+    "status": "Under construction: marketplace and chat are live, events and check-in come next.",
     "ctaLogin": "Sign in now",
     "ctaProfile": "Go to my profile",
     "hello": "Hi {nickname}!",
@@ -177,7 +178,10 @@
     "password_same": "That's already your current password.",
     "login_wrong": "Wrong email address or password. No password yet? Sign in with a code.",
     "reauth_needed": "For security reasons, please sign in again with a code, then change your password.",
-    "front_back_required": "Single cards and slabs need at least two photos: front and back."
+    "front_back_required": "Single cards and slabs need at least two photos: front and back.",
+    "cannot_message_self": "You can't message yourself.",
+    "blocked": "You can't message each other because of a block.",
+    "message_invalid": "Messages must be between 1 and 1,000 characters."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -309,8 +313,7 @@
     "seller": "Seller",
     "memberSince": "Member since {date}",
     "contactTitle": "Contact",
-    "contactSoon": "In-app chat is coming next. Until then, talk at the next TRACACON.",
-    "contactLogin": "Sign in to contact the seller once chat is available.",
+    "contactLogin": "Sign in to message the seller.",
     "safety": "You agree on payment and shipping directly with each other. TRACACON is not involved. The safest option is handing over in person at a TRACACON.",
     "ownerTools": "Your listing",
     "edit": "Edit",
@@ -340,7 +343,10 @@
     "front": "Front",
     "back": "Back",
     "photosHintRequired": "Required: one photo of the front and one of the back. More photos are optional (up to 6 in total).",
-    "missing": "missing"
+    "missing": "missing",
+    "writeMessage": "Send a message",
+    "openConversation": "Go to conversation",
+    "contactLoginButton": "Sign in"
   },
   "Moderation": {
     "title": "Moderation",
@@ -359,6 +365,40 @@
     "note": "Note (internal, optional)",
     "done": "Done.",
     "openCount": "{count, plural, one {# open report} other {# open reports}}",
-    "listingGone": "(listing deleted)"
+    "listingGone": "(listing deleted)",
+    "conversation": "Conversation",
+    "readConversation": "Read conversation",
+    "conversationBetween": "Between @{seller} (seller) and @{buyer} (buyer)",
+    "privacyNote": "You can only see this conversation because it was reported. Please treat it confidentially."
+  },
+  "Chat": {
+    "title": "Messages",
+    "back": "Back to messages",
+    "history": "Message history",
+    "empty": "Send {nickname} the first message.",
+    "you": "You",
+    "message": "Message",
+    "placeholder": "Write a message …",
+    "send": "Send",
+    "safety": "You agree on payment and shipping directly. The safest option is handing over at a TRACACON. Never share passwords or bank logins and be careful with prepayment to strangers.",
+    "listingGone": "The listing “{title}” no longer exists.",
+    "listing": "Listing",
+    "yourListing": "Your listing",
+    "inboxEmpty": "No messages yet. Message a seller directly from a listing.",
+    "toMarket": "Go to marketplace",
+    "unread": "{count, plural, one {# unread message} other {# unread messages}}",
+    "options": "Options",
+    "report": "Report conversation",
+    "reportIntro": "The team can read and review the reported conversation.",
+    "block": "Block",
+    "unblock": "Unblock",
+    "blockConfirm": "Block @{nickname}? You won't be able to message each other anymore.",
+    "unblockConfirm": "Unblock @{nickname}?",
+    "saved": "Done.",
+    "hide": "Hide conversation",
+    "hideHint": "It comes back as soon as a new message arrives.",
+    "close": "Close",
+    "youBlocked": "You blocked @{nickname}. You can undo this via ⋯.",
+    "blockedYou": "No more messages can be sent in this conversation."
   }
 }
