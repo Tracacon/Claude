@@ -66,7 +66,7 @@ export async function ProfileView({
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-xl font-bold">@{p.nickname}</h1>
             {p.role !== "member" && (
-              <span className="rounded-full bg-amber/15 px-2 py-0.5 text-xs font-semibold text-amber">{tRoles(p.role)}</span>
+              <span className="rounded-full bg-brand/15 px-2 py-0.5 text-xs font-semibold text-brand">{tRoles(p.role)}</span>
             )}
             {p.visibility === "followers" && <span className="text-xs text-cream/60" title={t("privateLabel")}>🔒</span>}
           </div>
@@ -96,13 +96,13 @@ export async function ProfileView({
         </div>
       </header>
 
-      <nav className="flex border-b border-white/10 text-sm" aria-label={t("sections")}>
+      <nav className="flex border-b border-line text-sm" aria-label={t("sections")}>
         {(["inserate", "abzeichen"] as const).map((x) => (
           <Link
             key={x}
             href={x === "inserate" ? basePath : `${basePath}?tab=abzeichen`}
             aria-current={tab === x ? "page" : undefined}
-            className={`flex-1 border-b-2 py-2.5 text-center font-semibold ${tab === x ? "border-amber text-amber" : "border-transparent text-cream/60"}`}
+            className={`flex-1 border-b-2 py-2.5 text-center font-semibold ${tab === x ? "border-brand text-brand" : "border-transparent text-cream/60"}`}
           >
             {x === "inserate" ? `▦ ${t("listings")}` : `🏅 ${t("badges")}`}
           </Link>
@@ -137,7 +137,7 @@ export async function ProfileView({
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {events.map((ev) => (
                 <li key={ev.id}>
-                  <Link href={`/termine/${ev.id}`} className="card flex h-full flex-col items-center gap-1 p-4 text-center hover:border-amber/50 sm:p-4">
+                  <Link href={`/termine/${ev.id}`} className="card flex h-full flex-col items-center gap-1 p-4 text-center hover:border-brand/50 sm:p-4">
                     <span className="text-3xl" aria-hidden>🎟️</span>
                     <span className="text-sm font-semibold">{ev.name}</span>
                     <span className="text-xs text-cream/60">{eventDay({ starts_at: ev.starts_at, ends_at: ev.starts_at, timezone: null }, locale)}</span>
@@ -159,7 +159,7 @@ export async function ProfileView({
                 ) : (
                   <span className="flex h-full items-center justify-center p-2 text-center text-xs text-cream/60">{l.title}</span>
                 )}
-                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/90 to-transparent px-1.5 pb-1 pt-4 text-[11px] font-bold text-amber">
+                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/90 to-transparent px-1.5 pb-1 pt-4 text-[11px] font-bold text-brand">
                   <PriceTag offer={l.offer} cents={l.price_cents} negotiable={l.negotiable} />
                 </span>
               </Link>

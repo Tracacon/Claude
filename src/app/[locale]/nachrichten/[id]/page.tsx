@@ -49,7 +49,7 @@ export default async function ConversationPage({ params }: PageProps<"/[locale]/
       </div>
 
       {c.listing_id ? (
-        <Link href={`/marktplatz/${c.listing_id}`} className="card flex items-center gap-3 p-3 hover:border-amber/50 sm:p-3">
+        <Link href={`/marktplatz/${c.listing_id}`} className="card flex items-center gap-3 p-3 hover:border-brand/50 sm:p-3">
           <div className="h-14 w-11 shrink-0 overflow-hidden rounded-lg bg-night-3">
             {c.cover_photo_id && c.listing_owner_id && (
               <img src={photoUrl(c.listing_owner_id, c.cover_photo_id, "thumb")} alt="" className="h-full w-full object-cover" />
@@ -57,7 +57,7 @@ export default async function ConversationPage({ params }: PageProps<"/[locale]/
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{c.listing_title}</p>
-            <p className="text-sm text-amber">
+            <p className="text-sm text-brand">
               {c.listing_offer && <PriceTag offer={c.listing_offer} cents={c.listing_price_cents} negotiable={false} />}
               {c.listing_status && c.listing_status !== "active" && (
                 <span className="ml-2 text-xs text-cream/60">({tStatus(c.listing_status)})</span>
@@ -69,7 +69,7 @@ export default async function ConversationPage({ params }: PageProps<"/[locale]/
         <p className="card p-3 text-sm text-cream/70 sm:p-3">{t("listingGone", { title: c.listing_title })}</p>
       )}
 
-      <p className="rounded-xl border border-amber/30 bg-amber/5 px-3 py-2 text-xs text-cream/80">{t("safety")}</p>
+      <p className="rounded-xl border border-brand/30 bg-brand/5 px-3 py-2 text-xs text-cream/80">{t("safety")}</p>
 
       <ChatThread
         conversationId={c.id}

@@ -109,10 +109,10 @@ export function PhotoUploader({
       <input type="hidden" name="photos" value={JSON.stringify(ready.map((p) => p.id))} />
       <ul className="grid grid-cols-3 gap-2 sm:grid-cols-6">
         {photos.map((p, i) => (
-          <li key={p.id} className="relative aspect-[3/4] overflow-hidden rounded-xl border border-white/15 bg-night-3">
+          <li key={p.id} className="relative aspect-[3/4] overflow-hidden rounded-xl border border-line bg-night-3">
             <img src={p.preview} alt="" className={`h-full w-full object-cover ${p.state !== "ready" ? "opacity-40" : ""}`} />
             {requireBothSides && i < 2 && (
-              <span className="absolute left-1 top-1 rounded-md bg-night/85 px-1.5 py-0.5 text-[10px] font-semibold text-amber">
+              <span className="absolute left-1 top-1 rounded-md bg-night/85 px-1.5 py-0.5 text-[10px] font-semibold text-brand">
                 {i === 0 ? t("front") : t("back")}
               </span>
             )}
@@ -151,8 +151,8 @@ export function PhotoUploader({
             <button
               type="button"
               onClick={() => setSheet(true)}
-              className={`flex aspect-[3/4] w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-center text-xs hover:border-amber hover:text-amber ${
-                requireBothSides && photos.length < 2 ? "border-amber/60 text-amber" : "border-white/20 text-cream/70"
+              className={`flex aspect-[3/4] w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-center text-xs hover:border-brand hover:text-brand ${
+                requireBothSides && photos.length < 2 ? "border-brand/60 text-brand" : "border-white/20 text-cream/70"
               }`}
             >
               <span className="text-2xl leading-none">📷</span>
@@ -161,7 +161,7 @@ export function PhotoUploader({
           </li>
         )}
         {requireBothSides && photos.length === 0 && (
-          <li aria-hidden className="flex aspect-[3/4] flex-col items-center justify-center rounded-xl border-2 border-dashed border-white/10 text-center text-xs text-cream/40">
+          <li aria-hidden className="flex aspect-[3/4] flex-col items-center justify-center rounded-xl border-2 border-dashed border-line text-center text-xs text-cream/40">
             {t("back")}
           </li>
         )}

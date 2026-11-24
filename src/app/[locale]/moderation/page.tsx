@@ -49,7 +49,7 @@ export default async function ModerationPage({ params }: PageProps<"/[locale]/mo
       <div>
         <h1 className="text-2xl font-bold">{t("title")}</h1>
         <p className="text-sm text-cream/70">{t("intro")}</p>
-        {total > 0 && <p className="mt-1 text-sm font-semibold text-amber">{t("openCount", { count: total })}</p>}
+        {total > 0 && <p className="mt-1 text-sm font-semibold text-brand">{t("openCount", { count: total })}</p>}
       </div>
       {error && <p className="error">{error.message}</p>}
       {reports.length === 0 ? (

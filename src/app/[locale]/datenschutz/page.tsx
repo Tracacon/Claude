@@ -14,7 +14,7 @@ export default async function PrivacyPage({ params }: PageProps<"/[locale]/daten
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">{t("privacyTitle")}</h1>
-      <p className="card border-amber/40 text-amber">{t("privacyDraft")}</p>
+      <p className="card border-brand/40 text-brand">{t("privacyDraft")}</p>
       <p className="text-cream/85">{t("privacyBasics")}</p>
     </div>
   );

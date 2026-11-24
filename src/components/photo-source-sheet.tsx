@@ -94,7 +94,7 @@ export function PhotoSourceSheet({
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={title}>
           <button type="button" aria-hidden tabIndex={-1} className="absolute inset-0 cursor-default bg-night/70" onClick={onClose} />
-          <div className="relative w-full max-w-md rounded-t-3xl border-t border-white/15 bg-night-2 p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-2xl sm:rounded-3xl sm:border">
+          <div className="relative w-full max-w-md rounded-t-3xl border-t border-line bg-night-2 p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-2xl sm:rounded-3xl sm:border">
             <div aria-hidden className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-white/20 sm:hidden" />
             <p className="px-4 pb-2 pt-1 text-center text-sm font-semibold text-cream/70">{title}</p>
             {touch && row(`${base}-camera`, "📷", t("camera"))}

@@ -27,12 +27,12 @@ export function BottomNav({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] ${active ? "text-amber" : "text-cream/70"}`}
+      className={`relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] ${active ? "text-brand" : "text-cream/70"}`}
     >
       <span aria-hidden className="text-lg leading-none">{icon}</span>
       {label}
       {badge > 0 && (
-        <span className="absolute right-[22%] top-1 min-w-4 rounded-full bg-amber px-1 text-[10px] font-bold leading-4 text-night">
+        <span className="absolute right-[22%] top-1 min-w-4 rounded-full bg-brand px-1 text-[10px] font-bold leading-4 text-night">
           {badge}
         </span>
       )}
@@ -42,7 +42,7 @@ export function BottomNav({
   return (
     <nav
       aria-label="Navigation"
-      className="fixed inset-x-0 bottom-0 z-20 flex border-t border-white/10 bg-night/95 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden"
+      className="fixed inset-x-0 bottom-0 z-20 flex border-t border-line bg-black/95 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden"
     >
       {item("/", "⌂", labels.home, is("/"))}
       {item("/termine", "📅", labels.events, is("/termine"))}
@@ -54,7 +54,7 @@ export function BottomNav({
           className="flex flex-1 flex-col items-center justify-center"
           aria-label={labels.sell}
         >
-          <span className="flex size-11 items-center justify-center rounded-full bg-amber text-2xl font-bold text-night shadow-lg">+</span>
+          <span className="flex size-11 items-center justify-center rounded-full bg-brand text-2xl font-bold text-on-brand shadow-cta">+</span>
         </Link>
       )}
       {onboarded && item("/nachrichten", "✉", labels.messages, is("/nachrichten"), unread)}

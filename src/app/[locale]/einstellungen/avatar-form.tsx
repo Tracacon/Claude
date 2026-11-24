@@ -74,11 +74,11 @@ export function AvatarForm({ userId, nickname, avatarId }: { userId: string; nic
         type="button"
         onClick={() => setSheet(true)}
         disabled={busy}
-        className="relative rounded-full focus-visible:outline-2 focus-visible:outline-amber"
+        className="relative rounded-full focus-visible:outline-2 focus-visible:outline-brand"
         aria-label={avatarId ? t("changeAvatar") : t("addAvatar")}
       >
         <Avatar userId={userId} avatarId={avatarId} nickname={nickname} size="lg" />
-        <span aria-hidden className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full border-2 border-night-2 bg-amber text-sm text-night">
+        <span aria-hidden className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full border-2 border-night-2 bg-brand text-sm text-night">
           {busy ? "…" : "📷"}
         </span>
       </button>

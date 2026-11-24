@@ -73,7 +73,7 @@ export function ListingForm({
 
       <section className="card space-y-2">
         <h2 className="font-semibold">{t("photos")}</h2>
-        <p className={`hint mt-0 ${bothSides ? "text-amber" : ""}`}>{bothSides ? t("photosHintRequired") : t("photosHint")}</p>
+        <p className={`hint mt-0 ${bothSides ? "text-brand" : ""}`}>{bothSides ? t("photosHintRequired") : t("photosHint")}</p>
         <PhotoUploader
           key={photos.join(",")}
           userId={userId}
@@ -113,7 +113,7 @@ export function ListingForm({
           <legend className="label">{t("offer")}</legend>
           <div className="flex flex-wrap gap-2">
             {OFFERS.map((x) => (
-              <label key={x} className={`btn cursor-pointer border ${offer === x ? "border-amber bg-amber/15 text-amber" : "border-white/15"}`}>
+              <label key={x} className={`btn cursor-pointer border ${offer === x ? "border-brand bg-brand/15 text-brand" : "border-line"}`}>
                 <input type="radio" name="offer" value={x} checked={offer === x} onChange={() => setOffer(x)} className="sr-only" />
                 {tOffer(x)}
               </label>
@@ -129,7 +129,7 @@ export function ListingForm({
               <FormError code={e.price} />
             </div>
             <label className="flex items-center gap-3 sm:pt-7">
-              <input type="checkbox" name="negotiable" defaultChecked={checked("negotiable")} className="size-5 accent-amber" />
+              <input type="checkbox" name="negotiable" defaultChecked={checked("negotiable")} className="size-5 accent-brand" />
               <span>{t("negotiable")}</span>
             </label>
           </div>
@@ -173,7 +173,7 @@ export function ListingForm({
           <div className="flex flex-wrap gap-x-5 gap-y-2">
             {(["handover_event", "handover_pickup", "handover_shipping"] as const).map((k) => (
               <label key={k} className="flex items-center gap-2">
-                <input type="checkbox" name={k} defaultChecked={checked(k)} className="size-5 accent-amber" />
+                <input type="checkbox" name={k} defaultChecked={checked(k)} className="size-5 accent-brand" />
                 <span>{t(k === "handover_event" ? "handoverEvent" : k === "handover_pickup" ? "handoverPickup" : "handoverShipping")}</span>
               </label>
             ))}
@@ -190,8 +190,8 @@ export function ListingForm({
             <p className="hint mt-0 mb-3">{t("bringToHint")}</p>
             <div className="space-y-2">
               {events.map((ev) => (
-                <label key={ev.id} className="flex items-center gap-3 rounded-xl border border-white/10 px-3 py-2.5 has-[:checked]:border-amber has-[:checked]:bg-amber/10">
-                  <input type="checkbox" name="events" value={ev.id} defaultChecked={chosenEvents.includes(ev.id)} className="size-5 shrink-0 accent-amber" />
+                <label key={ev.id} className="flex items-center gap-3 rounded-xl border border-line px-3 py-2.5 has-[:checked]:border-brand has-[:checked]:bg-brand/10">
+                  <input type="checkbox" name="events" value={ev.id} defaultChecked={chosenEvents.includes(ev.id)} className="size-5 shrink-0 accent-brand" />
                   <span className="min-w-0">
                     <span className="block truncate font-medium">{ev.name}</span>
                     <span className="block text-xs text-cream/60">

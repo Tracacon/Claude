@@ -17,15 +17,15 @@ export function PrivacyForm({ visibility, approval }: { visibility: "public" | "
       </div>
       <fieldset className="space-y-2">
         <legend className="label">{t("whoSees")}</legend>
-        <label className="flex items-start gap-3 rounded-xl border border-white/10 p-3">
-          <input type="radio" name="visibility" value="public" defaultChecked={visibility === "public"} className="mt-1 size-5 accent-amber" />
+        <label className="flex items-start gap-3 rounded-xl border border-line p-3">
+          <input type="radio" name="visibility" value="public" defaultChecked={visibility === "public"} className="mt-1 size-5 accent-brand" />
           <span>
             <span className="block font-semibold">{t("public")}</span>
             <span className="text-sm text-cream/70">{t("publicText")}</span>
           </span>
         </label>
-        <label className="flex items-start gap-3 rounded-xl border border-white/10 p-3">
-          <input type="radio" name="visibility" value="followers" defaultChecked={visibility === "followers"} className="mt-1 size-5 accent-amber" />
+        <label className="flex items-start gap-3 rounded-xl border border-line p-3">
+          <input type="radio" name="visibility" value="followers" defaultChecked={visibility === "followers"} className="mt-1 size-5 accent-brand" />
           <span>
             <span className="block font-semibold">🔒 {t("followersOnly")}</span>
             <span className="text-sm text-cream/70">{t("followersOnlyText")}</span>
@@ -33,7 +33,7 @@ export function PrivacyForm({ visibility, approval }: { visibility: "public" | "
         </label>
       </fieldset>
       <label className="flex items-start gap-3">
-        <input type="checkbox" name="approval" defaultChecked={approval} className="mt-1 size-5 accent-amber" />
+        <input type="checkbox" name="approval" defaultChecked={approval} className="mt-1 size-5 accent-brand" />
         <span>
           <span className="block font-semibold">{t("approval")}</span>
           <span className="text-sm text-cream/70">{t("approvalText")}</span>

@@ -26,13 +26,13 @@ export function EventCard({
 }) {
   const sheet = eventSheet(event, locale);
   return (
-    <Link href={`/termine/${event.id}`} className="card flex w-full items-center gap-4 p-4 transition hover:border-amber/50">
-      <span aria-hidden className="flex w-14 shrink-0 flex-col items-center rounded-xl bg-amber py-1.5 text-night">
+    <Link href={`/termine/${event.id}`} className="card card-hover flex w-full items-center gap-4 p-4">
+      <span aria-hidden className="flex w-14 shrink-0 flex-col items-center rounded-xl bg-brand py-1.5 font-display text-on-brand">
         <span className="text-xs font-bold uppercase">{sheet.month}</span>
         <span className="text-2xl font-black leading-none">{sheet.day}</span>
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block font-semibold leading-snug">{event.name}</span>
+        <span className="block font-display text-lg font-medium leading-snug">{event.name}</span>
         <span className="block text-sm text-cream/70">{eventWhen(event, locale)}</span>
         {(event.venue || event.city) && (
           <span className="block truncate text-sm text-cream/60">{[event.venue, event.city].filter(Boolean).join(" · ")}</span>

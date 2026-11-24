@@ -45,7 +45,7 @@ export default async function ModerationConversationPage({ params }: PageProps<"
       <Link href="/moderation" className="link text-sm">← {t("title")}</Link>
       <h1 className="text-xl font-bold">{t("readConversation")}: {c.listing_title}</h1>
       <p className="text-sm text-cream/70">{t("conversationBetween", { seller: c.seller, buyer: c.buyer })}</p>
-      <p className="rounded-xl border border-amber/30 bg-amber/5 px-3 py-2 text-xs">{t("privacyNote")}</p>
+      <p className="rounded-xl border border-brand/30 bg-brand/5 px-3 py-2 text-xs">{t("privacyNote")}</p>
       <ol className="space-y-2">
         {c.messages.map((m, i) => (
           <li key={i} className="card p-3 sm:p-3">

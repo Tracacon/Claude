@@ -25,7 +25,7 @@ function Face({ data, size }: { data: UserMenuData; size: string }) {
   return data.avatarId ? (
     <img src={avatarUrl(data.id, data.avatarId)} alt="" className={`${size} rounded-full bg-night-3 object-cover`} />
   ) : (
-    <span aria-hidden className={`${size} flex items-center justify-center rounded-full bg-amber text-sm font-black text-night`}>
+    <span aria-hidden className={`${size} flex items-center justify-center rounded-full bg-brand text-sm font-black text-night`}>
       {data.nickname.slice(0, 1).toUpperCase()}
     </span>
   );
@@ -60,7 +60,7 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
     <Link href={href} className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white/5">
       <span aria-hidden className="w-6 text-center text-lg">{icon}</span>
       <span className="flex-1">{label}</span>
-      {count > 0 && <span className="rounded-full bg-amber px-2 py-0.5 text-xs font-bold text-night">{count}</span>}
+      {count > 0 && <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-night">{count}</span>}
     </Link>
   );
 
@@ -71,8 +71,8 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
       aria-label={L.menu}
       className={
         variant === "header"
-          ? "absolute right-0 top-12 z-40 w-72 rounded-2xl border border-white/15 bg-night-2 p-2 shadow-2xl"
-          : "fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-white/15 bg-night-2 p-3 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl"
+          ? "absolute right-0 top-12 z-40 w-72 rounded-2xl border border-line bg-night-2 p-2 shadow-2xl"
+          : "fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-line bg-night-2 p-3 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl"
       }
     >
       {variant === "bottom" && <div aria-hidden className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-white/20" />}
@@ -83,14 +83,14 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
           <span className="text-xs text-cream/60">{L.myProfile}</span>
         </span>
       </Link>
-      <div className="my-1 border-t border-white/10" />
+      <div className="my-1 border-t border-line" />
       {item("/meine-inserate", "▦", L.myListings)}
       {item("/nachrichten", "✉", L.messages, data.unread)}
       {item(`/u/${data.nickname}/follower`, "👥", L.followers)}
       {item(`/u/${data.nickname}/folgt`, "➜", L.following)}
       {item("/anfragen", "🔔", L.requests, data.requests)}
       {item("/profil?tab=abzeichen", "🏅", L.badges)}
-      <div className="my-1 border-t border-white/10" />
+      <div className="my-1 border-t border-line" />
       {item("/einstellungen", "⚙", L.settings)}
       {(data.role === "team" || data.role === "admin") && item("/moderation", "⚑", L.moderation, data.reports)}
       {(data.role === "team" || data.role === "admin") && item("/team/termine", "📅", L.teamEvents)}
@@ -116,7 +116,7 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
         >
           <span className="relative">
             <Face data={data} size="size-8" />
-            {badgeCount > 0 && <span className="absolute -right-1 -top-1 size-3 rounded-full border-2 border-night bg-amber" />}
+            {badgeCount > 0 && <span className="absolute -right-1 -top-1 size-3 rounded-full border-2 border-night bg-brand" />}
           </span>
           <span className="max-w-32 truncate text-sm font-semibold">{data.nickname}</span>
           <span aria-hidden className="text-xs">▾</span>
@@ -139,12 +139,12 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
         aria-expanded={open}
         aria-haspopup="menu"
         className={`relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] ${
-          pathname.startsWith("/profil") || pathname.startsWith("/einstellungen") ? "text-amber" : "text-cream/70"
+          pathname.startsWith("/profil") || pathname.startsWith("/einstellungen") ? "text-brand" : "text-cream/70"
         }`}
       >
         <span className="relative">
           <Face data={data} size="size-6" />
-          {data.requests > 0 && <span className="absolute -right-1 -top-1 size-2.5 rounded-full bg-amber" />}
+          {data.requests > 0 && <span className="absolute -right-1 -top-1 size-2.5 rounded-full bg-brand" />}
         </span>
         {L.profile}
       </button>

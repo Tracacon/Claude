@@ -25,7 +25,7 @@ export function LanguageSwitch({ label }: { label: string }) {
           router.replace({ pathname, params }, { locale: next });
         });
       }}
-      className="rounded-lg border border-white/15 bg-night-2 px-2 py-1.5 text-sm uppercase"
+      className="rounded-lg border border-line bg-night-2 px-2 py-1.5 text-sm uppercase"
     >
       {routing.locales.map((l) => (
         <option key={l} value={l}>

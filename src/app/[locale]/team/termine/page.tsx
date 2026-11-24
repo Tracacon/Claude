@@ -46,7 +46,7 @@ export default async function TeamEventsPage({ params }: PageProps<"/[locale]/te
 
       <section className="card space-y-3">
         <h2 className="font-semibold">{t("syncTitle")}</h2>
-        {!configured && <p className="text-sm text-amber">{t("syncNotConfigured")}</p>}
+        {!configured && <p className="text-sm text-brand">{t("syncNotConfigured")}</p>}
         <p className="text-sm text-cream/70">
           {sync.synced_at
             ? t("syncLast", { when: format.dateTime(new Date(sync.synced_at), { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Berlin" }) })
@@ -63,7 +63,7 @@ export default async function TeamEventsPage({ params }: PageProps<"/[locale]/te
           {rows.map((r) => (
             <li key={r.id} className="card flex flex-wrap items-center justify-between gap-3 p-4">
               <div className="min-w-0">
-                <Link href={`/termine/${r.id}`} className="font-semibold hover:text-amber">{r.name}</Link>
+                <Link href={`/termine/${r.id}`} className="font-semibold hover:text-brand">{r.name}</Link>
                 <p className="text-sm text-cream/70">
                   {eventDay({ ...r, timezone: null }, locale)}
                   {r.city ? ` · ${r.city}` : ""}

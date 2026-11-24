@@ -89,14 +89,14 @@ export function RegisterForm() {
         </div>
         <div>
           <label className="flex items-start gap-3">
-            <input type="checkbox" name="confirmAge" required className="mt-1 size-5 accent-amber" />
+            <input type="checkbox" name="confirmAge" required className="mt-1 size-5 accent-brand" />
             <span>{tO("confirmAge")}</span>
           </label>
           <FormError code={e.confirmAge} />
         </div>
         <div>
           <label className="flex items-start gap-3">
-            <input type="checkbox" name="acceptTerms" required className="mt-1 size-5 accent-amber" />
+            <input type="checkbox" name="acceptTerms" required className="mt-1 size-5 accent-brand" />
             <span>
               {tO.rich("acceptTerms", {
                 rules: (chunks) => <Link href="/regeln" target="_blank" className="link">{chunks}</Link>,

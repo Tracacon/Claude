@@ -77,7 +77,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
               href={photoUrl(l.owner_id, p)}
               target="_blank"
               rel="noopener"
-              className="w-[78%] shrink-0 snap-center overflow-hidden rounded-2xl border border-white/10 bg-night-3 sm:w-[48%]"
+              className="w-[78%] shrink-0 snap-center overflow-hidden rounded-2xl border border-line bg-night-3 sm:w-[48%]"
             >
               <img
                 src={photoUrl(l.owner_id, p)}
@@ -92,13 +92,13 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
 
       <header className="space-y-2">
         <div className="flex flex-wrap gap-2 text-xs">
-          <span className="rounded-full bg-amber/15 px-2.5 py-1 font-semibold text-amber">{tTcg(l.tcg)}</span>
+          <span className="rounded-full bg-brand/15 px-2.5 py-1 font-semibold text-brand">{tTcg(l.tcg)}</span>
           <span className="rounded-full bg-white/10 px-2.5 py-1">{tKind(l.kind)}</span>
           <span className="rounded-full bg-white/10 px-2.5 py-1">{tOffer(l.offer)}</span>
           {l.status !== "active" && <span className="rounded-full bg-white/10 px-2.5 py-1">{tStatus(l.status)}</span>}
         </div>
         <h1 className="text-2xl font-bold leading-tight">{l.title}</h1>
-        <p className="text-3xl font-black text-amber">
+        <p className="text-3xl font-black text-brand">
           <PriceTag offer={l.offer} cents={l.price_cents} negotiable={l.negotiable} />
         </p>
       </header>
@@ -124,7 +124,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
             <dt className="text-cream/60">{tEv("bringsTo")}</dt>
             <dd className="mt-1 flex flex-wrap gap-2">
               {bringTo.map((ev) => (
-                <Link key={ev.id} href={`/termine/${ev.id}`} className="rounded-full border border-amber/50 bg-amber/10 px-3 py-1 text-sm text-amber hover:bg-amber/20">
+                <Link key={ev.id} href={`/termine/${ev.id}`} className="rounded-full border border-brand/50 bg-brand/10 px-3 py-1 text-sm text-brand hover:bg-brand/20">
                   📅 {ev.name} · {eventDay({ ...ev, timezone: null }, locale)}
                 </Link>
               ))}
@@ -142,7 +142,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
           <p className="text-xs text-cream/50">{t("memberSince", { date: date(owner.member_since) })}</p>
         </div>
         {owner.role !== "member" && (
-          <span className="rounded-full bg-amber/15 px-3 py-1 text-xs font-semibold text-amber">{tRoles(owner.role)}</span>
+          <span className="rounded-full bg-brand/15 px-3 py-1 text-xs font-semibold text-brand">{tRoles(owner.role)}</span>
         )}
       </section>
 

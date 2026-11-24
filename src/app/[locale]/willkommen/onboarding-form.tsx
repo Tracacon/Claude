@@ -54,7 +54,7 @@ export function OnboardingForm() {
 
       <div>
         <label className="flex items-start gap-3">
-          <input type="checkbox" name="confirmAge" required className="mt-1 size-5 accent-amber" />
+          <input type="checkbox" name="confirmAge" required className="mt-1 size-5 accent-brand" />
           <span>{t("confirmAge")}</span>
         </label>
         <FormError code={state.errors?.confirmAge} />
@@ -62,7 +62,7 @@ export function OnboardingForm() {
 
       <div>
         <label className="flex items-start gap-3">
-          <input type="checkbox" name="acceptTerms" required className="mt-1 size-5 accent-amber" />
+          <input type="checkbox" name="acceptTerms" required className="mt-1 size-5 accent-brand" />
           <span>
             {t.rich("acceptTerms", {
               rules: (chunks) => <Link href="/regeln" target="_blank" className="link">{chunks}</Link>,

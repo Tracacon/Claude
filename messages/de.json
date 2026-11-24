@@ -33,8 +33,7 @@
   },
   "Home": {
     "claim": "Collect. Connect. Trade.",
-    "intro": "Die App der TRACACON Trade Card Conventions in Stuttgart. Hier entstehen Marktplatz, Chat, Termine und Check-in für Sammlerinnen und Sammler.",
-    "status": "Aufbau läuft: Marktplatz und App-Chat sind da, Termine und Check-in folgen als Nächstes.",
+    "intro": "Die App der TRACACON-Community. Zeig, was du tauschen oder verkaufen willst, schreib mit anderen Sammlern und triff sie bei der nächsten Trade Night Show.",
     "ctaLogin": "Jetzt anmelden",
     "ctaProfile": "Zu meinem Profil",
     "hello": "Hallo {nickname}!",
@@ -42,7 +41,8 @@
     "latest": "Neu im Marktplatz",
     "toMarket": "Zum Marktplatz",
     "sell": "Karte inserieren",
-    "ctaRegister": "Registrieren"
+    "ctaRegister": "Registrieren",
+    "latestKicker": "Marktplatz"
   },
   "Login": {
     "title": "Anmelden",
@@ -591,7 +591,7 @@
     "bringingEmpty": "Noch hat niemand Karten angekündigt. Sei die oder der Erste!",
     "bringingEmptyPast": "Zu diesem Termin wurden keine Karten angekündigt.",
     "allEvents": "Alle Termine",
-    "next": "Nächste Termine",
+    "next": "Die nächsten Termine",
     "teamTitle": "Termine und Check-in",
     "teamIntro": "Termine kommen aus Odoo (App Veranstaltungen). Hier holst du sie sofort ab und druckst den Check-in-Aushang.",
     "syncTitle": "Abgleich mit Odoo",
@@ -618,6 +618,7 @@
     "visitedTitle": "Besuchte Events",
     "visitedEmptyMe": "Check beim nächsten Event am Eingang ein, dann erscheint es hier.",
     "visitedEmpty": "Noch keine besuchten Events.",
-    "checkinLoginHint": "Melde dich an oder registriere dich kostenlos. Danach wirst du automatisch eingecheckt."
+    "checkinLoginHint": "Melde dich an oder registriere dich kostenlos. Danach wirst du automatisch eingecheckt.",
+    "kicker": "Nächste Events"
   }
 }

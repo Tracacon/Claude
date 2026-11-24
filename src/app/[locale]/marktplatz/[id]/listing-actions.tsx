@@ -26,7 +26,7 @@ export function StatusSwitch({ id, status }: { id: string; status: ListingStatus
             value={s}
             disabled={pending || s === status}
             aria-pressed={s === status}
-            className={`btn border ${s === status ? "border-amber bg-amber/15 text-amber" : "border-white/15 hover:bg-white/5"}`}
+            className={`btn border ${s === status ? "border-brand bg-brand/15 text-brand" : "border-line hover:bg-white/5"}`}
           >
             {tStatus(s)}
           </button>
@@ -98,8 +98,8 @@ export function ModerateListing({ id, removed }: { id: string; removed: boolean 
   const [state, action, pending] = useActionState<ModerationState, FormData>(moderateListing, {});
 
   return (
-    <section className="card space-y-3 border-amber/40">
-      <h2 className="font-semibold text-amber">{t("moderate")}</h2>
+    <section className="card space-y-3 border-brand/40">
+      <h2 className="font-semibold text-brand">{t("moderate")}</h2>
       <form action={action} className="space-y-3" noValidate>
         <input type="hidden" name="listingId" value={id} />
         {removed ? (
