@@ -82,6 +82,7 @@ Bei jedem Push prüft GitHub dasselbe automatisch (`.github/workflows/pruefung.y
 
 ## Bekannte Punkte
 
-- Der Cloudflare-Adapter stuft den Proxy von Next.js 16 noch als experimentell ein. Getestet: Sprachweiche, Weiterleitungen und Sitzung funktionieren im lokalen Cloudflare-Simulator. Vor dem Pilot im echten Staging erneut prüfen.
+- Der Cloudflare-Adapter stuft den Proxy von Next.js 16 noch als experimentell ein. Der komplette Browsertest läuft im lokalen Cloudflare-Simulator (`wrangler dev`) durch.
+- `package.json` legt unter `overrides` für `@opennextjs/aws` das Paket `cookie@0.7.2` fest. Mit `cookie@1.x` stürzt der Adapter bei jeder Anfrage mit Cookie ab (`cookieParser.parse` ist dort undefiniert, Fehler 1101). Erst entfernen, wenn OpenNext das behoben hat, und dann den Browsertest im Simulator wiederholen.
 - Impressum, Datenschutzerklärung und Community-Regeln sind Platzhalter. Vor dem Start schreiben und juristisch prüfen lassen.
 - Die Altersgrenze wird per Bestätigung abgefragt, nicht nachgewiesen.
