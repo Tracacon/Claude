@@ -7,6 +7,8 @@ import { PriceTag } from "@/components/listing-card";
 import { Link } from "@/i18n/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { getListing } from "@/lib/listings";
+import { getListingEvents } from "@/lib/events";
+import { eventDay } from "@/lib/event-format";
 import { photoUrl } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteListing, ModerateListing, ReportForm, StartConversation, StatusSwitch } from "./listing-actions";
@@ -45,6 +47,9 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
     const { data: conv } = await supabase.rpc("my_conversation_for_listing", { p_listing_id: l.id });
     existingConversation = (conv as string | null) ?? null;
   }
+
+  const bringTo = publicVisible || isOwner ? await getListingEvents(l.id) : [];
+  const tEv = await getTranslations("Events");
 
   const handover = [
     l.handover_event && t("handoverEvent"),
@@ -114,6 +119,18 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
           <div><dt className="text-cream/60">{t("city")}</dt><dd>{l.city}</dd></div>
         )}
         <div className="col-span-2"><dt className="text-cream/60">{t("handover")}</dt><dd>{handover.join(" · ")}</dd></div>
+        {bringTo.length > 0 && (
+          <div className="col-span-2 sm:col-span-3">
+            <dt className="text-cream/60">{tEv("bringsTo")}</dt>
+            <dd className="mt-1 flex flex-wrap gap-2">
+              {bringTo.map((ev) => (
+                <Link key={ev.id} href={`/termine/${ev.id}`} className="rounded-full border border-amber/50 bg-amber/10 px-3 py-1 text-sm text-amber hover:bg-amber/20">
+                  📅 {ev.name} · {eventDay({ ...ev, timezone: null }, locale)}
+                </Link>
+              ))}
+            </dd>
+          </div>
+        )}
         <div className="col-span-2 sm:col-span-3 text-xs text-cream/50">{t("postedAt", { date: date(l.created_at) })}</div>
       </dl>
 

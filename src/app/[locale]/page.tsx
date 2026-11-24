@@ -1,8 +1,10 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { EventCard } from "@/components/event-card";
 import { ListingCard } from "@/components/listing-card";
 import { Link } from "@/i18n/navigation";
 import { getMyProfile } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/env";
+import { ensureEventsFresh, getEvents } from "@/lib/events";
 import type { ListingSummary } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/server";
 
@@ -18,7 +20,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   setRequestLocale(locale);
   const t = await getTranslations("Home");
   const configured = isSupabaseConfigured();
-  const [profile, latest] = await Promise.all([getMyProfile(), latestListings()]);
+  await ensureEventsFresh();
+  const [profile, latest, events] = await Promise.all([getMyProfile(), latestListings(), getEvents(false, 2)]);
+  const tEv = await getTranslations("Events");
 
   return (
     <div className="space-y-8">
@@ -41,6 +45,26 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           )}
         </div>
       </section>
+
+      {events.length > 0 && (
+        <section className="space-y-3">
+          <div className="flex items-end justify-between">
+            <h2 className="text-xl font-bold">{tEv("next")}</h2>
+            <Link href="/termine" className="link text-sm">{tEv("allEvents")} →</Link>
+          </div>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {events.map((e) => (
+              <li key={e.id} className="flex">
+                <EventCard
+                  event={e}
+                  locale={locale}
+                  labels={{ listings: tEv("listingCount", { count: e.listing_count }), checkedIn: tEv("youWereThere") }}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {latest.length > 0 && (
         <section className="space-y-3">

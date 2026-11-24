@@ -39,4 +39,7 @@ export const BADGE_ICONS: Record<string, string> = {
   first_listing: "🃏",
   seller_10: "🏆",
   popular: "🔥",
+  regular_3: "🎟️",
+  regular_10: "🎖️",
+  regular_25: "👑",
 };

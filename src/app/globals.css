@@ -62,3 +62,18 @@ body {
 @utility link {
   @apply text-amber underline-offset-2 hover:underline;
 }
+
+/* Drucken (z. B. Check-in-Aushang): nur der Inhalt, weißer Hintergrund */
+@media print {
+  body > header,
+  body header.sticky,
+  body > nav,
+  nav[aria-label="Navigation"],
+  footer {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+}

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
+import { takePendingCheckin } from "@/lib/checkin";
 import { requireProfile, requireUser } from "@/lib/auth";
 import { mapDbError } from "@/lib/db-errors";
 import { PHOTO_BUCKET } from "@/lib/marketplace";
@@ -51,7 +52,7 @@ export async function completeOnboarding(_prev: FormState, formData: FormData): 
 
   revalidatePath("/", "layout");
   const locale = await getLocale();
-  return redirect({ href: "/profil", locale });
+  return redirect({ href: (await takePendingCheckin()) ?? "/profil", locale });
 }
 
 function passwordErrorCode(code?: string) {

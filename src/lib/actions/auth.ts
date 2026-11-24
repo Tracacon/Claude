@@ -2,6 +2,7 @@
 
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
+import { takePendingCheckin } from "@/lib/checkin";
 import { mapDbError } from "@/lib/db-errors";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -31,7 +32,8 @@ async function afterLogin(userId: string, href?: string): Promise<never> {
     .eq("id", userId)
     .maybeSingle<{ nickname: string | null; locale: "de" | "en" }>();
   const locale = profile?.locale ?? (await getLocale());
-  return redirect({ href: href ?? (profile?.nickname ? "/profil" : "/willkommen"), locale });
+  const pending = profile?.nickname ? await takePendingCheckin() : null;
+  return redirect({ href: pending ?? href ?? (profile?.nickname ? "/profil" : "/willkommen"), locale });
 }
 
 const str = (fd: FormData, k: string) => String(fd.get(k) ?? "");

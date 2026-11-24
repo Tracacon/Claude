@@ -33,6 +33,55 @@ blocks: set[tuple[str, str]] = set()
 
 
 PUBLIC_BUCKETS = ("listing-photos", "avatars")
+SERVICE_KEY = "sb_secret_test"
+ODOO_KEY = "odoo-test-key"
+events: dict[str, dict] = {}  # id -> event (wie public.events)
+listing_events: set[tuple[str, str]] = set()  # (listing_id, event_id)
+checkin_codes: dict[str, str] = {}  # event_id -> code
+checkins: dict[tuple[str, str], str] = {}  # (event_id, user_id) -> Zeit
+sync_state = {"synced_at": None, "error": None}
+odoo_calls: list[str] = []
+
+
+def odoo_time(hours):
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time() + hours * 3600))
+
+
+# Nachgebaute Odoo-Termine (Modell event.event). Über /test/odoo änderbar.
+odoo_events = [
+    {"id": 7, "name": "TNS Stuttgart Testabend", "subtitle": "Trade Night Show", "date_begin": odoo_time(-1), "date_end": odoo_time(5),
+     "date_tz": "Europe/Berlin", "address_id": [50, "Halle West"], "is_published": True, "website_url": "/event/tns-stuttgart-7",
+     "description": '<p>Tickets: <a href="https://www.eventim.de/event/tns-stuttgart-123/?affiliate=TRA&amp;x=1">EVENTIM</a></p>',
+     "x_studio_eventim_link": False},
+    {"id": 8, "name": "Messe Kornwestheim", "subtitle": False, "date_begin": odoo_time(24 * 10), "date_end": odoo_time(24 * 10 + 8),
+     "date_tz": "Europe/Berlin", "address_id": [51, "Das K."], "is_published": True, "website_url": "/event/messe-8",
+     "description": False, "x_studio_eventim_link": "https://www.eventim.de/event/messe-kornwestheim-456/"},
+    {"id": 9, "name": "Interner Planungstermin", "subtitle": False, "date_begin": odoo_time(24 * 3), "date_end": odoo_time(24 * 3 + 2),
+     "date_tz": "Europe/Berlin", "address_id": False, "is_published": False, "website_url": "/event/intern-9",
+     "description": False, "x_studio_eventim_link": False},
+]
+odoo_partners = {50: {"id": 50, "name": "Halle West", "street": "Hauptstraße 1", "zip": "70173", "city": "Stuttgart"},
+                 51: {"id": 51, "name": "Das K.", "street": "Stuttgarter Str. 65", "zip": "70806", "city": "Kornwestheim"}}
+
+
+def parse_iso(v):
+    from datetime import datetime
+    return datetime.fromisoformat(v.replace("Z", "+00:00")).timestamp()
+
+
+def ev_count_listings(eid):
+    return sum(1 for (lid, e) in listing_events if e == eid and lid in listings and listings[lid]["status"] in ("active", "reserved"))
+
+
+def ev_public(e, uid):
+    return {k: e[k] for k in ("id", "name", "subtitle", "starts_at", "ends_at", "timezone", "venue", "city", "ticket_url")} | {
+        "listing_count": ev_count_listings(e["id"]),
+        "checkin_count": sum(1 for (ev, _) in checkins if ev == e["id"]),
+        "checked_in": (e["id"], uid) in checkins}
+
+
+def visits(uid):
+    return sum(1 for (_, u) in checkins if u == uid)
 follows: dict[tuple[str, str], str] = {}  # (follower, following) -> pending/accepted
 
 
@@ -263,6 +312,8 @@ class Handler(BaseHTTPRequestHandler):
             return
         if url.path == "/test/codes":
             return self.send(200, sent_codes)
+        if url.path == "/test/odoo-calls":
+            return self.send(200, odoo_calls)
         return self.send(404, {"message": "not found"})
 
     def do_POST(self):
@@ -348,6 +399,33 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(204)
         if url.path.startswith("/rest/v1/rpc/"):
             return self.rpc(url.path.rsplit("/", 1)[1], data)
+        if url.path.startswith("/json/2/"):
+            return self.odoo(url.path.split("/json/2/", 1)[1], data)
+        if url.path == "/test/odoo":
+            # Termin verschieben: {"id": 8, "hours": -1} lässt ihn jetzt beginnen
+            for e in odoo_events:
+                if e["id"] == data["id"]:
+                    e["date_begin"] = odoo_time(data["hours"])
+                    e["date_end"] = odoo_time(data["hours"] + 6)
+            return self.send(200, {})
+        return self.send(404, {"message": "not found"})
+
+    def odoo(self, path, data):
+        odoo_calls.append(path)
+        if self.headers.get("Authorization", "") != f"bearer {ODOO_KEY}":
+            return self.send(401, {"name": "odoo.exceptions.AccessDenied", "message": "Access Denied"})
+        model, method = path.split("/", 1)
+        if model == "event.event" and method == "fields_get":
+            names = ["name", "subtitle", "date_begin", "date_end", "date_tz", "address_id", "is_published", "website_url", "description"]
+            out = {n: {"type": "char", "string": n} for n in names}
+            out["x_studio_eventim_link"] = {"type": "char", "string": "EVENTIM-Link"}
+            return self.send(200, out)
+        if model == "event.event" and method == "search_read":
+            since = data["domain"][0][2]
+            rows = [{k: e[k] for k in ["id", *data["fields"]] if k in e} for e in odoo_events if e["date_end"] >= since]
+            return self.send(200, rows)
+        if model == "res.partner" and method == "read":
+            return self.send(200, [odoo_partners[i] for i in data["ids"] if i in odoo_partners])
         return self.send(404, {"message": "not found"})
 
     def do_PUT(self):
@@ -424,7 +502,8 @@ class Handler(BaseHTTPRequestHandler):
                 "my_follow": follows.get((uid, p["id"]), "none"), "follows_me": follows.get((p["id"], uid)) == "accepted",
                 "blocked": bool(uid) and blocked_between(uid, p["id"]),
                 "badges": [b for b, ok in (("team", p["role"] in ("team", "admin")), ("founder", True),
-                                           ("first_listing", any(l["owner_id"] == p["id"] for l in listings.values()))) if ok]})
+                                           ("first_listing", any(l["owner_id"] == p["id"] for l in listings.values())),
+                                           ("regular_3", 3 <= visits(p["id"]) < 10)) if ok]})
         if name == "profile_listings":
             p = profile_by_nick(data["p_nickname"])
             if not p or not can_view(uid, p["id"]):
@@ -472,9 +551,73 @@ class Handler(BaseHTTPRequestHandler):
         return self.send(200, out)
 
     def rpc_inner(self, name, data):
+        if name in ("sync_events", "sync_events_failed"):
+            if self.headers.get("Authorization", "") != f"Bearer {SERVICE_KEY}":
+                return self.send(401, {"code": "42501", "message": "permission denied for function " + name})
+            return self.service_rpc(name, data)
         if name in ("search_listings", "get_listing", "get_profile", "profile_listings", "list_follows"):
             return self.public_rpc(name, data)
+        if name in ("list_events", "get_event", "event_listings", "listing_event_list", "event_sync_state", "profile_events"):
+            return self.event_rpc(name, data)
         return self.private_rpc(name, data)
+
+    def service_rpc(self, name, data):
+        if name == "sync_events_failed":
+            sync_state.update(synced_at=now_iso(), error=data["p_error"])
+            return self.send(204)
+        p = data["p"]
+        seen = set()
+        for e in p["events"]:
+            ex = next((x for x in events.values() if x["odoo_id"] == e["odoo_id"]), None)
+            row = {**(ex or {"id": str(uuid.uuid4())}), **{k: e.get(k) for k in (
+                "odoo_id", "name", "subtitle", "starts_at", "ends_at", "timezone", "venue", "address", "city", "ticket_url",
+                "website_url", "published")}}
+            events[row["id"]] = row
+            seen.add(e["odoo_id"])
+        for ev in events.values():
+            if ev["odoo_id"] not in seen and parse_iso(ev["ends_at"]) >= parse_iso(p["since"]):
+                ev["published"] = False
+        sync_state.update(synced_at=now_iso(), error=None)
+        return self.send(200, len(p["events"]))
+
+    def event_rpc(self, name, data):
+        me = self.me()
+        uid = me["id"] if me else None
+        now = time.time()
+        if name == "event_sync_state":
+            return self.send(200, {"synced_at": sync_state["synced_at"], "error": sync_state["error"] if is_team(uid) else None})
+        if name == "list_events":
+            past = data.get("p_past")
+            rows = [e for e in events.values() if e["published"] and ((parse_iso(e["ends_at"]) < now) == bool(past))]
+            rows.sort(key=lambda e: e["starts_at"], reverse=bool(past))
+            return self.send(200, [ev_public(e, uid) for e in rows[: data.get("p_limit") or 30]])
+        if name == "get_event":
+            e = events.get(data["p_id"])
+            if not e or not (e["published"] or is_team(uid)):
+                return self.send(200, None)
+            st, en = parse_iso(e["starts_at"]), parse_iso(e["ends_at"])
+            return self.send(200, {**{k: v for k, v in e.items() if k != "odoo_id"}, **ev_public(e, uid),
+                                   "is_past": en < now, "checkin_open": st - 7200 <= now <= en + 7200})
+        if name == "event_listings":
+            rows = [listings[lid] for (lid, eid) in listing_events if eid == data["p_event"] and lid in listings
+                    and listings[lid]["status"] in ("active", "reserved")]
+            rows.sort(key=lambda l: l["created_at"], reverse=True)
+            return self.send(200, [{**{k: l[k] for k in ("id", "title", "tcg", "kind", "offer", "price_cents", "negotiable", "condition",
+                                                         "city", "status", "created_at", "owner_id")},
+                                    "owner_nickname": profiles[l["owner_id"]]["nickname"],
+                                    "cover_photo_id": (listing_photos(l["id"]) or [None])[0], "total_count": len(rows)} for l in rows])
+        if name == "listing_event_list":
+            rows = [events[eid] for (lid, eid) in listing_events if lid == data["p_listing"] and eid in events
+                    and events[eid]["published"] and parse_iso(events[eid]["ends_at"]) >= now]
+            rows.sort(key=lambda e: e["starts_at"])
+            return self.send(200, [{k: e[k] for k in ("id", "name", "starts_at", "ends_at", "city")} for e in rows])
+        if name == "profile_events":
+            p = profile_by_nick(data["p_nickname"])
+            if not p or not can_view(uid, p["id"]):
+                return self.send(200, [])
+            rows = [events[eid] for (eid, u) in checkins if u == p["id"]]
+            return self.send(200, [{k: e[k] for k in ("id", "name", "starts_at", "city")} for e in rows])
+        return self.send(404, {"message": "unknown rpc"})
 
     def private_rpc(self, name, data):
         u = self.me()
@@ -787,6 +930,45 @@ class Handler(BaseHTTPRequestHandler):
             old = me["avatar_id"]
             me["avatar_id"] = data.get("p_avatar_id")
             return self.send(200, old)
+        if name == "set_listing_events":
+            l = listings.get(data["p_listing"])
+            if not l or l["owner_id"] != u["id"]:
+                return self.send(400, {"code": "P0002", "message": "not_found"})
+            now = time.time()
+            for key in [k for k in listing_events if k[0] == l["id"] and parse_iso(events[k[1]]["ends_at"]) >= now]:
+                listing_events.discard(key)
+            for eid in data["p_events"] or []:
+                if eid in events and events[eid]["published"] and parse_iso(events[eid]["ends_at"]) >= now:
+                    listing_events.add((l["id"], eid))
+            return self.send(204)
+        if name == "team_checkin_code":
+            if not is_team(u["id"]):
+                return self.send(403, {"code": "42501", "message": "forbidden"})
+            if data["p_event"] not in checkin_codes or data.get("p_renew"):
+                checkin_codes[data["p_event"]] = uuid.uuid4().hex + uuid.uuid4().hex[:8]
+            return self.send(200, checkin_codes[data["p_event"]])
+        if name == "team_event_overview":
+            if not is_team(u["id"]):
+                return self.send(403, {"code": "42501", "message": "forbidden"})
+            rows = sorted(events.values(), key=lambda e: e["starts_at"])
+            return self.send(200, [{k: e[k] for k in ("id", "name", "starts_at", "ends_at", "city", "published")} | {
+                "has_code": e["id"] in checkin_codes, "checkin_count": sum(1 for (ev, _) in checkins if ev == e["id"])} for e in rows])
+        if name == "check_in":
+            if not me["nickname"]:
+                return self.send(403, {"code": "42501", "message": "onboarding_required"})
+            code = data["p_code"].strip().lower()
+            eid = next((k for k, v in checkin_codes.items() if v == code), None)
+            if not eid:
+                return self.send(404, {"code": "P0002", "message": "checkin_invalid"})
+            e = events[eid]
+            now = time.time()
+            if now < parse_iso(e["starts_at"]) - 7200:
+                return self.send(400, {"code": "22023", "message": "checkin_not_open"})
+            if now > parse_iso(e["ends_at"]) + 7200:
+                return self.send(400, {"code": "22023", "message": "checkin_closed"})
+            new = (eid, u["id"]) not in checkins
+            checkins.setdefault((eid, u["id"]), now_iso())
+            return self.send(200, {"event_id": eid, "name": e["name"], "starts_at": e["starts_at"], "new": new, "visits": visits(u["id"])})
         if name == "delete_own_account":
             for lid in [l["id"] for l in listings.values() if l["owner_id"] == u["id"]]:
                 for pid in listing_photos(lid):
@@ -794,6 +976,8 @@ class Handler(BaseHTTPRequestHandler):
                 listings.pop(lid)
             users.pop(u["email"], None)
             profiles.pop(u["id"], None)
+            for key in [k for k in checkins if k[1] == u["id"]]:
+                checkins.pop(key)
             return self.send(204)
         return self.send(404, {"message": "unknown rpc"})
 

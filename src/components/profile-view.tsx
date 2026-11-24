@@ -1,10 +1,12 @@
 /* eslint-disable @next/next/no-img-element -- Bilder kommen direkt aus Supabase Storage */
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/avatar";
 import { FollowButton } from "@/components/follow-button";
 import { PriceTag } from "@/components/listing-card";
 import { Link } from "@/i18n/navigation";
+import { eventDay } from "@/lib/event-format";
 import { photoUrl, type ListingSummary } from "@/lib/marketplace";
+import type { VisitedEvent } from "@/lib/profiles";
 import { BADGE_ICONS, type PublicProfile } from "@/lib/social";
 
 /**
@@ -14,12 +16,15 @@ import { BADGE_ICONS, type PublicProfile } from "@/lib/social";
 export async function ProfileView({
   profile: p,
   listings,
+  events = [],
   tab,
   loggedIn,
   basePath,
 }: {
   profile: PublicProfile;
   listings: ListingSummary[];
+  /** Besuchte Events (nur im Reiter Abzeichen) */
+  events?: VisitedEvent[];
   tab: "inserate" | "abzeichen";
   loggedIn: boolean;
   basePath: string;
@@ -28,6 +33,8 @@ export async function ProfileView({
   const tRoles = await getTranslations("Roles");
   const tBadges = await getTranslations("Badges");
   const format = await getFormatter();
+  const tEv = await getTranslations("Events");
+  const locale = await getLocale();
   const userPath = `/u/${p.nickname}`;
 
   const stat = (count: number, label: string, href?: string) => {
@@ -123,7 +130,22 @@ export async function ProfileView({
               ))}
             </ul>
           )}
-          <p className="text-xs text-cream/50">{t("eventBadgesSoon")}</p>
+          <h2 className="pt-2 font-semibold">{tEv("visitedTitle")}</h2>
+          {events.length === 0 ? (
+            <p className="card text-sm text-cream/70">{p.is_me ? tEv("visitedEmptyMe") : tEv("visitedEmpty")}</p>
+          ) : (
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {events.map((ev) => (
+                <li key={ev.id}>
+                  <Link href={`/termine/${ev.id}`} className="card flex h-full flex-col items-center gap-1 p-4 text-center hover:border-amber/50 sm:p-4">
+                    <span className="text-3xl" aria-hidden>🎟️</span>
+                    <span className="text-sm font-semibold">{ev.name}</span>
+                    <span className="text-xs text-cream/60">{eventDay({ starts_at: ev.starts_at, ends_at: ev.starts_at, timezone: null }, locale)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       ) : listings.length === 0 ? (
         <p className="card py-8 text-center text-sm text-cream/70">{p.is_me ? t("noListingsMe") : t("noListings")}</p>

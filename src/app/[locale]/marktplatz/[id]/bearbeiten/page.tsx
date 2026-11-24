@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ListingForm } from "@/components/listing-form";
 import { redirect } from "@/i18n/navigation";
 import { requireProfile } from "@/lib/auth";
+import { ensureEventsFresh, getEvents, getListingEvents } from "@/lib/events";
 import { getListing } from "@/lib/listings";
 import { centsToInput } from "@/lib/marketplace";
 
@@ -22,6 +23,10 @@ export default async function EditListingPage({ params }: PageProps<"/[locale]/m
   if (data.listing.status === "removed") redirect({ href: `/marktplatz/${id}`, locale });
 
   const l = data.listing;
+  await ensureEventsFresh();
+  const [upcoming, chosen] = await Promise.all([getEvents(false, 8), getListingEvents(l.id)]);
+  // Bereits gewählte Termine immer anzeigen, auch wenn sie nicht unter den nächsten acht sind
+  const events = [...upcoming, ...chosen.filter((c) => !upcoming.some((u) => u.id === c.id)).map((c) => ({ ...c, timezone: null }))];
   const t = await getTranslations("Listing");
   return (
     <div className="space-y-4">
@@ -45,7 +50,9 @@ export default async function EditListingPage({ params }: PageProps<"/[locale]/m
           handover_pickup: l.handover_pickup,
           handover_shipping: l.handover_shipping,
           photos: data.photos,
+          events: chosen.map((e) => e.id),
         }}
+        events={events}
       />
     </div>
   );

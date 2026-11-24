@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ProfileView } from "@/components/profile-view";
 import { requireProfile } from "@/lib/auth";
-import { getProfileListings, getPublicProfile } from "@/lib/profiles";
+import { getProfileEvents, getProfileListings, getPublicProfile } from "@/lib/profiles";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/profil">): Promise<Metadata> {
   const { locale } = await params;
@@ -21,5 +21,6 @@ export default async function MyProfilePage({ params, searchParams }: PageProps<
   if (!profile) notFound();
   const tab = sp.tab === "abzeichen" ? "abzeichen" : "inserate";
   const listings = tab === "inserate" ? await getProfileListings(me.nickname!) : [];
-  return <ProfileView profile={profile} listings={listings} tab={tab} loggedIn basePath="/profil" />;
+  const events = tab === "abzeichen" ? await getProfileEvents(me.nickname!) : [];
+  return <ProfileView profile={profile} listings={listings} events={events} tab={tab} loggedIn basePath="/profil" />;
 }

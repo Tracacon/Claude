@@ -18,11 +18,16 @@ const KNOWN = [
   "cannot_message_self",
   "blocked",
   "photo_missing",
+  "checkin_invalid",
+  "checkin_not_open",
+  "checkin_closed",
+  "too_many_events",
 ] as const;
 
 const ALIASES: Record<string, string> = {
   age_not_confirmed: "age_required",
   terms_not_accepted: "terms_required",
+  onboarding_required: "profile_incomplete",
 };
 
 /** Übersetzt Fehler aus Postgres/PostgREST in Fehlercodes der Oberfläche (messages/*.json → Errors). */

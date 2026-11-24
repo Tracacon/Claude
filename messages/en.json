@@ -27,7 +27,9 @@
     "requests": "Follow requests",
     "badges": "Badges",
     "settings": "Settings",
-    "close": "Close"
+    "close": "Close",
+    "events": "Events",
+    "teamEvents": "Events & check-in"
   },
   "Home": {
     "claim": "Collect. Connect. Trade.",
@@ -183,7 +185,17 @@
     "email_taken": "There is already an account for this email address.",
     "email_not_confirmed": "Your email address is not confirmed yet. Sign up again to get a new code.",
     "photo_missing": "The photo could not be sent. Please try again.",
-    "not_an_image": "This file is not an image that can be processed."
+    "not_an_image": "This file is not an image that can be processed.",
+    "checkin_invalid": "This check-in code is invalid or was renewed. Scan the current poster.",
+    "checkin_not_open": "Check-in opens 2 hours before the event starts.",
+    "checkin_closed": "Check-in for this event is closed.",
+    "too_many_events": "At most 10 events per listing.",
+    "sync_not_configured": "Sync with Odoo isn't set up yet.",
+    "odoo_not_configured": "Sync with Odoo isn't set up yet.",
+    "odoo_unauthorized": "Odoo rejects the API key. Please check the key.",
+    "odoo_unreachable": "Odoo can't be reached right now. Try again later.",
+    "odoo_bad_response": "Odoo answered unexpectedly. Is the Events app installed?",
+    "sync_failed": "The events couldn't be saved."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -348,7 +360,9 @@
     "missing": "missing",
     "writeMessage": "Send a message",
     "openConversation": "Go to conversation",
-    "contactLoginButton": "Sign in"
+    "contactLoginButton": "Sign in",
+    "bringTo": "Bring to an event",
+    "bringToHint": "Tick the events you'll have this card with you. It then shows up on the event page."
   },
   "Moderation": {
     "title": "Moderation",
@@ -465,7 +479,6 @@
     "privateTitle": "This profile is private",
     "privateText": "Follow @{nickname} to see their photo, bio and listings.",
     "noBadges": "No badges yet.",
-    "eventBadgesSoon": "Badges for attending TRACACON events come with check-in.",
     "noListings": "No active listings yet.",
     "noListingsMe": "You don't have any active listings yet. Tap “Sell” to list your first card.",
     "back": "Back",
@@ -500,6 +513,18 @@
     "popular": {
       "title": "Popular",
       "text": "At least 10 followers"
+    },
+    "regular_3": {
+      "title": "Regular",
+      "text": "Attended 3 events"
+    },
+    "regular_10": {
+      "title": "Silver regular",
+      "text": "Attended 10 events"
+    },
+    "regular_25": {
+      "title": "Gold regular",
+      "text": "Attended 25 events"
     }
   },
   "Settings": {
@@ -539,5 +564,60 @@
     "cropFront": "Crop front",
     "cropBack": "Crop back",
     "cropCard": "Crop photo"
+  },
+  "Events": {
+    "title": "Events",
+    "intro": "TRACACON Trade Night Shows and fairs. See in advance who brings which cards.",
+    "empty": "No events planned right now. Check back soon.",
+    "past": "{count, plural, one {# past event} other {# past events}}",
+    "listingCount": "{count, plural, =0 {No cards announced yet} one {# listing coming along} other {# listings coming along}}",
+    "youWereThere": "You were there",
+    "checkinFailed": "Check-in didn't work",
+    "checkedInTitle": "You're checked in!",
+    "alreadyCheckedIn": "You're already checked in",
+    "checkedInText": "Welcome to {name}. This is visit number {count}.",
+    "newRegularBadge": "New badge: regular with {count} visits",
+    "checkedInHint": "You'll find the event badge in your profile under badges.",
+    "tickets": "Tickets at EVENTIM",
+    "website": "More on tracacon.de",
+    "poster": "Check-in poster",
+    "checkinHowTo": "Check-in: scan the QR code at the entrance with your phone camera.",
+    "checkinOver": "This event is over.",
+    "checkinLater": "Check in on site: scan the QR code at the entrance.",
+    "checkinCount": "{count, plural, one {# person checked in} other {# people checked in}}",
+    "bringing": "What the community brings",
+    "bringingIntro": "Listings brought to this event. Message beforehand so you find each other on site.",
+    "bringCard": "Bring a card",
+    "bringingEmpty": "Nobody has announced cards yet. Be the first!",
+    "bringingEmptyPast": "No cards were announced for this event.",
+    "allEvents": "All events",
+    "next": "Upcoming events",
+    "teamTitle": "Events and check-in",
+    "teamIntro": "Events come from Odoo (Events app). Fetch them right away here and print the check-in poster.",
+    "syncTitle": "Sync with Odoo",
+    "syncNotConfigured": "Sync isn't set up yet: ODOO_API_KEY or SUPABASE_SECRET_KEY is missing at Cloudflare.",
+    "syncLast": "Last synced: {when}",
+    "syncNever": "Never synced.",
+    "syncError": "Last error: {error}",
+    "hidden": "hidden",
+    "posterCreate": "Create poster",
+    "syncing": "Fetching events …",
+    "syncNow": "Fetch from Odoo now",
+    "syncDone": "{count, plural, one {# event imported} other {# events imported}}",
+    "print": "Print",
+    "renew": "Create new code",
+    "renewConfirm": "The current poster will stop working. Create a new code?",
+    "renewed": "New code created. Please print the poster again.",
+    "posterIntro": "Print the poster and put it up at the entrance. The code only works from 2 hours before start until 2 hours after the end.",
+    "posterHeadline": "Check in now!",
+    "posterQr": "QR code to check in",
+    "posterStep1": "Open your phone camera and point it at the code",
+    "posterStep2": "Log in to the TRACACON app or sign up for free",
+    "posterStep3": "Collect badges and become a regular",
+    "bringsTo": "Coming along to",
+    "visitedTitle": "Events attended",
+    "visitedEmptyMe": "Check in at the entrance of the next event and it shows up here.",
+    "visitedEmpty": "No events attended yet.",
+    "checkinLoginHint": "Log in or sign up for free. You'll be checked in automatically afterwards."
   }
 }
