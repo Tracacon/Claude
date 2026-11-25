@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { parseProfileTab, ProfileView } from "@/components/profile-view";
+import { UserMenu } from "@/components/user-menu";
 import { getProfilePosts } from "@/lib/feed";
 import { requireProfile } from "@/lib/auth";
 import { getProfileEvents, getProfileListings, getPublicProfile } from "@/lib/profiles";
+import { getUserMenu } from "@/lib/user-menu-data";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/profil">): Promise<Metadata> {
   const { locale } = await params;
@@ -24,5 +26,16 @@ export default async function MyProfilePage({ params, searchParams }: PageProps<
   const listings = tab === "inserate" ? await getProfileListings(me.nickname!) : [];
   const events = tab === "abzeichen" ? await getProfileEvents(me.nickname!) : [];
   const posts = tab === "beitraege" ? await getProfilePosts(me.nickname!) : [];
-  return <ProfileView profile={profile} listings={listings} events={events} posts={posts} tab={tab} loggedIn basePath="/profil" />;
+  const { menu } = await getUserMenu();
+  return (
+    <div className="space-y-1">
+      {/* Handy: Menü (Meine Inserate, Einstellungen, Abmelden …) oben rechts auf dem eigenen Profil */}
+      {menu && (
+        <div className="-mt-3 flex justify-end sm:hidden">
+          <UserMenu data={menu} variant="sheet" />
+        </div>
+      )}
+      <ProfileView profile={profile} listings={listings} events={events} posts={posts} tab={tab} loggedIn basePath="/profil" />
+    </div>
+  );
 }
