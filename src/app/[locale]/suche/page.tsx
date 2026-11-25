@@ -3,7 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { connection } from "next/server";
 import { Avatar } from "@/components/avatar";
 import { PostGrid } from "@/components/feed/post-grid";
-import { CalendarIcon, MarketIcon, SearchIcon } from "@/components/icons";
+import { CalendarIcon, MarketIcon } from "@/components/icons";
+import { SearchBox } from "@/components/search/search-box";
 import { Link } from "@/i18n/navigation";
 import { eventDay } from "@/lib/event-format";
 import { getEvents } from "@/lib/events";
@@ -24,9 +25,11 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
   const tFeed = await getTranslations("Feed");
   const raw = (await searchParams).q;
   const q = (typeof raw === "string" ? raw : "").trim().slice(0, 60);
+  // "@name" findet die Person genauso wie "name"
+  const who = q.replace(/^@+/, "");
 
   const [people, events, explore] = await Promise.all([
-    q ? searchProfiles(q) : Promise.resolve([]),
+    who ? searchProfiles(who) : Promise.resolve([]),
     getEvents(false, 30),
     q ? Promise.resolve([]) : getExplore(),
   ]);
@@ -35,11 +38,9 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
   return (
     <div className="mx-auto max-w-[620px] space-y-5">
       <h1 className="sr-only">{t("title")}</h1>
-      <form role="search" className="relative">
-        <label htmlFor="q" className="sr-only">{t("label")}</label>
-        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-cream/50" />
-        <input id="q" name="q" type="search" defaultValue={q} placeholder={t("placeholder")} autoComplete="off" className="input pl-10" />
-      </form>
+      <SearchBox initial={q} label={t("label")} placeholder={t("placeholder")} />
+
+      {!q && <p className="text-sm text-cream/60">{t("hint")}</p>}
 
       {!q && (
         <div className="flex gap-2">
