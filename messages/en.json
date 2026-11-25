@@ -212,7 +212,9 @@
     "instagram_not_configured": "Instagram isn't set up yet.",
     "instagram_token": "Instagram rejects the key. Please create a new one and add it at Cloudflare.",
     "instagram_failed": "Something went wrong with Instagram. Details are shown above.",
-    "invalid_instagram": "Instagram names only contain letters, numbers, dots and underscores (max. 30 characters)."
+    "invalid_instagram": "Instagram names only contain letters, numbers, dots and underscores (max. 30 characters).",
+    "grade_required": "Please choose the grade.",
+    "grading_company_required": "Please choose the grading company."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -246,6 +248,35 @@
     "light_played": "Light Played (LP)",
     "played": "Played (PL)",
     "poor": "Poor (PO)"
+  },
+  "Variant": {
+    "normal": "Normal",
+    "holo": "Holo",
+    "reverse_holo": "Reverse Holo",
+    "first_edition": "1st Edition",
+    "promo": "Promo",
+    "full_art": "Full Art",
+    "alt_art": "Alternate Art"
+  },
+  "GradingCompany": {
+    "psa": "PSA",
+    "bgs": "BGS (Beckett)",
+    "cgc": "CGC",
+    "sgc": "SGC",
+    "tag": "TAG",
+    "ace": "ACE",
+    "other": "Other"
+  },
+  "SealedType": {
+    "booster": "Booster pack",
+    "sleeved_booster": "Sleeved booster",
+    "booster_bundle": "Booster bundle",
+    "display": "Booster box (display)",
+    "etb": "Elite Trainer Box (ETB)",
+    "collection": "Collection / box",
+    "tin": "Tin",
+    "blister": "Blister",
+    "other": "Other"
   },
   "CardLanguage": {
     "de": "German",
@@ -379,7 +410,37 @@
     "openConversation": "Go to conversation",
     "contactLoginButton": "Sign in",
     "bringTo": "Bring to an event",
-    "bringToHint": "Tick the events you'll have this card with you. It then shows up on the event page."
+    "bringToHint": "Tick the events you'll have this card with you. It then shows up on the event page.",
+    "stepCard": "Card",
+    "stepPhotos": "Photos",
+    "stepPrice": "Condition & price",
+    "stepHandover": "Handover",
+    "stepOf": "Step {current} of {total}",
+    "next": "Next",
+    "cardSearch": "Find card",
+    "cardSearchHint": "Type the name (German or English) or the number printed on the card, e.g. “Charizard 199” or “199/165”.",
+    "cardSearchPlaceholder": "e.g. Charizard ex 199",
+    "cardSearching": "Searching …",
+    "cardNoHits": "No card found. Check the spelling or enter the card yourself below.",
+    "cardSearchError": "Card search is not available right now. Please enter the card yourself below.",
+    "cardChosen": "Selected card",
+    "cardChange": "Other card",
+    "cardRemove": "Don't select a card",
+    "cardManual": "Card not listed? Just enter it in the title below.",
+    "cardNoSearch": "There is no card search for this game yet. Please enter the card in the title.",
+    "titleAuto": "Taken from the card. You can change it.",
+    "variant": "Variant",
+    "variantNone": "Not specified",
+    "gradingCompany": "Grading company",
+    "gradingGrade": "Grade",
+    "gradingOther": "Grading (company and grade)",
+    "sealedType": "Product type",
+    "sealedNone": "Not specified",
+    "rarity": "Rarity",
+    "cardSet": "Set",
+    "cardNumber": "Number",
+    "cardName": "Card",
+    "stepBack": "Back"
   },
   "Moderation": {
     "title": "Moderation",

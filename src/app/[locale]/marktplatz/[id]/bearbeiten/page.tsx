@@ -51,6 +51,21 @@ export default async function EditListingPage({ params }: PageProps<"/[locale]/m
           handover_shipping: l.handover_shipping,
           photos: data.photos,
           events: chosen.map((e) => e.id),
+          card:
+            l.card_ref && l.card_name
+              ? {
+                  id: l.card_ref.replace(/^tcgdex:/, ""),
+                  name: l.card_name,
+                  name_en: l.card_name_en,
+                  set: l.card_set ?? "",
+                  number: l.card_number ?? "",
+                  image: l.card_image,
+                }
+              : null,
+          variant: l.variant ?? "",
+          grading_company: l.grading_company ?? "",
+          grading_grade: l.grading_grade === null ? "" : String(Number(l.grading_grade)),
+          sealed_type: l.sealed_type ?? "",
         }}
         events={events}
       />
