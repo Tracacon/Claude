@@ -1,4 +1,4 @@
-// Formularprüfung für Inserate: Kartendetails, Grading und Produktart.
+// Formularprüfung für Inserate: Set-Kürzel und Kartennummer.
 import { describe, expect, it } from "vitest";
 import { listingSchema } from "@/lib/validation";
 
@@ -6,11 +6,11 @@ const base = {
   title: "Glurak-ex 199/165 151",
   description: "",
   tcg: "pokemon",
-  kind: "slab",
+  kind: "single",
   offer: "sell",
-  price: "500",
+  price: "120",
   negotiable: "",
-  condition: "",
+  condition: "near_mint",
   card_language: "de",
   grading: "",
   city: "",
@@ -18,38 +18,32 @@ const base = {
   handover_pickup: "",
   handover_shipping: "",
   photos: JSON.stringify(["10000000-0000-0000-0000-000000000001", "10000000-0000-0000-0000-000000000002"]),
-  card_id: "sv03.5-199",
-  variant: "full_art",
-  grading_company: "psa",
-  grading_grade: "10",
-  sealed_type: "",
+  card_code: " mew ",
+  card_no: "199/165",
 };
 
 describe("Inserat prüfen", () => {
-  it("setzt den Grading-Text aus Firma und Note zusammen", () => {
+  it("übernimmt Set-Kürzel (groß geschrieben) und Kartennummer", () => {
     const r = listingSchema.parse(base);
-    expect(r.grading).toBe("PSA 10");
-    expect(r.details).toEqual({ card_id: "sv03.5-199", variant: "full_art", grading_company: "psa", grading_grade: 10, sealed_type: null });
+    expect(r.card).toEqual({ code: "MEW", number: "199/165" });
+    expect(r).not.toHaveProperty("card_code");
   });
 
-  it("verlangt eine Note, wenn eine Firma gewählt ist", () => {
-    const r = listingSchema.safeParse({ ...base, grading_grade: "" });
-    expect(r.success).toBe(false);
-    expect(r.error?.issues[0].message).toBe("grade_required");
+  it("Kürzel und Nummer sind freiwillig", () => {
+    expect(listingSchema.parse({ ...base, card_code: "", card_no: "" }).card).toEqual({ code: null, number: null });
   });
 
-  it("nimmt bei „Andere“ den freien Text", () => {
-    const r = listingSchema.parse({ ...base, grading_company: "other", grading_grade: "", grading: "Hauseigenes Grading 9" });
-    expect(r.grading).toBe("Hauseigenes Grading 9");
+  it("ignoriert Kürzel und Nummer bei Sealed-Ware", () => {
+    expect(listingSchema.parse({ ...base, kind: "sealed", photos: "[]" }).card).toEqual({ code: null, number: null });
   });
 
-  it("ignoriert Karte und Grading bei Sealed-Ware", () => {
-    const r = listingSchema.parse({ ...base, kind: "sealed", photos: "[]", sealed_type: "display" });
-    expect(r.grading).toBeNull();
-    expect(r.details).toEqual({ card_id: null, variant: null, grading_company: null, grading_grade: null, sealed_type: "display" });
+  it("verlangt weiterhin Vorder- und Rückseite bei Einzelkarten", () => {
+    const r = listingSchema.safeParse({ ...base, photos: JSON.stringify(["10000000-0000-0000-0000-000000000001"]) });
+    expect(r.error?.issues[0].message).toBe("front_back_required");
   });
 
-  it("lehnt ungültige Kartenkennungen ab", () => {
-    expect(listingSchema.safeParse({ ...base, card_id: "../../geheim" }).success).toBe(false);
+  it("lehnt seltsame Zeichen ab", () => {
+    expect(listingSchema.safeParse({ ...base, card_code: "<b>" }).success).toBe(false);
+    expect(listingSchema.safeParse({ ...base, card_no: "1;drop" }).success).toBe(false);
   });
 });

@@ -1,5 +1,6 @@
 import "server-only";
 import type { CardHit, CardInfo } from "@/lib/marketplace";
+import { normalizeSetCode, setsForCode } from "@/lib/set-codes";
 
 /**
  * Pokémon-Kartensuche über TCGdex (https://tcgdex.dev): kostenlos, ohne Zugangsschlüssel,
@@ -113,10 +114,11 @@ export async function searchCards(input: string): Promise<CardHit[]> {
   for (const c of de ?? []) merged.set(c.id, { de: c, en: enById.get(c.id) });
   for (const c of en ?? []) if (!merged.has(c.id)) merged.set(c.id, { en: c });
 
-  const hits: (CardHit & { order: number })[] = [];
+  const hits: (CardHit & { order: number; setId: string; deMissing: boolean })[] = [];
   for (const [id, { de: d, en: e }] of merged) {
     const card = (d ?? e)!;
     const setId = setIdOf(card);
+    if (isPocketSet(setId)) continue;
     const set = setsDe.get(setId) ?? setsEn.get(setId);
     if (total && set?.official && set.official !== total) continue;
     hits.push({
@@ -127,14 +129,108 @@ export async function searchCards(input: string): Promise<CardHit[]> {
       number: printedNumber(card.localId, set?.official),
       image: cardImage(d?.image ?? e?.image),
       order: setsEn.get(setId)?.order ?? set?.order ?? -1,
+      setId,
+      deMissing: !d,
     });
   }
   // Neueste Sets zuerst
   hits.sort((a, b) => b.order - a.order);
-  return hits.slice(0, MAX_HITS).map(({ order: _order, ...h }) => {
+  const top = hits.slice(0, MAX_HITS);
+
+  // Wer auf Englisch sucht ("Charizard"), findet die Karte nur in der englischen Liste.
+  // Den deutschen Namen holen wir dann aus dem deutschen Set (zwischengespeichert, höchstens 10 Sets).
+  const missingSets = [...new Set(top.filter((h) => h.deMissing).map((h) => h.setId))].slice(0, 10);
+  const deSets = new Map(
+    await Promise.all(missingSets.map(async (id) => [id, await getSetFull("de", id).catch(() => null)] as const)),
+  );
+  return top.map(({ order: _order, setId, deMissing, ...h }) => {
     void _order;
-    return h;
+    if (!deMissing) return h;
+    const deCard = deSets.get(setId)?.cards?.find((c) => c.id === h.id);
+    if (!deCard || deCard.name === h.name) return h;
+    return { ...h, name: deCard.name, name_en: h.name, image: cardImage(deCard.image) ?? h.image };
   });
+}
+
+/** Sets aus dem Handyspiel "TCG Pocket" (A1, A1a, B1, P-A …) gibt es nicht als echte Karten */
+export function isPocketSet(setId: string) {
+  return /^(?:[AB]\d+[a-z]?|P-[A-Z])$/.test(setId);
+}
+
+/** Nummer vergleichbar machen: "199/165" → "199", "005" → "5", "tg05" → "TG5" */
+export function normalizeCardNumber(input: string) {
+  return input
+    .trim()
+    .toUpperCase()
+    .split("/")[0]
+    .replace(/\s+/g, "")
+    .replace(/^([A-Z-]*)0*(\d)/, "$1$2");
+}
+
+type SetFull = SetBrief & { cards?: CardBrief[] };
+const setDetailCache = new Map<string, { at: number; set: SetFull | null }>();
+
+async function getSetFull(lang: Lang, id: string): Promise<SetFull | null> {
+  const key = `${lang}:${id}`;
+  const cached = setDetailCache.get(key);
+  if (cached && Date.now() - cached.at < SETS_TTL) return cached.set;
+  const set = await getJson<SetFull>(`/${lang}/sets/${encodeURIComponent(id)}`);
+  setDetailCache.set(key, { at: Date.now(), set });
+  return set;
+}
+
+export type CodeSearchResult = { sets: { code: string; name: string }[]; hits: CardHit[] };
+
+/**
+ * Karte über Set-Kürzel und Nummer finden, z. B. "MEW" + "199".
+ * Bekannte Kürzel stehen in set-codes.json; unbekannte (neue Sets) fragt der Server bei TCGdex nach.
+ */
+export async function searchByCode(codeInput: string, numberInput: string): Promise<CodeSearchResult> {
+  const code = normalizeSetCode(codeInput).slice(0, 12);
+  if (!/^[A-Z0-9:-]{1,12}$/.test(code)) return { sets: [], hits: [] };
+
+  let setIds = setsForCode(code).map((s) => s.id);
+  if (setIds.length === 0) {
+    // Achtung: TCGdex findet mit "eq:" bei nur einem einzigen Wert nichts, deshalb zwei Schreibweisen
+    const found = await getJson<SetBrief[]>(`/en/sets?${new URLSearchParams({ "abbreviation.official": `eq:${code}|${code.toLowerCase()}` })}`);
+    setIds = (found ?? []).map((s) => s.id).filter((id) => !isPocketSet(id)).slice(0, 3);
+  }
+  if (setIds.length === 0) return { sets: [], hits: [] };
+
+  const wanted = normalizeCardNumber(numberInput);
+  const results = await Promise.all(
+    setIds.map(async (id) => {
+      const [de, en] = await Promise.all([getSetFull("de", id).catch(() => null), getSetFull("en", id).catch(() => null)]);
+      return { de, en };
+    }),
+  );
+
+  const sets: CodeSearchResult["sets"] = [];
+  const hits: CardHit[] = [];
+  for (const { de, en } of results) {
+    const set = de ?? en;
+    if (!set) continue;
+    sets.push({ code, name: set.name });
+    if (!wanted) continue;
+    const official = set.cardCount?.official ?? en?.cardCount?.official ?? null;
+    const enById = new Map((en?.cards ?? []).map((c) => [c.id, c]));
+    const pool = new Map<string, { de?: CardBrief; en?: CardBrief }>();
+    for (const c of de?.cards ?? []) pool.set(c.id, { de: c, en: enById.get(c.id) });
+    for (const c of en?.cards ?? []) if (!pool.has(c.id)) pool.set(c.id, { en: c });
+    for (const [cardId, { de: d, en: e }] of pool) {
+      const card = (d ?? e)!;
+      if (normalizeCardNumber(card.localId) !== wanted) continue;
+      hits.push({
+        id: cardId,
+        name: card.name,
+        name_en: e && d && e.name !== d.name ? e.name : null,
+        set: set.name,
+        number: printedNumber(card.localId, official),
+        image: cardImage(d?.image ?? e?.image),
+      });
+    }
+  }
+  return { sets, hits };
 }
 
 export const CARD_ID_PATTERN = /^[A-Za-z0-9._-]{1,60}$/;

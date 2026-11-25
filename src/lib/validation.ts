@@ -2,19 +2,14 @@ import { z } from "zod";
 import {
   CARD_LANGUAGES,
   CONDITIONS,
-  GRADES,
-  GRADING_COMPANIES,
   KINDS,
-  KINDS_WITH_CARD,
   KINDS_NEEDING_BOTH_SIDES,
+  KINDS_WITH_CARD,
   MAX_PHOTOS,
   OFFERS,
   REPORT_REASONS,
-  SEALED_TYPES,
   TCGS,
-  TCGS_WITH_CARD_SEARCH,
   UUID_PATTERN,
-  VARIANTS,
   parseEuroToCents,
 } from "@/lib/marketplace";
 
@@ -143,16 +138,19 @@ export const listingSchema = z
     condition: z.union([z.enum(CONDITIONS), z.literal("")]).transform((v) => (v === "" ? null : v)),
     card_language: z.union([z.enum(CARD_LANGUAGES), z.literal("")]).transform((v) => (v === "" ? null : v)),
     grading: optionalText(40),
-    // Kennung der Karte aus der Kartensuche (z. B. "sv03.5-199"); die Kartendaten holt der Server selbst
-    card_id: z
+    // Set-Kürzel (z. B. "MEW") und Kartennummer (z. B. "199/165") für die bessere Suche
+    card_code: z
       .string()
       .trim()
-      .refine((v) => v === "" || /^[A-Za-z0-9._-]{1,60}$/.test(v), { message: "generic" })
-      .transform((v) => (v === "" ? null : v)),
-    variant: z.union([z.enum(VARIANTS), z.literal("")]).transform((v) => (v === "" ? null : v)),
-    grading_company: z.union([z.enum(GRADING_COMPANIES), z.literal("")]).transform((v) => (v === "" ? null : v)),
-    grading_grade: z.union([z.enum(GRADES as [string, ...string[]]), z.literal("")]).transform((v) => (v === "" ? null : Number(v))),
-    sealed_type: z.union([z.enum(SEALED_TYPES), z.literal("")]).transform((v) => (v === "" ? null : v)),
+      .max(12, { message: "too_long" })
+      .refine((v) => /^[A-Za-z0-9:.\- ]*$/.test(v), { message: "invalid_card_code" })
+      .transform((v) => (v === "" ? null : v.toUpperCase().replace(/\s+/g, ""))),
+    card_no: z
+      .string()
+      .trim()
+      .max(20, { message: "too_long" })
+      .refine((v) => /^[A-Za-z0-9/.\- ]*$/.test(v), { message: "invalid_card_number" })
+      .transform((v) => (v === "" ? null : v.replace(/\s+/g, ""))),
     city: optionalText(80),
     handover_event: checkbox,
     handover_pickup: checkbox,
@@ -187,43 +185,11 @@ export const listingSchema = z
       ctx.addIssue({ code: "custom", path: ["handover"], message: "handover_required" });
       return z.NEVER;
     }
-    // Grading nur bei Slabs: Firma und Note auswählen, bei "Andere" frei eintragen
-    let grading: string | null = null;
-    if (v.kind === "slab") {
-      if (v.grading_company && v.grading_company !== "other" && v.grading_grade === null) {
-        ctx.addIssue({ code: "custom", path: ["grading_grade"], message: "grade_required" });
-        return z.NEVER;
-      }
-      if (!v.grading_company && v.grading_grade !== null) {
-        ctx.addIssue({ code: "custom", path: ["grading_company"], message: "grading_company_required" });
-        return z.NEVER;
-      }
-      grading =
-        v.grading_company === "other"
-          ? v.grading
-          : v.grading_company
-            ? `${v.grading_company.toUpperCase()} ${String(v.grading_grade)}`
-            : null;
-    }
     const withCard = KINDS_WITH_CARD.includes(v.kind);
-    const details = {
-      card_id: withCard && TCGS_WITH_CARD_SEARCH.includes(v.tcg) ? v.card_id : null,
-      variant: withCard ? v.variant : null,
-      grading_company: v.kind === "slab" ? v.grading_company : null,
-      grading_grade: v.kind === "slab" && v.grading_company !== "other" ? v.grading_grade : null,
-      sealed_type: v.kind === "sealed" ? v.sealed_type : null,
-    };
-    const {
-      price: _price,
-      card_id: _card,
-      variant: _variant,
-      grading_company: _company,
-      grading_grade: _grade,
-      sealed_type: _sealed,
-      ...rest
-    } = v;
-    void [_price, _card, _variant, _company, _grade, _sealed];
-    return { ...rest, grading, price_cents: cents, negotiable: v.offer === "trade" ? false : v.negotiable, details };
+    const card = { code: withCard ? v.card_code : null, number: withCard ? v.card_no : null };
+    const { price: _price, card_code: _code, card_no: _no, ...rest } = v;
+    void [_price, _code, _no];
+    return { ...rest, price_cents: cents, negotiable: v.offer === "trade" ? false : v.negotiable, card };
   });
 
 export type ListingInput = z.output<typeof listingSchema>;
