@@ -5,6 +5,7 @@ import { getSessionUser, requireProfile } from "@/lib/auth";
 import { AvatarForm } from "./avatar-form";
 import { DeleteAccountForm } from "./delete-account-form";
 import { PasswordForm } from "./password-form";
+import { PresenceForm } from "./presence-form";
 import { PrivacyForm } from "./privacy-form";
 import { ProfileForm } from "./profile-form";
 
@@ -36,6 +37,7 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/eins
         initial={{ city: profile.city ?? "", bio: profile.bio ?? "", website: profile.website ?? "", instagram: profile.instagram ?? "", locale: profile.locale }}
       />
       <PrivacyForm visibility={profile.profile_visibility} approval={profile.follow_approval} />
+      <PresenceForm showOnline={profile.show_online !== false} showSignup={profile.show_signup !== false} />
       <PasswordForm />
       <DeleteAccountForm />
     </div>

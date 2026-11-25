@@ -20,6 +20,9 @@ export type Profile = {
   avatar_id: string | null;
   profile_visibility: "public" | "followers";
   follow_approval: boolean;
+  /** fehlen, solange die Datenbank-Erweiterung noch nicht eingespielt ist */
+  show_online?: boolean;
+  show_signup?: boolean;
   age_confirmed_at: string | null;
   terms_accepted_at: string | null;
   created_at: string;
@@ -47,7 +50,7 @@ export const getMyProfile = cache(async (): Promise<Profile | null> => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
-    .select("id, nickname, city, bio, website, instagram, locale, role, avatar_id, profile_visibility, follow_approval, age_confirmed_at, terms_accepted_at, created_at")
+    .select("*")
     .eq("id", user.id)
     .maybeSingle<Profile>();
   return data ?? null;

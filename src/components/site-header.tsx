@@ -1,11 +1,13 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getMyProfile } from "@/lib/auth";
+import { touchPresence, unreadNotificationCount } from "@/lib/notifications";
 import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "./bottom-nav";
 import { CreateMenu } from "./create-menu";
 import { HeartIcon } from "./icons";
 import { LanguageSwitch } from "./language-switch";
+import { PresencePing } from "./presence-ping";
 import { UserMenu, type UserMenuData } from "./user-menu";
 
 async function unreadMessages(onboarded: boolean) {
@@ -36,11 +38,15 @@ export async function SiteHeader() {
   const profile = await getMyProfile();
   const isTeam = profile?.role === "team" || profile?.role === "admin";
   const onboarded = Boolean(profile?.nickname);
-  const [reports, unread, requests] = await Promise.all([
+  const [reports, unread, requests, notes] = await Promise.all([
     openReports(isTeam),
     unreadMessages(onboarded),
     pendingRequests(onboarded),
+    onboarded ? unreadNotificationCount() : 0,
+    onboarded ? touchPresence() : undefined,
   ]);
+  // Offene Anfragen stehen auch als Benachrichtigung in der Liste; die größere Zahl zählt
+  const activity = Math.max(notes, requests);
   const menu: UserMenuData | null =
     profile && profile.nickname
       ? {
@@ -49,7 +55,7 @@ export async function SiteHeader() {
           avatarId: profile.avatar_id,
           role: profile.role,
           unread,
-          requests,
+          requests: activity,
           reports,
           labels: {
             menu: t("menu"),
@@ -111,9 +117,17 @@ export async function SiteHeader() {
               />
             )}
             {onboarded && (
-              <Link href="/anfragen" aria-label={t("activity")} className="relative rounded-lg p-1.5 text-cream hover:text-brand sm:hidden">
+              <Link
+                href="/aktivitaet"
+                aria-label={activity > 0 ? t("activityCount", { count: activity }) : t("activity")}
+                className="relative rounded-lg p-1.5 text-cream hover:text-brand"
+              >
                 <HeartIcon className="size-[26px]" />
-                {requests > 0 && <span className="absolute right-1 top-1 size-2.5 rounded-full bg-danger" />}
+                {activity > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 min-w-5 rounded-full bg-danger px-1 text-center text-xs font-bold leading-5 text-white">
+                    {activity > 99 ? "99+" : activity}
+                  </span>
+                )}
               </Link>
             )}
             {isTeam && (
@@ -145,6 +159,7 @@ export async function SiteHeader() {
           </nav>
         </div>
       </header>
+      {onboarded && <PresencePing />}
       <BottomNav
         loggedIn={Boolean(profile)}
         onboarded={onboarded}

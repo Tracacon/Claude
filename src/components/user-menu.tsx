@@ -88,7 +88,7 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
       {item("/nachrichten", "✉", L.messages, data.unread)}
       {item(`/u/${data.nickname}/follower`, "👥", L.followers)}
       {item(`/u/${data.nickname}/folgt`, "➜", L.following)}
-      {item("/anfragen", "🔔", L.requests, data.requests)}
+      {item("/aktivitaet", "🔔", L.requests, data.requests)}
       {item("/profil?tab=abzeichen", "🏅", L.badges)}
       <div className="my-1 border-t border-line" />
       {item("/einstellungen", "⚙", L.settings)}

@@ -1,8 +1,9 @@
 import { getTranslations } from "next-intl/server";
-import { Avatar } from "@/components/avatar";
+import { OnlineAvatar } from "@/components/online-avatar";
 import { FollowButton } from "@/components/follow-button";
 import { RemoveFollowerButton } from "@/components/social-buttons";
 import { Link } from "@/i18n/navigation";
+import { getOnlineContacts } from "@/lib/notifications";
 import type { FollowListItem, PublicProfile } from "@/lib/social";
 
 /** Liste der Follower bzw. gefolgten Personen mit Umschalter. */
@@ -18,6 +19,9 @@ export async function FollowList({
   loggedIn: boolean;
 }) {
   const t = await getTranslations("Social");
+  const tA = await getTranslations("Activity");
+  // Grüner Punkt nur für eigene Follower und Gefolgte, die den Status zeigen (prüft die Datenbank)
+  const online = new Set(loggedIn ? (await getOnlineContacts()).map((p) => p.id) : []);
   const base = `/u/${profile.nickname}`;
   return (
     <div className="space-y-4">
@@ -44,8 +48,11 @@ export async function FollowList({
           {items.map((u) => (
             <li key={u.id} className="flex items-center gap-3 p-3">
               <Link href={`/u/${u.nickname}`} className="flex min-w-0 flex-1 items-center gap-3">
-                <Avatar userId={u.id} avatarId={u.avatar_id} nickname={u.nickname} />
-                <span className="truncate font-semibold">@{u.nickname}</span>
+                <OnlineAvatar userId={u.id} avatarId={u.avatar_id} nickname={u.nickname} online={online.has(u.id)} label={tA("online")} />
+                <span className="min-w-0">
+                  <span className="block truncate font-semibold">@{u.nickname}</span>
+                  {online.has(u.id) && <span className="block text-xs text-ok">{tA("online")}</span>}
+                </span>
               </Link>
               {profile.is_me && kind === "followers" && <RemoveFollowerButton userId={u.id} />}
               {loggedIn && !u.is_me && !(profile.is_me && kind === "followers") && (
