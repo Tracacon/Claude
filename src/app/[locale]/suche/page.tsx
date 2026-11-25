@@ -102,7 +102,7 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
       ) : explore.length > 0 ? (
         <section className="-mx-4 sm:mx-0">
           <h2 className="sr-only">{t("explore")}</h2>
-          <PostGrid posts={explore} label={(p) => tFeed("gridLabel", { likes: p.like_count, comments: p.comment_count })} />
+          <PostGrid posts={explore} list="entdecken" label={(p) => tFeed("gridLabel", { likes: p.like_count, comments: p.comment_count })} />
         </section>
       ) : (
         <p className="card text-sm text-cream/70">{t("exploreEmpty")}</p>

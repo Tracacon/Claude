@@ -211,6 +211,42 @@ with sync_playwright() as p:
     expect(ana.get_by_text("Teile Fotos deiner Sammlung")).to_be_visible()
     step("Eigenen Beitrag gelöscht; Profil ist wieder leer")
 
+    # --- Aus dem Raster weiterscrollen, langer Text eingeklappt -----------------
+    long_text = "Mein Tauschordner ist endlich sortiert. " * 8 + "ENDE-DES-TEXTES"
+    for i in range(1, 6):
+        make_post(ana, [picture(f"s{i}.jpg", (40 * i, 90, 160))], long_text if i == 5 else f"Sammlung Teil {i}")
+    ben.goto(f"{BASE}/de/u/Ana")
+    ben.get_by_role("link", name=re.compile(r"^Beitrag: ")).first.click()
+    expect(ben).to_have_url(re.compile(r"/de/p/[0-9a-f-]{36}\?liste=profil$"))
+    first = ben.get_by_role("article").first
+    expect(first.get_by_role("button", name="mehr", exact=True)).to_be_visible()
+    caption = first.locator("p.whitespace-pre-line")
+    clamped = caption.evaluate("e => e.scrollHeight > e.clientHeight + 2")
+    assert clamped, "langer Text sollte eingeklappt sein"
+    shot(ben, "70-text-eingeklappt")
+    first.get_by_role("button", name="mehr", exact=True).click()
+    expect(first.get_by_role("button", name="mehr", exact=True)).to_have_count(0)
+    assert not caption.evaluate("e => e.scrollHeight > e.clientHeight + 2"), "Text sollte ganz aufgeklappt sein"
+    step("Langer Beschreibungstext ist eingeklappt; „mehr“ klappt ihn auf")
+
+    for i in (4, 3, 2, 1):
+        ben.get_by_text(f"Sammlung Teil {i}").scroll_into_view_if_needed(timeout=15000)
+        expect(ben.get_by_text(f"Sammlung Teil {i}")).to_be_visible()
+    expect(ben.get_by_role("article", name="Beitrag von Ana")).to_have_count(5)
+    expect(ben.get_by_text("Das waren alle Beiträge.")).to_be_visible(timeout=15000)
+    shot(ben, "71-weiterscrollen")
+    ben.get_by_role("article").nth(1).get_by_role("link", name="Kommentare").click()
+    expect(ben).to_have_url(re.compile(r"/de/p/[0-9a-f-]{36}#kommentare$"))
+    expect(ben.get_by_role("article")).to_have_count(1)
+    step("Aus dem Profil-Raster einfach weiterscrollen zu den nächsten Beiträgen; Kommentare per Sprechblase")
+
+    ben.goto(f"{BASE}/de/suche")
+    ben.get_by_role("link", name=re.compile(r"^Beitrag: ")).first.click()
+    expect(ben).to_have_url(re.compile(r"/de/p/[0-9a-f-]{36}\?liste=entdecken$"))
+    ben.mouse.wheel(0, 20000)
+    expect(ben.get_by_role("article").nth(2)).to_be_visible(timeout=15000)
+    step("Auch aus Entdecken geht es per Scrollen weiter")
+
     browser.close()
 
 print(f"Alle {step_no} Schritte bestanden.")

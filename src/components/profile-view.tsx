@@ -149,7 +149,7 @@ export async function ProfileView({
           </div>
         ) : (
           <div className="-mx-4 sm:mx-0">
-            <PostGrid posts={posts} label={(g) => tFeed("gridLabel", { likes: g.like_count, comments: g.comment_count })} />
+            <PostGrid posts={posts} list="profil" label={(g) => tFeed("gridLabel", { likes: g.like_count, comments: g.comment_count })} />
           </div>
         )
       ) : tab === "abzeichen" ? (
