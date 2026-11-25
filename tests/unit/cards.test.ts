@@ -70,7 +70,12 @@ describe("Kartensuche", () => {
     await searchCards("Pikachu 5");
     const url = decodeURIComponent(String(fetchMock.mock.calls.find((c) => String(c[0]).includes("/de/cards"))?.[0]));
     expect(url).toContain("name=Pikachu");
-    expect(url).toContain("localId=eq:5|05|005");
+    expect(url).toContain("localId=eq:5|05|005|0005");
+  });
+
+  it("schickt immer mehrere Schreibweisen der Nummer (TCGdex findet mit nur einem Wert nichts)", async () => {
+    const { numberVariants } = await import("@/lib/cards");
+    for (const n of ["199", "5", "1000", "SWSH020", "tg05"]) expect(numberVariants(n).length).toBeGreaterThan(1);
   });
 
   it("sucht nicht bei zu kurzer Eingabe", async () => {
