@@ -11,6 +11,8 @@ import { hasServiceKey, serviceClient } from "@/lib/service";
  */
 
 const API = process.env.INSTAGRAM_API_URL ?? "https://graph.instagram.com";
+/** Für Schlüssel aus der Facebook-Anmeldung (beginnen mit "EAA") */
+const FB_API = process.env.INSTAGRAM_FB_API_URL ?? "https://graph.facebook.com";
 const VERSION = "v23.0";
 /** Höchstens so oft wird bei Instagram nachgesehen */
 const FRESH_MINUTES = 30;
@@ -73,9 +75,16 @@ export async function syncInstagram(): Promise<InstagramResult> {
     if (!state.author_id) throw new Error("Kein Profil für die Instagram-Beiträge gefunden (INSTAGRAM_AUTHOR)");
     let token = state.token ?? (process.env.INSTAGRAM_TOKEN as string);
 
-    // Schlüssel regelmäßig verlängern, damit er nicht nach 60 Tagen abläuft
+    // Meta gibt je nach Einrichtung zwei Arten von Schlüsseln aus:
+    // Instagram-Schlüssel (graph.instagram.com, 60 Tage, verlängerbar) oder
+    // Facebook-Schlüssel "EAA…" (graph.facebook.com, braucht die Instagram-Konto-ID, verlängert sich nicht hier).
+    const facebook = token.startsWith("EAA");
+    const igUserId = process.env.INSTAGRAM_USER_ID ?? "";
+    if (facebook && !/^\d+$/.test(igUserId)) throw new Error("INSTAGRAM_USER_ID fehlt für den Facebook-Schlüssel");
+
+    // Instagram-Schlüssel regelmäßig verlängern, damit er nicht nach 60 Tagen abläuft
     const age = state.token_refreshed_at ? Date.now() - new Date(state.token_refreshed_at).getTime() : Infinity;
-    if (age > REFRESH_DAYS * 86400_000) {
+    if (!facebook && age > REFRESH_DAYS * 86400_000) {
       try {
         const r = await getJson(`${API}/refresh_access_token?grant_type=ig_refresh_token&access_token=${encodeURIComponent(token)}`);
         if (typeof r.access_token === "string") {
@@ -89,7 +98,8 @@ export async function syncInstagram(): Promise<InstagramResult> {
     }
 
     const fields = "id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,children{media_type,media_url,thumbnail_url}";
-    const list = await getJson(`${API}/${VERSION}/me/media?fields=${encodeURIComponent(fields)}&limit=30&access_token=${encodeURIComponent(token)}`);
+    const base = facebook ? `${FB_API}/${VERSION}/${igUserId}` : `${API}/${VERSION}/me`;
+    const list = await getJson(`${base}/media?fields=${encodeURIComponent(fields)}&limit=30&access_token=${encodeURIComponent(token)}`);
     const media = ((list.data as Media[]) ?? []).filter((m) => !state.known.includes(m.id) && imagesOf(m).length > 0);
 
     let imported = 0;

@@ -76,7 +76,8 @@ with sync_playwright() as p:
     step("Feed übernimmt automatisch Bildbeiträge als eigene Beiträge, ohne Instagram-Hinweis; Reels nicht")
 
     refreshes = json.loads(urllib.request.urlopen("http://127.0.0.1:54321/test/ig-refreshes").read())
-    assert refreshes == ["ig-test-token"], refreshes
+    # Instagram-Schlüssel werden verlängert, Facebook-Schlüssel (EAA…) nicht
+    assert refreshes == ([] if os.environ.get("IG_KIND") == "facebook" else ["ig-test-token"]), refreshes
     step("Zugangsschlüssel wurde automatisch verlängert")
 
     admin.goto(f"{BASE}/de/team/termine")

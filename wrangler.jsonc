@@ -15,7 +15,9 @@
   // (sonst die erste Verwaltung).
   "vars": {
     "ODOO_URL": "https://tracacon.odoo.com",
-    "ODOO_PUBLIC_URL": "https://www.tracacon.de"
+    "ODOO_PUBLIC_URL": "https://www.tracacon.de",
+    // Instagram-Konto tracacon.de (ID aus der Meta-App „TRACACON Community App“)
+    "INSTAGRAM_USER_ID": "17841477767684437"
   },
   // Staging: eigener Worker und eigenes Supabase-Projekt
   "env": {
