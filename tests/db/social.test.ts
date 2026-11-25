@@ -237,3 +237,20 @@ describe("Fotos im Chat", () => {
     expect(c.rows[0].other_avatar_id).toBe(photo(9));
   });
 });
+
+describe("Instagram-Name im Profil", () => {
+  it("nur gültige Namen, sichtbar wie Bio und Ort", async () => {
+    const db = await createDb();
+    const a = uid(201);
+    const b = uid(202);
+    await db.member(a, "Ina");
+    await db.member(b, "Bob");
+    await db.as(a, "update public.profiles set instagram = 'tracacon.de' where id = auth.uid()");
+    await expect(db.as(a, "update public.profiles set instagram = 'Böse Name!' where id = auth.uid()")).rejects.toThrow(/profiles_instagram_format/);
+    const pub = await db.as<{ get_profile: { instagram: string | null } }>(null, "select public.get_profile('Ina')");
+    expect(pub.rows[0].get_profile.instagram).toBe("tracacon.de");
+    await db.as(a, "select public.update_privacy('followers', true)");
+    const hidden = await db.as<{ get_profile: { instagram: string | null } }>(b, "select public.get_profile('Ina')");
+    expect(hidden.rows[0].get_profile.instagram).toBeNull();
+  });
+});

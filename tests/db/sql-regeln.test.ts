@@ -11,7 +11,7 @@ describe("SQL-Regeln", () => {
     const missing: string[] = [];
     for (const f of readdirSync(dir).filter((x) => x.endsWith(".sql"))) {
       const sql = readFileSync(join(dir, f), "utf8");
-      for (const m of sql.matchAll(/\b(update\s+public\.\w+|delete\s+from\s+public\.\w+)[^;]*;/gis)) {
+      for (const m of sql.matchAll(/\b(update\s+public\.\w+|delete\s+from\s+public\.\w+)[^;]*;/gi)) {
         if (!/\bwhere\b/i.test(m[0])) missing.push(`${f}: ${m[0].slice(0, 60).replace(/\s+/g, " ")}`);
       }
     }

@@ -45,6 +45,7 @@ export function mapDbError(error: DbError): string {
   for (const known of KNOWN) if (text.includes(known)) return known;
   if (error.code === "23514" && text.includes("nickname")) return "invalid_nickname";
   if (error.code === "23514" && text.includes("website")) return "invalid_website";
+  if (error.code === "23514" && text.includes("instagram")) return "invalid_instagram";
   if (error.code === "23514" && text.includes("listings_handover")) return "handover_required";
   if (error.code === "23514" && text.includes("listings_price")) return "invalid_price";
   if (error.code === "23514" && text.includes("listings_title")) return "title_short";

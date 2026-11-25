@@ -21,6 +21,7 @@ export type PublicProfile = {
   bio: string | null;
   city: string | null;
   website: string | null;
+  instagram?: string | null;
   listing_count: number;
   post_count?: number;
   follower_count: number;
