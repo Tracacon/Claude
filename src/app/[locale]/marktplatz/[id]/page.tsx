@@ -12,6 +12,7 @@ import { eventDay } from "@/lib/event-format";
 import { photoUrl } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteListing, ModerateListing, ReportForm, StartConversation, StatusSwitch } from "./listing-actions";
+import { BrandText } from "@/components/brand-text";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/marktplatz/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -97,7 +98,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
           <span className="rounded-full bg-white/10 px-2.5 py-1">{tOffer(l.offer)}</span>
           {l.status !== "active" && <span className="rounded-full bg-white/10 px-2.5 py-1">{tStatus(l.status)}</span>}
         </div>
-        <h1 className="text-2xl font-bold leading-tight">{l.title}</h1>
+        <h1 className="text-2xl font-bold leading-tight"><BrandText text={l.title} /></h1>
         <p className="text-3xl font-black text-brand">
           <PriceTag offer={l.offer} cents={l.price_cents} negotiable={l.negotiable} />
         </p>

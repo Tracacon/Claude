@@ -8,11 +8,12 @@ import { getMyProfile } from "@/lib/auth";
 import { eventSheet, eventWhen } from "@/lib/event-format";
 import { ensureEventsFresh, getEvent, getEventListings } from "@/lib/events";
 import { PAGE_SIZE } from "@/lib/marketplace";
+import { BrandText } from "@/components/brand-text";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/termine/[id]">): Promise<Metadata> {
   const { id } = await params;
   const e = await getEvent(id);
-  return { title: e?.name ?? "TRACACON" };
+  return { title: e?.name ?? "Tracacon" };
 }
 
 const REGULAR_STEPS = [3, 10, 25];
@@ -58,7 +59,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
             <span className="text-3xl font-black leading-none">{sheet.day}</span>
           </span>
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold leading-tight">{e.name}</h1>
+            <h1 className="text-2xl font-bold leading-tight"><BrandText text={e.name} /></h1>
             {e.subtitle && <p className="text-cream/80">{e.subtitle}</p>}
             <p className="mt-1 text-sm text-cream/70">{eventWhen(e, locale)}</p>
             {where && (

@@ -29,8 +29,8 @@ export default async function FeedPage({ params }: PageProps<"/[locale]">) {
       {!profile && (
         <section className="card space-y-3 bg-[radial-gradient(ellipse_at_10%_0%,rgb(34_205_215/0.22),transparent_60%)]">
           <p className="kicker">Trade · Card · Convention</p>
-          <p className="font-display text-2xl font-bold uppercase leading-tight">
-            Collect. <span className="text-brand">Connect.</span> Trade.
+          <p className="font-display text-2xl font-bold leading-tight">
+            Trading · <span className="text-brand">Dealing</span> · Connecting
           </p>
           <p className="text-sm text-cream/75">{tHome("intro")}</p>
           <div className="flex flex-wrap gap-2">

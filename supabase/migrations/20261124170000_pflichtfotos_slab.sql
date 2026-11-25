@@ -1,4 +1,4 @@
--- TRACACON-App: Pflichtfotos und Art "Slab"
+-- Tracacon-App: Pflichtfotos und Art "Slab"
 -- Einzelkarten und Slabs (gegradete Karten) brauchen mindestens zwei Fotos:
 -- Position 0 = Vorderseite, Position 1 = Rückseite.
 -- Die Prüfung läuft am Ende der Transaktion (zurückgestellt), damit Inserat und

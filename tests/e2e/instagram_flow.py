@@ -49,7 +49,7 @@ with sync_playwright() as p:
     mobile = {"viewport": {"width": 390, "height": 844}, "locale": "de-DE", "has_touch": True}
 
     admin = browser.new_context(**mobile).new_page()
-    register(admin, "team@tracacon.de", "TRACACON")
+    register(admin, "team@tracacon.de", "Tracacon")
     step("Team-Konto angelegt (erste Verwaltung = Absender der Instagram-Beiträge)")
 
     req = urllib.request.Request("http://127.0.0.1:54321/test/ig", data=b'{"on": true}', headers={"Content-Type": "application/json"})

@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { requireRole } from "@/lib/auth";
 import { UUID_PATTERN } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/server";
+import { BrandText } from "@/components/brand-text";
 
 type ModConversation = {
   id: string;
@@ -43,7 +44,7 @@ export default async function ModerationConversationPage({ params }: PageProps<"
   return (
     <div className="space-y-4">
       <Link href="/moderation" className="link text-sm">← {t("title")}</Link>
-      <h1 className="text-xl font-bold">{t("readConversation")}: {c.listing_title}</h1>
+      <h1 className="text-xl font-bold">{t("readConversation")}: <BrandText text={c.listing_title} /></h1>
       <p className="text-sm text-cream/70">{t("conversationBetween", { seller: c.seller, buyer: c.buyer })}</p>
       <p className="rounded-xl border border-brand/30 bg-brand/5 px-3 py-2 text-xs">{t("privacyNote")}</p>
       <ol className="space-y-2">

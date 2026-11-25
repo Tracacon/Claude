@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/p/[id]">
   const { id, locale } = await params;
   const p = await getPost(id);
   const t = await getTranslations({ locale, namespace: "Feed" });
-  return { title: p ? t("postBy", { nickname: p.author.nickname }) : "TRACACON" };
+  return { title: p ? t("postBy", { nickname: p.author.nickname }) : "Tracacon" };
 }
 
 const FIRST = 3;

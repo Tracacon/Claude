@@ -7,6 +7,7 @@ import { Avatar } from "@/components/avatar";
 import { CommentIcon, HeartIcon, ShareIcon } from "@/components/icons";
 import { Link, useRouter } from "@/i18n/navigation";
 import { toggleLike } from "@/lib/actions/posts";
+import { fixBrand } from "@/lib/brand";
 import { postPhotoUrl, type PostItem } from "@/lib/feed-shared";
 import { PostMenu } from "./post-menu";
 
@@ -78,7 +79,9 @@ export function PostCard({
     }
   }
 
-  const long = post.caption.length > 120 || post.caption.split("\n").length > 2;
+  // Ältere Instagram-Beiträge, die vor der automatischen Korrektur übernommen wurden, ebenfalls richtig zeigen
+  const caption = post.source === "instagram" ? fixBrand(post.caption) : post.caption;
+  const long = caption.length > 120 || caption.split("\n").length > 2;
 
   return (
     <article className="border-b border-line pb-4 sm:rounded-2xl sm:border sm:bg-night-2" aria-label={t("postBy", { nickname: post.author.nickname })}>
@@ -151,7 +154,7 @@ export function PostCard({
         {post.caption && (
           <p className={`whitespace-pre-line text-sm ${expanded ? "" : "line-clamp-2"}`}>
             <Link href={`/u/${post.author.nickname}`} className="mr-1.5 font-semibold">{post.author.nickname}</Link>
-            {post.caption}
+            {caption}
           </p>
         )}
         {post.caption && long && !expanded && (

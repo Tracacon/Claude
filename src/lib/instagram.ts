@@ -1,10 +1,11 @@
 import "server-only";
 import { after } from "next/server";
 import { POST_BUCKET } from "@/lib/feed-shared";
+import { fixBrand } from "@/lib/brand";
 import { hasServiceKey, serviceClient } from "@/lib/service";
 
 /**
- * Übernimmt die Bildbeiträge des TRACACON-Instagram-Kontos als eigene Beiträge in den Feed
+ * Übernimmt die Bildbeiträge des Tracacon-Instagram-Kontos als eigene Beiträge in den Feed
  * (Fotos und Text werden kopiert, ohne Verweis auf Instagram).
  * Offizielle Schnittstelle von Instagram (Instagram API mit Instagram-Anmeldung), nur lesend.
  * Zugangsschlüssel: Cloudflare-Geheimnis INSTAGRAM_TOKEN; verlängerte Schlüssel speichert die App selbst.
@@ -129,7 +130,7 @@ export async function syncInstagram(): Promise<InstagramResult> {
           author_id: state.author_id,
           external_id: m.id,
           external_url: m.permalink ?? null,
-          caption: m.caption ?? "",
+          caption: fixBrand(m.caption ?? ""),
           created_at: m.timestamp ? m.timestamp.replace(/\+0000$/, "Z") : null,
           is_video: false,
           photos: photoIds,

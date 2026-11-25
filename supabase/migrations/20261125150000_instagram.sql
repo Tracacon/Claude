@@ -1,4 +1,4 @@
--- Instagram-Beiträge von TRACACON automatisch im Feed.
+-- Instagram-Beiträge von Tracacon automatisch im Feed.
 -- Einmal im SQL Editor von Supabase ausführen (nach 20261125130000_feed_beitraege.sql).
 
 -- Herkunft eines Beitrags

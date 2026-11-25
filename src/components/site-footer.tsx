@@ -6,7 +6,7 @@ export async function SiteFooter() {
   return (
     <footer className="border-t border-line bg-black pb-20 text-sm text-cream/60 sm:pb-0">
       <div className="mx-auto flex max-w-5xl flex-wrap gap-x-5 gap-y-2 px-4 py-5">
-        <span>© {new Date().getFullYear()} TRACACON</span>
+        <span>© {new Date().getFullYear()} Tracacon</span>
         <Link href="/impressum" className="hover:text-cream">
           {t("imprint")}
         </Link>
