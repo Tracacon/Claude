@@ -1,10 +1,10 @@
 import "server-only";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { after } from "next/server";
 import { cache } from "react";
-import { isSupabaseConfigured, supabaseEnv } from "@/lib/env";
+import { isSupabaseConfigured } from "@/lib/env";
 import { UUID_PATTERN, type ListingSummary } from "@/lib/marketplace";
 import { fetchOdooEvents, odooConfig, OdooError } from "@/lib/odoo";
+import { serviceClient, serviceKey } from "@/lib/service";
 import { createClient } from "@/lib/supabase/server";
 
 export type EventSummary = {
@@ -35,17 +35,8 @@ const FRESH_MINUTES = 15;
 /** Wie weit zurück Termine abgeglichen werden (für Abzeichen und Verlauf) */
 const SYNC_DAYS_BACK = 400;
 
-function serviceKey() {
-  return process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-}
-
 export function isEventSyncConfigured() {
   return isSupabaseConfigured() && Boolean(serviceKey()) && odooConfig().configured;
-}
-
-function serviceClient() {
-  const { url } = supabaseEnv();
-  return createServiceClient(url, serviceKey(), { auth: { persistSession: false, autoRefreshToken: false } });
 }
 
 export type SyncResult = { ok: true; count: number } | { ok: false; error: string };

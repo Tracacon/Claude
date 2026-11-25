@@ -205,7 +205,10 @@
     "sync_failed": "Die Termine konnten nicht gespeichert werden.",
     "photo_required": "Wähle mindestens ein Foto aus.",
     "caption_too_long": "Der Text ist zu lang (höchstens 2.200 Zeichen).",
-    "comment_invalid": "Der Kommentar muss 1 bis 500 Zeichen lang sein."
+    "comment_invalid": "Der Kommentar muss 1 bis 500 Zeichen lang sein.",
+    "instagram_not_configured": "Instagram ist noch nicht eingerichtet.",
+    "instagram_token": "Instagram lehnt den Schlüssel ab. Bitte einen neuen erzeugen und bei Cloudflare eintragen.",
+    "instagram_failed": "Bei Instagram hat etwas nicht geklappt. Details stehen oben."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -712,5 +715,15 @@
     "searchMarket": "Im Marktplatz nach „{q}“ suchen",
     "explore": "Entdecken",
     "exploreEmpty": "Hier erscheinen bald Beiträge der Community."
+  },
+  "Instagram": {
+    "title": "Instagram",
+    "intro": "Neue Bildbeiträge von eurem Instagram erscheinen automatisch als Beiträge des Team-Profils bei allen im Feed. Videos und Reels werden nicht übernommen. Die App sieht höchstens alle 30 Minuten nach.",
+    "notConfigured": "Noch nicht eingerichtet: Bei Cloudflare fehlt das Geheimnis INSTAGRAM_TOKEN.",
+    "total": "{count, plural, one {# Beitrag übernommen} other {# Beiträge übernommen}}",
+    "syncing": "Sehe nach …",
+    "syncNow": "Jetzt bei Instagram nachsehen",
+    "imported": "{count, plural, =0 {Keine neuen Beiträge.} one {# neuer Beitrag übernommen.} other {# neue Beiträge übernommen.}}",
+    "pending": "{count, plural, one {# weiterer folgt beim nächsten Mal.} other {# weitere folgen beim nächsten Mal.}}"
   }
 }

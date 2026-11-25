@@ -5,6 +5,8 @@ import { requireRole } from "@/lib/auth";
 import { eventDay } from "@/lib/event-format";
 import { getSyncState, isEventSyncConfigured } from "@/lib/events";
 import { createClient } from "@/lib/supabase/server";
+import { isInstagramConfigured } from "@/lib/instagram";
+import { InstagramButton } from "./instagram-button";
 import { SyncButton } from "./sync-button";
 
 type Row = {
@@ -32,7 +34,13 @@ export default async function TeamEventsPage({ params }: PageProps<"/[locale]/te
   const format = await getFormatter();
 
   const supabase = await createClient();
-  const [{ data, error }, sync] = await Promise.all([supabase.rpc("team_event_overview"), getSyncState()]);
+  const [{ data, error }, sync, ig] = await Promise.all([
+    supabase.rpc("team_event_overview"),
+    getSyncState(),
+    supabase.rpc("instagram_sync_status"),
+  ]);
+  const insta = (ig.data ?? null) as { synced_at: string | null; error: string | null; imported_count: number } | null;
+  const tIg = await getTranslations("Instagram");
   if (error) console.error("team_event_overview", error.message);
   const rows = (data ?? []) as Row[];
   const configured = isEventSyncConfigured();
@@ -54,6 +62,20 @@ export default async function TeamEventsPage({ params }: PageProps<"/[locale]/te
         </p>
         {sync.error && <p className="error">{t("syncError", { error: sync.error })}</p>}
         {configured && <SyncButton />}
+      </section>
+
+      <section className="card space-y-3">
+        <h2 className="font-semibold">{tIg("title")}</h2>
+        <p className="text-sm text-cream/70">{tIg("intro")}</p>
+        {!isInstagramConfigured() && <p className="text-sm text-brand">{tIg("notConfigured")}</p>}
+        <p className="text-sm text-cream/70">
+          {insta?.synced_at
+            ? t("syncLast", { when: format.dateTime(new Date(insta.synced_at), { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Berlin" }) })
+            : t("syncNever")}
+          {insta ? ` · ${tIg("total", { count: insta.imported_count })}` : ""}
+        </p>
+        {insta?.error && <p className="error">{t("syncError", { error: insta.error })}</p>}
+        {isInstagramConfigured() && <InstagramButton />}
       </section>
 
       {rows.length === 0 ? (
