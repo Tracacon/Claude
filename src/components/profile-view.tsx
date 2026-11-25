@@ -8,6 +8,7 @@ import { eventDay } from "@/lib/event-format";
 import { photoUrl, type ListingSummary } from "@/lib/marketplace";
 import type { VisitedEvent } from "@/lib/profiles";
 import { PostGrid } from "@/components/feed/post-grid";
+import { InstagramIcon } from "@/components/icons";
 import type { GridPost } from "@/lib/feed-shared";
 
 export type ProfileTab = "beitraege" | "inserate" | "abzeichen";
@@ -84,6 +85,18 @@ export async function ProfileView({
           </div>
           {p.can_view && p.city && <p className="text-sm text-cream/70">📍 {p.city}</p>}
           {p.can_view && p.bio && <p className="whitespace-pre-line text-[15px]">{p.bio}</p>}
+          {p.can_view && p.instagram && (
+            <a
+              href={`https://www.instagram.com/${p.instagram}/`}
+              target="_blank"
+              rel="noopener noreferrer nofollow ugc"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-cream hover:text-brand"
+              aria-label={t("instagramLink", { name: p.instagram })}
+            >
+              <InstagramIcon className="size-5" />
+              {p.instagram}
+            </a>
+          )}
           {p.can_view && p.website && (
             <a href={p.website} target="_blank" rel="noopener noreferrer nofollow ugc" className="link break-all text-sm">
               {p.website.replace(/^https:\/\//, "")}

@@ -105,7 +105,10 @@
     "newPassword": "Neues Passwort",
     "repeatPassword": "Passwort wiederholen",
     "savePassword": "Passwort speichern",
-    "passwordSaved": "Passwort gespeichert. Du kannst dich jetzt auf jedem Gerät damit anmelden."
+    "passwordSaved": "Passwort gespeichert. Du kannst dich jetzt auf jedem Gerät damit anmelden.",
+    "instagram": "Instagram",
+    "instagramPlaceholder": "deinname",
+    "instagramHint": "Nur deinen Instagram-Namen eintippen, ohne @. Ein kopierter Instagram-Link funktioniert auch."
   },
   "Roles": {
     "member": "Mitglied",
@@ -208,7 +211,8 @@
     "comment_invalid": "Der Kommentar muss 1 bis 500 Zeichen lang sein.",
     "instagram_not_configured": "Instagram ist noch nicht eingerichtet.",
     "instagram_token": "Instagram lehnt den Schlüssel ab. Bitte einen neuen erzeugen und bei Cloudflare eintragen.",
-    "instagram_failed": "Bei Instagram hat etwas nicht geklappt. Details stehen oben."
+    "instagram_failed": "Bei Instagram hat etwas nicht geklappt. Details stehen oben.",
+    "invalid_instagram": "Instagram-Namen bestehen nur aus Buchstaben, Zahlen, Punkt und Unterstrich (höchstens 30 Zeichen)."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -512,7 +516,8 @@
     "noRequests": "Keine offenen Anfragen.",
     "requestsOff": "Hinweis: Bei dir kann jeder direkt folgen. Anfragen gibt es nur, wenn du in den Einstellungen „Follower bestätigen“ einschaltest.",
     "posts": "Beiträge",
-    "newPost": "Beitrag"
+    "newPost": "Beitrag",
+    "instagramLink": "Instagram-Profil von {name} öffnen"
   },
   "Badges": {
     "team": {

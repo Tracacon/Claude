@@ -74,6 +74,17 @@ export const onboardingSchema = z
   })
   .refine((v) => v.password === v.password2, { path: ["password2"], message: "password_mismatch" });
 
+/**
+ * Instagram-Name aus allem, was Leute eingeben oder einfügen:
+ * "tracacon.de", "@tracacon.de", "instagram.com/tracacon.de", "https://www.instagram.com/tracacon.de/?igsh=…"
+ */
+export function normalizeInstagram(raw: string): string {
+  let v = raw.trim();
+  const m = v.match(/instagram\.com\/([^/?#\s]+)/i);
+  if (m) v = m[1];
+  return v.replace(/^@+/, "").replace(/\/+$/, "").toLowerCase();
+}
+
 export const profileSchema = z.object({
   city: optionalText(80),
   bio: optionalText(500),
@@ -82,6 +93,11 @@ export const profileSchema = z.object({
     .trim()
     .max(200, { message: "too_long" })
     .refine((v) => v === "" || /^https:\/\/[^\s]+\.[^\s]+$/.test(v), { message: "invalid_website" })
+    .transform((v) => (v === "" ? null : v)),
+  instagram: z
+    .string()
+    .transform(normalizeInstagram)
+    .refine((v) => v === "" || /^[a-z0-9._]{1,30}$/.test(v), { message: "invalid_instagram" })
     .transform((v) => (v === "" ? null : v)),
   locale: z.enum(["de", "en"]),
 });

@@ -82,6 +82,7 @@ export async function updateProfile(_prev: FormState, formData: FormData): Promi
     city: str(formData, "city"),
     bio: str(formData, "bio"),
     website: str(formData, "website"),
+    instagram: str(formData, "instagram"),
     locale: str(formData, "locale"),
   };
   const parsed = profileSchema.safeParse(values);
@@ -92,6 +93,8 @@ export async function updateProfile(_prev: FormState, formData: FormData): Promi
   if (error) return { errors: { _form: mapDbError(error) }, values };
 
   revalidatePath("/", "layout");
+  // Im Formular den bereinigten Namen zeigen (aus einem eingefügten Link wird "name")
+  values.instagram = parsed.data.instagram ?? "";
   if (parsed.data.locale !== profile.locale) {
     return redirect({ href: "/einstellungen", locale: parsed.data.locale });
   }

@@ -113,12 +113,23 @@ with sync_playwright() as p:
     cropper.get_by_role("button", name="Übernehmen").click()
     expect(seller.get_by_role("button", name="Profilbild ändern").first).to_be_visible(timeout=15000)
     seller.get_by_label("Über mich").fill("Sammle Vintage-Pokémon und tausche gern.")
+    # Kopierter Instagram-Link wird zum Namen
+    seller.get_by_label("Instagram", exact=True).fill("https://www.instagram.com/Sammlerin.TCG/?igsh=abc123")
+    seller.get_by_role("button", name="Speichern", exact=True).first.click()
+    expect(seller.get_by_text("Gespeichert.").first).to_be_visible()
+    expect(seller.get_by_label("Instagram", exact=True)).to_have_value("sammlerin.tcg")
+    seller.get_by_label("Instagram", exact=True).fill("Böser Name!")
+    seller.get_by_role("button", name="Speichern", exact=True).first.click()
+    expect(seller.get_by_text("Instagram-Namen bestehen nur aus")).to_be_visible()
+    seller.get_by_label("Instagram", exact=True).fill("@sammlerin.tcg")
     seller.get_by_role("button", name="Speichern", exact=True).first.click()
     expect(seller.get_by_text("Gespeichert.").first).to_be_visible()
     seller.goto(f"{BASE}/de/profil")
     images_loaded(seller, "header img:not([alt=TRACACON])")
     expect(seller.get_by_text("Sammle Vintage-Pokémon und tausche gern.")).to_be_visible()
-    step("Profilbild: Menü mit Frontkamera, Ausschnitt verschoben und gezoomt, hochgeladen")
+    expect(seller.get_by_role("link", name="Instagram-Profil von sammlerin.tcg öffnen")).to_have_attribute(
+        "href", "https://www.instagram.com/sammlerin.tcg/")
+    step("Profilbild: Menü mit Frontkamera, Ausschnitt verschoben und gezoomt, hochgeladen; Instagram-Name aus kopiertem Link")
 
     # --- Inserat, damit es etwas zu sehen gibt ----------------------------------------
     seller.goto(f"{BASE}/de/marktplatz/neu")

@@ -33,7 +33,7 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/eins
       </p>
       <AvatarForm userId={profile.id} nickname={profile.nickname!} avatarId={profile.avatar_id} />
       <ProfileForm
-        initial={{ city: profile.city ?? "", bio: profile.bio ?? "", website: profile.website ?? "", locale: profile.locale }}
+        initial={{ city: profile.city ?? "", bio: profile.bio ?? "", website: profile.website ?? "", instagram: profile.instagram ?? "", locale: profile.locale }}
       />
       <PrivacyForm visibility={profile.profile_visibility} approval={profile.follow_approval} />
       <PasswordForm />

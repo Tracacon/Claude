@@ -14,6 +14,7 @@ export type Profile = {
   city: string | null;
   bio: string | null;
   website: string | null;
+  instagram: string | null;
   locale: "de" | "en";
   role: AppRole;
   avatar_id: string | null;
@@ -46,7 +47,7 @@ export const getMyProfile = cache(async (): Promise<Profile | null> => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
-    .select("id, nickname, city, bio, website, locale, role, avatar_id, profile_visibility, follow_approval, age_confirmed_at, terms_accepted_at, created_at")
+    .select("id, nickname, city, bio, website, instagram, locale, role, avatar_id, profile_visibility, follow_approval, age_confirmed_at, terms_accepted_at, created_at")
     .eq("id", user.id)
     .maybeSingle<Profile>();
   return data ?? null;

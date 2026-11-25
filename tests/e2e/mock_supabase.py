@@ -316,7 +316,7 @@ class Handler(BaseHTTPRequestHandler):
         users[email] = {"id": uid, "email": email, "aud": "authenticated", "role": "authenticated",
                         "app_metadata": {}, "user_metadata": meta, "confirmed": confirmed,
                         "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ")}
-        profiles[uid] = {"id": uid, "nickname": None, "city": None, "bio": None, "website": None,
+        profiles[uid] = {"id": uid, "nickname": None, "city": None, "bio": None, "website": None, "instagram": None,
                          "locale": meta.get("locale", "de"), "role": "member",
                          "age_confirmed_at": None, "terms_accepted_at": None,
                          "avatar_id": None, "profile_visibility": "public", "follow_approval": False,
@@ -540,7 +540,7 @@ class Handler(BaseHTTPRequestHandler):
         if url.path == "/rest/v1/profiles" and u:
             target = parse_qs(url.query)["id"][0].removeprefix("eq.")
             if target == u["id"]:
-                profiles[target].update({k: v for k, v in data.items() if k in ("city", "bio", "website", "locale")})
+                profiles[target].update({k: v for k, v in data.items() if k in ("city", "bio", "website", "instagram", "locale")})
             return self.send(204)
         return self.send(401, {"message": "permission denied"})
 
@@ -587,6 +587,7 @@ class Handler(BaseHTTPRequestHandler):
                 "is_me": p["id"] == uid, "can_view": cv, "visibility": p["profile_visibility"],
                 "avatar_id": p["avatar_id"] if cv else None, "bio": p["bio"] if cv else None,
                 "city": p["city"] if cv else None, "website": p["website"] if cv else None,
+                "instagram": p.get("instagram") if cv else None,
                 "listing_count": sum(1 for l in listings.values() if l["owner_id"] == p["id"] and l["status"] in ("active", "reserved")),
                 "post_count": sum(1 for po in posts.values() if po["author_id"] == p["id"] and not po["hidden"]),
                 "follower_count": sum(1 for (a, b), st in follows.items() if b == p["id"] and st == "accepted"),

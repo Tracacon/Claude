@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { FormError } from "@/components/form-error";
 import { updateProfile, type FormState } from "@/lib/actions/profile";
 
-type Values = { city: string; bio: string; website: string; locale: string };
+type Values = { city: string; bio: string; website: string; instagram: string; locale: string };
 
 export function ProfileForm({ initial }: { initial: Values }) {
   const t = useTranslations("Profile");
@@ -24,6 +24,26 @@ export function ProfileForm({ initial }: { initial: Values }) {
         <textarea id="bio" name="bio" rows={4} maxLength={500} defaultValue={v.bio} className="input" aria-describedby="bio-hint" />
         <p id="bio-hint" className="hint">{t("bioHint")}</p>
         <FormError code={state.errors?.bio} />
+      </div>
+      <div>
+        <label htmlFor="instagram" className="label">{t("instagram")}</label>
+        <div className="relative">
+          <span aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-cream/50">@</span>
+          <input
+            id="instagram"
+            name="instagram"
+            maxLength={200}
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            placeholder={t("instagramPlaceholder")}
+            defaultValue={v.instagram}
+            className="input pl-8"
+            aria-describedby="instagram-hint"
+          />
+        </div>
+        <p id="instagram-hint" className="hint">{t("instagramHint")}</p>
+        <FormError code={state.errors?.instagram} />
       </div>
       <div>
         <label htmlFor="website" className="label">{t("website")}</label>
