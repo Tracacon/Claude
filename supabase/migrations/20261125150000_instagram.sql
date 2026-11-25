@@ -101,7 +101,7 @@ begin
   for g in 1 .. array_length(v_photos, 1) loop
     insert into public.post_photos (id, post_id, position) values (v_photos[g], v_id, g - 1);
   end loop;
-  update public.instagram_sync set imported_count = imported_count + 1;
+  update public.instagram_sync set imported_count = imported_count + 1 where id;
   return v_id;
 end;
 $$;
@@ -117,7 +117,8 @@ as $$
      set synced_at = now(),
          error = left(p_error, 500),
          token = coalesce(p_token, token),
-         token_refreshed_at = case when p_token is not null then now() else token_refreshed_at end;
+         token_refreshed_at = case when p_token is not null then now() else token_refreshed_at end
+   where id;
 $$;
 
 -- Für das Team: Stand des Abgleichs (ohne Schlüssel)
