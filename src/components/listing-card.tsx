@@ -6,6 +6,7 @@ import { photoUrl, type ListingSummary } from "@/lib/marketplace";
 export function PriceTag({ offer, cents, negotiable }: { offer: string; cents: number | null; negotiable: boolean }) {
   const t = useTranslations("Market");
   const format = useFormatter();
+  if (offer === "gift") return <span>{t("giftOnly")}</span>;
   if (offer === "trade" || cents === null) return <span>{t("tradeOnly")}</span>;
   return (
     <span>

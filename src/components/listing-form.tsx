@@ -17,6 +17,7 @@ import {
   OFFERS,
   TCGS,
   TCGS_WITH_CARD_LOOKUP,
+  offerHasPrice,
 } from "@/lib/marketplace";
 
 export type ListingFormValues = {
@@ -137,7 +138,7 @@ export function ListingForm({
           </div>
         </fieldset>
 
-        {offer !== "trade" ? (
+        {offerHasPrice(offer) ? (
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="price" className="label">{t("price")}</label>

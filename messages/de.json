@@ -238,7 +238,8 @@
   "Offer": {
     "sell": "Verkauf",
     "trade": "Tausch",
-    "sell_or_trade": "Verkauf oder Tausch"
+    "sell_or_trade": "Verkauf oder Tausch",
+    "gift": "Verschenken"
   },
   "Condition": {
     "mint": "Mint (M)",
@@ -303,7 +304,8 @@
     "tradeOnly": "Tausch",
     "vb": "VB",
     "noPhoto": "Kein Foto",
-    "sell": "Inserieren"
+    "sell": "Inserieren",
+    "giftOnly": "Zu verschenken"
   },
   "Listing": {
     "newTitle": "Inserat erstellen",

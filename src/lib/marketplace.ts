@@ -4,7 +4,11 @@ export const TCGS = ["pokemon", "one_piece", "yugioh", "magic", "sports", "riftb
 export const KINDS = ["single", "slab", "sealed", "lot", "accessory", "other"] as const;
 /** Arten, bei denen Vorder- und Rückseite als Foto Pflicht sind. */
 export const KINDS_NEEDING_BOTH_SIDES: readonly string[] = ["single", "slab"];
-export const OFFERS = ["sell", "trade", "sell_or_trade"] as const;
+export const OFFERS = ["sell", "trade", "sell_or_trade", "gift"] as const;
+/** Angebote mit Preis (Tausch und Verschenken haben keinen) */
+export function offerHasPrice(offer: string) {
+  return offer === "sell" || offer === "sell_or_trade";
+}
 export const CONDITIONS = ["mint", "near_mint", "excellent", "good", "light_played", "played", "poor"] as const;
 export const CARD_LANGUAGES = ["de", "en", "ja", "fr", "it", "es", "pt", "ko", "zh", "other"] as const;
 export const STATUSES = ["active", "reserved", "done", "removed"] as const;

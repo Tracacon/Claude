@@ -46,4 +46,10 @@ describe("Inserat prüfen", () => {
     expect(listingSchema.safeParse({ ...base, card_code: "<b>" }).success).toBe(false);
     expect(listingSchema.safeParse({ ...base, card_no: "1;drop" }).success).toBe(false);
   });
+
+  it("Verschenken braucht keinen Preis", () => {
+    const r = listingSchema.parse({ ...base, offer: "gift", price: "", negotiable: "on" });
+    expect(r.price_cents).toBeNull();
+    expect(r.negotiable).toBe(false);
+  });
 });

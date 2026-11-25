@@ -13,8 +13,10 @@ export function ListingPost({ item }: { item: ListingItem }) {
   const tl = useTranslations("Market");
   const format = useFormatter();
   const price =
-    item.offer === "trade" || item.price_cents == null
-      ? tl("tradeOnly")
+    item.offer === "gift"
+      ? tl("giftOnly")
+      : item.offer === "trade" || item.price_cents == null
+        ? tl("tradeOnly")
       : format.number(item.price_cents / 100, { style: "currency", currency: "EUR" });
 
   return (
