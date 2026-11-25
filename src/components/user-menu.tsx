@@ -35,7 +35,7 @@ function Face({ data, size }: { data: UserMenuData; size: string }) {
  * Profilmenü: Auf breiten Bildschirmen als Aufklappmenü in der Kopfzeile,
  * auf dem Handy als Blatt von unten (aus der Leiste am unteren Rand).
  */
-export function UserMenu({ data, variant }: { data: UserMenuData; variant: "header" | "bottom" }) {
+export function UserMenu({ data, variant }: { data: UserMenuData; variant: "header" | "bottom" | "sheet" }) {
   const pathname = usePathname();
   // Menü merkt sich die Seite, auf der es geöffnet wurde; nach einem Seitenwechsel ist es zu.
   const [openOn, setOpenOn] = useState<string | null>(null);
@@ -131,6 +131,19 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
     );
   }
 
+  // Leiste unten: Profilbild führt direkt zum eigenen Profil (das Menü sitzt dort oben rechts)
+  if (variant === "bottom") {
+    const active = pathname.startsWith("/profil") || pathname.startsWith("/einstellungen");
+    return (
+      <Link href="/profil" aria-label={L.myProfile} aria-current={active ? "page" : undefined} className="relative flex flex-1 items-center justify-center py-3">
+        <span className={`relative rounded-full ${active ? "ring-2 ring-cream ring-offset-1 ring-offset-black" : ""}`}>
+          <Face data={data} size="size-[26px]" />
+        </span>
+      </Link>
+    );
+  }
+
+  // Menü-Knopf (☰) auf dem eigenen Profil, öffnet das Blatt von unten
   return (
     <>
       <button
@@ -138,17 +151,13 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
         onClick={() => setOpen(true)}
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-label={L.profile}
-        className="relative flex flex-1 items-center justify-center py-3"
+        aria-label={L.menu}
+        className="relative grid size-11 place-items-center rounded-lg text-cream hover:bg-white/5"
       >
-        <span
-          className={`relative rounded-full ${
-            pathname.startsWith("/profil") || pathname.startsWith("/einstellungen") ? "ring-2 ring-cream ring-offset-1 ring-offset-black" : ""
-          }`}
-        >
-          <Face data={data} size="size-[26px]" />
-          {data.requests > 0 && <span className="absolute -right-1 -top-1 size-2.5 rounded-full bg-danger" />}
-        </span>
+        <svg viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+        {data.requests + data.reports > 0 && <span className="absolute right-1.5 top-1.5 size-2.5 rounded-full bg-danger" />}
       </button>
       {open && (
         <>

@@ -2,7 +2,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { connection } from "next/server";
 import { FeedList } from "@/components/feed/feed-list";
 import { EventStrip } from "@/components/feed/event-strip";
-import { NewMembersBar } from "@/components/feed/new-members-bar";
 import { OnlineStrip } from "@/components/feed/online-strip";
 import { PushSettings } from "@/components/push-settings";
 import { Link } from "@/i18n/navigation";
@@ -11,7 +10,7 @@ import { isSupabaseConfigured } from "@/lib/env";
 import { ensureEventsFresh, getEvents } from "@/lib/events";
 import { FEED_PAGE, getFeed } from "@/lib/feed";
 import { ensureInstagramFresh } from "@/lib/instagram";
-import { getNewMembers, getOnlineContacts } from "@/lib/notifications";
+import { getOnlineContacts } from "@/lib/notifications";
 import { isPushConfigured } from "@/lib/push";
 
 /** Startseite = Feed wie bei Instagram */
@@ -25,7 +24,7 @@ export default async function FeedPage({ params }: PageProps<"/[locale]">) {
   await Promise.all([ensureEventsFresh(), ensureInstagramFresh()]);
   const [profile, events, items] = await Promise.all([getMyProfile(), getEvents(false, 12), getFeed()]);
   const loggedIn = Boolean(profile?.nickname);
-  const [online, newMembers] = await Promise.all([loggedIn ? getOnlineContacts() : [], getNewMembers()]);
+  const online = loggedIn ? await getOnlineContacts() : [];
   const isTeam = profile?.role === "team" || profile?.role === "admin";
 
   return (
@@ -50,8 +49,6 @@ export default async function FeedPage({ params }: PageProps<"/[locale]">) {
       )}
 
       {loggedIn && <PushSettings available={isPushConfigured()} compact />}
-
-      <NewMembersBar people={newMembers} />
 
       {events.length > 0 && <EventStrip events={events} locale={locale} allLabel={t("allEvents")} />}
 

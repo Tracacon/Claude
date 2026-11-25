@@ -1,81 +1,21 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { getMyProfile } from "@/lib/auth";
-import { touchPresence, unreadNotificationCount } from "@/lib/notifications";
-import { createClient } from "@/lib/supabase/server";
+import { getNewMembers, touchPresence } from "@/lib/notifications";
+import { getUserMenu } from "@/lib/user-menu-data";
 import { BottomNav } from "./bottom-nav";
 import { CreateMenu } from "./create-menu";
 import { HeartIcon } from "./icons";
 import { LanguageSwitch } from "./language-switch";
 import { PresencePing } from "./presence-ping";
-import { UserMenu, type UserMenuData } from "./user-menu";
-
-async function unreadMessages(onboarded: boolean) {
-  if (!onboarded) return 0;
-  const supabase = await createClient();
-  const { data } = await supabase.rpc("unread_message_count");
-  return Number(data ?? 0);
-}
-
-async function pendingRequests(onboarded: boolean) {
-  if (!onboarded) return 0;
-  const supabase = await createClient();
-  const { data } = await supabase.rpc("pending_follow_request_count");
-  return Number(data ?? 0);
-}
-
-async function openReports(isTeam: boolean) {
-  if (!isTeam) return 0;
-  const supabase = await createClient();
-  const { data } = await supabase.rpc("open_report_count");
-  return Number(data ?? 0);
-}
+import { NewMembersBar } from "./feed/new-members-bar";
+import { UserMenu } from "./user-menu";
 
 const LOGO_URL = "https://www.tracacon.de/web/image/website/1/logo/TRACACON"; // Dateiname der Bildadresse bei Odoo, wird nicht angezeigt
 
 export async function SiteHeader() {
   const t = await getTranslations("Nav");
-  const profile = await getMyProfile();
-  const isTeam = profile?.role === "team" || profile?.role === "admin";
-  const onboarded = Boolean(profile?.nickname);
-  const [reports, unread, requests, notes] = await Promise.all([
-    openReports(isTeam),
-    unreadMessages(onboarded),
-    pendingRequests(onboarded),
-    onboarded ? unreadNotificationCount() : 0,
-    onboarded ? touchPresence() : undefined,
-  ]);
-  // Offene Anfragen stehen auch als Benachrichtigung in der Liste; die größere Zahl zählt
-  const activity = Math.max(notes, requests);
-  const menu: UserMenuData | null =
-    profile && profile.nickname
-      ? {
-          id: profile.id,
-          nickname: profile.nickname,
-          avatarId: profile.avatar_id,
-          role: profile.role,
-          unread,
-          requests: activity,
-          reports,
-          labels: {
-            menu: t("menu"),
-            myProfile: t("myProfile"),
-            myListings: t("myListings"),
-            messages: t("messages"),
-            followers: t("followers"),
-            following: t("following"),
-            requests: t("requests"),
-            badges: t("badges"),
-            settings: t("settings"),
-            moderation: t("moderation"),
-            teamEvents: t("teamEvents"),
-            admin: t("admin"),
-            logout: t("logout"),
-            profile: t("profile"),
-            close: t("close"),
-          },
-        }
-      : null;
+  const { profile, onboarded, isTeam, reports, unread, activity, menu } = await getUserMenu();
+  const [newMembers] = await Promise.all([getNewMembers(), onboarded ? touchPresence() : undefined]);
 
   return (
     <>
@@ -158,6 +98,7 @@ export async function SiteHeader() {
             <LanguageSwitch label={t("language")} />
           </nav>
         </div>
+        <NewMembersBar people={newMembers} />
       </header>
       {onboarded && <PresencePing />}
       <BottomNav

@@ -2,6 +2,7 @@
 import { avatarUrl } from "@/lib/social";
 
 const sizes = {
+  "2xs": "size-5 text-[10px]",
   xs: "size-7 text-xs",
   sm: "size-10 text-base",
   md: "size-12 text-lg",
