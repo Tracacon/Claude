@@ -783,5 +783,29 @@
     "newBadge": "Neu dabei",
     "welcome": "Willkommen, @{nickname}!",
     "welcomeRich": "Willkommen, <b>@{nickname}</b>!"
+  },
+  "Push": {
+    "title": "Tracacon App",
+    "follow": "{nickname} folgt dir jetzt.",
+    "followRequest": "{nickname} möchte dir folgen.",
+    "followAccepted": "{nickname} hat deine Anfrage angenommen.",
+    "like": "{nickname} gefällt dein Beitrag.",
+    "comment": "{nickname} hat kommentiert: „{text}“",
+    "many": "Du hast {count} neue Benachrichtigungen.",
+    "test": "Test geklappt! So sehen Mitteilungen der Tracacon App aus.",
+    "settingsTitle": "Mitteilungen aufs Handy",
+    "settingsText": "Bekomme eine Mitteilung auf dein Handy, wenn dir jemand folgt, eine Anfrage schickt oder deine Beiträge mag und kommentiert. Das gilt für dieses Gerät; auf anderen Geräten schaltest du es dort ein.",
+    "enable": "Mitteilungen einschalten",
+    "disable": "Ausschalten",
+    "on": "Auf diesem Gerät eingeschaltet",
+    "testButton": "Test senden",
+    "enabled": "Eingeschaltet. Tipp auf „Test senden“, um es auszuprobieren.",
+    "testSent": "Test verschickt – die Mitteilung sollte gleich erscheinen.",
+    "error": "Das hat nicht geklappt. Versuch es bitte noch einmal.",
+    "unsupported": "Dieser Browser kann leider keine Mitteilungen empfangen.",
+    "iosInstall": "Auf dem iPhone kommen Mitteilungen nur an, wenn die App auf dem Home-Bildschirm liegt: in Safari unten auf das Teilen-Symbol tippen, dann „Zum Home-Bildschirm“. Danach die App über das Symbol öffnen und hier einschalten.",
+    "denied": "Mitteilungen sind für diese Seite blockiert. Du kannst sie in den Einstellungen deines Handys bzw. Browsers wieder erlauben.",
+    "notReady": "Mitteilungen aufs Handy werden gerade eingerichtet und sind bald verfügbar.",
+    "hint": "Nichts mehr verpassen: Lass dich aufs Handy benachrichtigen, wenn dir jemand folgt oder deine Beiträge mag."
   }
 }

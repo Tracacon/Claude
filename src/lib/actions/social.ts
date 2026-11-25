@@ -5,6 +5,7 @@ import { requireProfile } from "@/lib/auth";
 import { mapDbError } from "@/lib/db-errors";
 import { UUID_PATTERN } from "@/lib/marketplace";
 import { AVATAR_BUCKET } from "@/lib/social";
+import { pushNotify } from "@/lib/push";
 import { createClient } from "@/lib/supabase/server";
 
 export type SocialState = { ok?: boolean; error?: string; status?: string };
@@ -25,6 +26,7 @@ export async function toggleFollow(_prev: SocialState, formData: FormData): Prom
   if (intent === "follow") {
     const { data, error } = await supabase.rpc("follow_user", { p_target: target });
     if (error) return { error: mapDbError(error) };
+    pushNotify(target);
     revalidatePath("/", "layout");
     return { ok: true, status: String(data ?? "") };
   }
@@ -44,6 +46,7 @@ export async function respondFollowRequest(_prev: SocialState, formData: FormDat
     p_accept: formData.get("accept") === "1",
   });
   if (error) return { error: mapDbError(error) };
+  if (formData.get("accept") === "1") pushNotify(follower);
   revalidatePath("/", "layout");
   return { ok: true };
 }

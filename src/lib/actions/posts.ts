@@ -8,6 +8,7 @@ import { mapDbError } from "@/lib/db-errors";
 import { getFeed, getPost } from "@/lib/feed";
 import { CAPTION_MAX, COMMENT_MAX, POST_BUCKET, POST_PHOTOS_MAX, type FeedItem, type PostItem } from "@/lib/feed-shared";
 import { UUID_PATTERN } from "@/lib/marketplace";
+import { pushNotifyPostAuthor } from "@/lib/push";
 import { createClient } from "@/lib/supabase/server";
 import { moderationReasonSchema, reportSchema } from "@/lib/validation";
 
@@ -67,7 +68,9 @@ export async function toggleLike(postId: string): Promise<{ liked: boolean; like
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("toggle_like", { p_post: postId });
   if (error) return { error: mapDbError(error) };
-  return data as { liked: boolean; like_count: number };
+  const result = data as { liked: boolean; like_count: number };
+  if (result.liked) pushNotifyPostAuthor(postId);
+  return result;
 }
 
 export async function addComment(_prev: PostState, formData: FormData): Promise<PostState> {
@@ -79,6 +82,7 @@ export async function addComment(_prev: PostState, formData: FormData): Promise<
   const supabase = await createClient();
   const { error } = await supabase.rpc("add_comment", { p_post: postId, p_body: body });
   if (error) return { error: mapDbError(error) };
+  pushNotifyPostAuthor(postId);
   revalidatePath(`/p/${postId}`);
   return { ok: true };
 }
