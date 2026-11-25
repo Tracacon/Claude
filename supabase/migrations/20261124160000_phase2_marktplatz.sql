@@ -1,4 +1,4 @@
--- TRACACON-App, Phase 2: Marktplatz, Fotos, Meldungen, Moderation
+-- Tracacon-App, Phase 2: Marktplatz, Fotos, Meldungen, Moderation
 -- Voraussetzung: Phase 1 (profiles, is_team, is_admin).
 --
 -- Schreibzugriffe laufen über Funktionen mit den Rechten des Aufrufers

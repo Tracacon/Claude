@@ -1,4 +1,4 @@
--- TRACACON-App, Phase 1: Profile und Rollen
+-- Tracacon-App, Phase 1: Profile und Rollen
 -- Läuft in Supabase (Postgres 15+). Voraussetzung: Schema "auth" von Supabase.
 --
 -- Grundsätze:

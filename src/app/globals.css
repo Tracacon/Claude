@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* TRACACON-Design wie auf tracacon.de: fast Schwarz, Türkis, Schrift Chakra Petch und Inter */
+/* Tracacon-Design wie auf tracacon.de: fast Schwarz, Türkis, Schrift Chakra Petch und Inter */
 @theme {
   --color-night: #0a0d11;
   --color-night-2: #151a20;

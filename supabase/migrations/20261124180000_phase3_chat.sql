@@ -1,4 +1,4 @@
--- TRACACON-App, Phase 3: App-Chat
+-- Tracacon-App, Phase 3: App-Chat
 -- Eine Unterhaltung je Inserat und Interessent. Nur die beiden Beteiligten sehen sie;
 -- das Team sieht eine Unterhaltung nur, wenn sie gemeldet wurde.
 -- Alle Schreibzugriffe laufen über geprüfte Funktionen.

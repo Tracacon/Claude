@@ -1,7 +1,7 @@
 {
   "Meta": {
-    "title": "TRACACON",
-    "description": "The community app of the TRACACON Trade Card Conventions. Collect. Connect. Trade."
+    "title": "Tracacon App",
+    "description": "The community app of the Tracacon Trade Card Conventions. Trading · Dealing · Connecting."
   },
   "Nav": {
     "home": "Home",
@@ -39,8 +39,8 @@
     "activity": "Follow requests"
   },
   "Home": {
-    "claim": "Collect. Connect. Trade.",
-    "intro": "The TRACACON community app. Show what you want to trade or sell, chat with other collectors and meet them at the next Trade Night Show.",
+    "claim": "Trading · Dealing · Connecting",
+    "intro": "The Tracacon community app. Show what you want to trade or sell, chat with other collectors and meet them at the next Trade Night Show.",
     "ctaLogin": "Sign in now",
     "ctaProfile": "Go to my profile",
     "hello": "Hi {nickname}!",
@@ -58,12 +58,12 @@
     "forgot": "Forgot password?",
     "submit": "Sign in",
     "verifying": "Checking …",
-    "noAccount": "No TRACACON account yet?",
+    "noAccount": "No Tracacon account yet?",
     "register": "Sign up",
     "hint": "You stay signed in on this device until you sign out."
   },
   "Onboarding": {
-    "title": "Welcome to TRACACON",
+    "title": "Welcome to Tracacon",
     "intro": "Just a few details and you're in.",
     "nickname": "Nickname",
     "nicknameHint": "3 to 24 characters: letters, digits, dot, underscore, hyphen. Others will see this name.",
@@ -148,7 +148,7 @@
     "rulesDraft": "Draft: the final rules will follow before launch.",
     "rules1": "Be respectful. Insults, hate and harassment lead to a ban.",
     "rules2": "No counterfeits, unmarked proxies or misleading listings.",
-    "rules3": "You agree on payment and shipping directly with each other. TRACACON is not a party to the deal.",
+    "rules3": "You agree on payment and shipping directly with each other. Tracacon is not a party to the deal.",
     "rules4": "Report content that breaks these rules. The team reviews every report."
   },
   "Errors": {
@@ -275,7 +275,7 @@
   },
   "Market": {
     "title": "Marketplace",
-    "intro": "Buy, sell and trade cards in the TRACACON community.",
+    "intro": "Buy, sell and trade cards in the Tracacon community.",
     "search": "Search",
     "searchPlaceholder": "e.g. Charizard, Luffy, booster box",
     "game": "Game",
@@ -332,7 +332,7 @@
     "gradingHint": "If graded, e.g. “PSA 10”",
     "city": "City",
     "handover": "Handover",
-    "handoverEvent": "At a TRACACON",
+    "handoverEvent": "At a Tracacon",
     "handoverPickup": "Pickup",
     "handoverShipping": "Shipping possible",
     "save": "Publish listing",
@@ -345,7 +345,7 @@
     "memberSince": "Member since {date}",
     "contactTitle": "Contact",
     "contactLogin": "Sign in to message the seller.",
-    "safety": "You agree on payment and shipping directly with each other. TRACACON is not involved. The safest option is handing over in person at a TRACACON.",
+    "safety": "You agree on payment and shipping directly with each other. Tracacon is not involved. The safest option is handing over in person at a Tracacon.",
     "ownerTools": "Your listing",
     "edit": "Edit",
     "changeStatus": "Change status",
@@ -419,7 +419,7 @@
     "message": "Message",
     "placeholder": "Write a message …",
     "send": "Send",
-    "safety": "You agree on payment and shipping directly. The safest option is handing over at a TRACACON. Never share passwords or bank logins and be careful with prepayment to strangers.",
+    "safety": "You agree on payment and shipping directly. The safest option is handing over at a Tracacon. Never share passwords or bank logins and be careful with prepayment to strangers.",
     "listingGone": "The listing “{title}” no longer exists.",
     "listing": "Listing",
     "yourListing": "Your listing",
@@ -450,7 +450,7 @@
   },
   "Register": {
     "title": "Sign up",
-    "intro": "Create your TRACACON account. The app is for ages 16 and up.",
+    "intro": "Create your Tracacon account. The app is for ages 16 and up.",
     "email": "Email address",
     "passwordHint": "At least 8 characters. You'll use it to sign in.",
     "submit": "Create account",
@@ -522,7 +522,7 @@
   "Badges": {
     "team": {
       "title": "Team",
-      "text": "Part of the TRACACON team"
+      "text": "Part of the Tracacon team"
     },
     "founder": {
       "title": "Founding member",
@@ -593,7 +593,7 @@
   },
   "Events": {
     "title": "Events",
-    "intro": "TRACACON Trade Night Shows and fairs. See in advance who brings which cards.",
+    "intro": "Tracacon Trade Night Shows and fairs. See in advance who brings which cards.",
     "empty": "No events planned right now. Check back soon.",
     "past": "{count, plural, one {# past event} other {# past events}}",
     "listingCount": "{count, plural, =0 {No cards announced yet} one {# listing coming along} other {# listings coming along}}",
@@ -638,7 +638,7 @@
     "posterHeadline": "Check in now!",
     "posterQr": "QR code to check in",
     "posterStep1": "Open your phone camera and point it at the code",
-    "posterStep2": "Log in to the TRACACON app or sign up for free",
+    "posterStep2": "Log in to the Tracacon App or sign up for free",
     "posterStep3": "Collect badges and become a regular",
     "bringsTo": "Coming along to",
     "visitedTitle": "Events attended",
@@ -682,7 +682,7 @@
     "deleteText": "Photos, likes and comments will be removed for good.",
     "postBy": "Post by {nickname}",
     "listingBy": "Listing by {nickname}",
-    "highlighted": "Highlighted by TRACACON",
+    "highlighted": "Highlighted by Tracacon",
     "hidden": "Hidden by the team",
     "photoOf": "Photo {n} of {total}",
     "unlike": "Unlike",

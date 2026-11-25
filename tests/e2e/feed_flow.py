@@ -180,7 +180,7 @@ with sync_playwright() as p:
     ben.reload()
     hl = ben.get_by_role("article", name="Beitrag von Chefin")
     expect(hl).to_be_visible()
-    expect(hl.get_by_text("Von TRACACON hervorgehoben")).to_be_visible()
+    expect(hl.get_by_text("Von Tracacon hervorgehoben")).to_be_visible()
     step("Vom Team hervorgehobener Beitrag erscheint bei allen")
 
     # --- Melden und Ausblenden ----------------------------------------------------

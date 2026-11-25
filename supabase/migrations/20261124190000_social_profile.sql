@@ -1,4 +1,4 @@
--- TRACACON-App: Social-Funktionen
+-- Tracacon-App: Social-Funktionen
 -- Profilbild, Privatsphäre (öffentlich / nur Follower), Folgen mit optionaler Bestätigung,
 -- Abzeichen, Fotos im Chat (geschützter Speicher).
 

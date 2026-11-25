@@ -10,6 +10,7 @@ import { getEvent } from "@/lib/events";
 import { createClient } from "@/lib/supabase/server";
 import { PosterActions } from "./poster-actions";
 import { PosterExport } from "./poster-export";
+import { BrandText } from "@/components/brand-text";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/team/termine/[id]/aushang">): Promise<Metadata> {
   const { locale } = await params;
@@ -77,8 +78,8 @@ export default async function PosterPage({ params }: PageProps<"/[locale]/team/t
       />
 
       <article className="mx-auto max-w-xl rounded-3xl bg-white p-8 text-center text-black print:max-w-none print:rounded-none print:p-0">
-        <p className="text-sm font-bold uppercase tracking-[0.3em]">TRACACON</p>
-        <h1 className="mt-2 text-3xl font-black">{t("posterHeadline")}</h1>
+        <p className="text-sm font-bold tracking-[0.2em]">Tracacon</p>
+        <h1 className="mt-2 text-3xl font-black"><BrandText text={t("posterHeadline")} /></h1>
         <p className="mt-1 text-lg">{e.name}</p>
         <p className="text-sm text-neutral-600">{eventWhen(e, locale)}</p>
         <div

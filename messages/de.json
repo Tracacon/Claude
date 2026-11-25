@@ -1,7 +1,7 @@
 {
   "Meta": {
-    "title": "TRACACON",
-    "description": "Die Community-App der TRACACON Trade Card Conventions. Collect. Connect. Trade."
+    "title": "Tracacon App",
+    "description": "Die Community-App der Tracacon Trade Card Conventions. Trading · Dealing · Connecting."
   },
   "Nav": {
     "home": "Startseite",
@@ -39,8 +39,8 @@
     "activity": "Follower-Anfragen"
   },
   "Home": {
-    "claim": "Collect. Connect. Trade.",
-    "intro": "Die App der TRACACON-Community. Zeig, was du tauschen oder verkaufen willst, schreib mit anderen Sammlern und triff sie bei der nächsten Trade Night Show.",
+    "claim": "Trading · Dealing · Connecting",
+    "intro": "Die App der Tracacon-Community. Zeig, was du tauschen oder verkaufen willst, schreib mit anderen Sammlern und triff sie bei der nächsten Trade Night Show.",
     "ctaLogin": "Jetzt anmelden",
     "ctaProfile": "Zu meinem Profil",
     "hello": "Hallo {nickname}!",
@@ -58,12 +58,12 @@
     "forgot": "Passwort vergessen?",
     "submit": "Anmelden",
     "verifying": "Wird geprüft …",
-    "noAccount": "Noch kein Konto bei TRACACON?",
+    "noAccount": "Noch kein Konto bei Tracacon?",
     "register": "Registrieren",
     "hint": "Du bleibst auf diesem Gerät angemeldet, bis du dich abmeldest."
   },
   "Onboarding": {
-    "title": "Willkommen bei TRACACON",
+    "title": "Willkommen bei Tracacon",
     "intro": "Noch ein paar Angaben, dann bist du dabei.",
     "nickname": "Nickname",
     "nicknameHint": "3 bis 24 Zeichen: Buchstaben, Ziffern, Punkt, Unterstrich, Bindestrich. Andere sehen diesen Namen.",
@@ -148,7 +148,7 @@
     "rulesDraft": "Entwurf: Die endgültigen Regeln folgen vor dem Start.",
     "rules1": "Sei respektvoll. Beleidigungen, Hetze und Belästigung führen zur Sperre.",
     "rules2": "Keine Fälschungen, Proxies ohne Kennzeichnung oder irreführenden Angebote.",
-    "rules3": "Zahlung und Versand vereinbart ihr direkt miteinander. TRACACON ist nicht Vertragspartner.",
+    "rules3": "Zahlung und Versand vereinbart ihr direkt miteinander. Tracacon ist nicht Vertragspartner.",
     "rules4": "Melde Inhalte, die gegen diese Regeln verstoßen. Das Team prüft jede Meldung."
   },
   "Errors": {
@@ -275,7 +275,7 @@
   },
   "Market": {
     "title": "Marktplatz",
-    "intro": "Karten kaufen, verkaufen und tauschen in der TRACACON-Community.",
+    "intro": "Karten kaufen, verkaufen und tauschen in der Tracacon-Community.",
     "search": "Suche",
     "searchPlaceholder": "z. B. Glurak, Luffy, Booster Display",
     "game": "Spiel",
@@ -332,7 +332,7 @@
     "gradingHint": "Falls bewertet, z. B. „PSA 10“",
     "city": "Ort",
     "handover": "Übergabe",
-    "handoverEvent": "Auf einer TRACACON",
+    "handoverEvent": "Auf einer Tracacon",
     "handoverPickup": "Abholung",
     "handoverShipping": "Versand möglich",
     "save": "Inserat veröffentlichen",
@@ -345,7 +345,7 @@
     "memberSince": "Dabei seit {date}",
     "contactTitle": "Kontakt",
     "contactLogin": "Melde dich an, um dem Anbieter eine Nachricht zu schreiben.",
-    "safety": "Zahlung und Versand vereinbart ihr direkt miteinander. TRACACON ist nicht beteiligt. Am sichersten ist die Übergabe vor Ort auf einer TRACACON.",
+    "safety": "Zahlung und Versand vereinbart ihr direkt miteinander. Tracacon ist nicht beteiligt. Am sichersten ist die Übergabe vor Ort auf einer Tracacon.",
     "ownerTools": "Dein Inserat",
     "edit": "Bearbeiten",
     "changeStatus": "Status ändern",
@@ -419,7 +419,7 @@
     "message": "Nachricht",
     "placeholder": "Nachricht schreiben …",
     "send": "Senden",
-    "safety": "Zahlung und Versand vereinbart ihr direkt. Am sichersten ist die Übergabe auf einer TRACACON. Gib keine Passwörter oder Bankzugänge weiter und sei vorsichtig bei Vorkasse an Unbekannte.",
+    "safety": "Zahlung und Versand vereinbart ihr direkt. Am sichersten ist die Übergabe auf einer Tracacon. Gib keine Passwörter oder Bankzugänge weiter und sei vorsichtig bei Vorkasse an Unbekannte.",
     "listingGone": "Das Inserat „{title}“ gibt es nicht mehr.",
     "listing": "Inserat",
     "yourListing": "Dein Inserat",
@@ -450,7 +450,7 @@
   },
   "Register": {
     "title": "Registrieren",
-    "intro": "Lege dein TRACACON-Konto an. Die App ist ab 16 Jahren.",
+    "intro": "Lege dein Tracacon-Konto an. Die App ist ab 16 Jahren.",
     "email": "E-Mail-Adresse",
     "passwordHint": "Mindestens 8 Zeichen. Damit meldest du dich künftig an.",
     "submit": "Konto erstellen",
@@ -522,7 +522,7 @@
   "Badges": {
     "team": {
       "title": "Team",
-      "text": "Gehört zum TRACACON-Team"
+      "text": "Gehört zum Tracacon-Team"
     },
     "founder": {
       "title": "Gründungsmitglied",
@@ -593,7 +593,7 @@
   },
   "Events": {
     "title": "Termine",
-    "intro": "Trade Night Shows und Messen von TRACACON. Sieh vorab, wer welche Karten mitbringt.",
+    "intro": "Trade Night Shows und Messen von Tracacon. Sieh vorab, wer welche Karten mitbringt.",
     "empty": "Gerade sind keine Termine geplant. Schau bald wieder vorbei.",
     "past": "{count, plural, one {# vergangener Termin} other {# vergangene Termine}}",
     "listingCount": "{count, plural, =0 {Noch keine Karten angekündigt} one {# Inserat wird mitgebracht} other {# Inserate werden mitgebracht}}",
@@ -638,7 +638,7 @@
     "posterHeadline": "Jetzt einchecken!",
     "posterQr": "QR-Code zum Einchecken",
     "posterStep1": "Handykamera öffnen und auf den Code richten",
-    "posterStep2": "In der TRACACON-App anmelden oder kostenlos registrieren",
+    "posterStep2": "In der Tracacon App anmelden oder kostenlos registrieren",
     "posterStep3": "Abzeichen sammeln und Stammgast werden",
     "bringsTo": "Kommt mit zu",
     "visitedTitle": "Besuchte Events",
@@ -682,7 +682,7 @@
     "deleteText": "Fotos, Gefällt mir und Kommentare werden endgültig entfernt.",
     "postBy": "Beitrag von {nickname}",
     "listingBy": "Inserat von {nickname}",
-    "highlighted": "Von TRACACON hervorgehoben",
+    "highlighted": "Von Tracacon hervorgehoben",
     "hidden": "Vom Team ausgeblendet",
     "photoOf": "Foto {n} von {total}",
     "unlike": "Gefällt mir nicht mehr",

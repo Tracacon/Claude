@@ -150,7 +150,7 @@ with sync_playwright() as p:
     expect(seller.get_by_role("heading", name="Glurak ex 199/165 Pokémon 151")).to_be_visible()
     expect(seller.get_by_text("124,50 €")).to_be_visible()
     expect(seller.get_by_text("Near Mint (NM)")).to_be_visible()
-    expect(seller.get_by_text("Auf einer TRACACON · Versand möglich")).to_be_visible()
+    expect(seller.get_by_text("Auf einer Tracacon · Versand möglich")).to_be_visible()
     imgs = seller.locator("article img")
     expect(imgs).to_have_count(2)
     seller.wait_for_function("() => [...document.querySelectorAll('article img')].every(i => i.complete && i.naturalWidth > 0)")

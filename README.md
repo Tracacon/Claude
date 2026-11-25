@@ -1,6 +1,6 @@
-# TRACACON-App
+# Tracacon App
 
-Community-App der TRACACON Trade Card Conventions. *Collect. Connect. Trade.*
+Community-App der Tracacon Trade Card Conventions. *Trading · Dealing · Connecting*
 
 Grundlage ist das [Entscheidungsdokument](https://claude.ai/artifact/2BZqtKyEzQiHVrAccM2YuY). Stand:
 
@@ -43,7 +43,7 @@ tests/e2e/               Browsertest des ganzen Ablaufs
 3. **Authentication → Sign In / Providers → Email**: E-Mail aktiv lassen. „Confirm email“ kann an bleiben.
 4. **Authentication → Emails → Templates**: In den Vorlagen **Magic Link** und **Confirm signup** den Code einbauen, zum Beispiel:
    ```html
-   <h2>Dein Anmeldecode für TRACACON</h2>
+   <h2>Dein Anmeldecode für Tracacon</h2>
    <p>Gib diesen Code in der App ein: <strong>{{ .Token }}</strong></p>
    <p>Der Code ist eine Stunde gültig. Wenn du das nicht warst, ignoriere diese E-Mail.</p>
    ```

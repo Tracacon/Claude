@@ -120,9 +120,9 @@ with sync_playwright() as p:
 
     seller.goto(conv_url)
     buyer.goto(conv_url)
-    seller.get_by_label("Nachricht", exact=True).fill("Ja! Ich bringe sie\nzur nächsten TRACACON mit.")
+    seller.get_by_label("Nachricht", exact=True).fill("Ja! Ich bringe sie\nzur nächsten Tracacon mit.")
     seller.get_by_role("button", name="Senden").click()
-    expect(buyer.get_by_text("zur nächsten TRACACON mit.")).to_be_visible(timeout=10000)
+    expect(buyer.get_by_text("zur nächsten Tracacon mit.")).to_be_visible(timeout=10000)
     step("Antwort erscheint beim Interessenten ohne Neuladen")
 
     buyer.get_by_label("Nachricht", exact=True).fill("Super, bis Samstag!")

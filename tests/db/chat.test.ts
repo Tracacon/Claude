@@ -63,9 +63,9 @@ describe("Unterhaltung beginnen", () => {
 describe("Nachrichten", () => {
   it("sendet und zeigt Nachrichten beiden Beteiligten", async () => {
     await send(buyer, convId, "  Hallo! Ist die Elsa noch da?  ");
-    await send(seller, convId, "Ja, bringe sie zur nächsten TRACACON mit.");
+    await send(seller, convId, "Ja, bringe sie zur nächsten Tracacon mit.");
     const forBuyer = await t.as<{ body: string }>(buyer, "select body from public.get_messages($1)", [convId]);
-    expect(forBuyer.rows.map((m) => m.body)).toEqual(["Hallo! Ist die Elsa noch da?", "Ja, bringe sie zur nächsten TRACACON mit."]);
+    expect(forBuyer.rows.map((m) => m.body)).toEqual(["Hallo! Ist die Elsa noch da?", "Ja, bringe sie zur nächsten Tracacon mit."]);
     const forSeller = await t.as(seller, "select * from public.messages");
     expect(forSeller.rows).toHaveLength(2);
   });
@@ -105,7 +105,7 @@ describe("Nachrichten", () => {
     expect(list.rows[0]).toMatchObject({
       unread: 1,
       other_nickname: "Haendlerin",
-      last_body: "Ja, bringe sie zur nächsten TRACACON mit.",
+      last_body: "Ja, bringe sie zur nächsten Tracacon mit.",
       last_from_me: false,
       i_am_seller: false,
     });

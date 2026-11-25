@@ -1,4 +1,5 @@
 import "server-only";
+import { fixBrand } from "@/lib/brand";
 
 /**
  * Liest Termine aus der Odoo-App „Veranstaltungen“ (Modell event.event).
@@ -7,6 +8,8 @@ import "server-only";
  * Bevorzugt die JSON-2-Schnittstelle (Odoo 19). Für ältere Versionen gibt es den klassischen Weg über
  * /jsonrpc, dafür braucht es zusätzlich ODOO_LOGIN (E-Mail des Odoo-Benutzers).
  */
+
+const fixBrandOrNull = (v: string | null) => (v ? fixBrand(v) : v);
 
 export type OdooEvent = {
   odoo_id: number;
@@ -195,7 +198,8 @@ export async function fetchOdooEvents(since: Date): Promise<OdooEvent[]> {
   for (const e of raw) {
     const starts = utc(e.date_begin);
     const ends = utc(e.date_end) ?? starts;
-    const name = text(e.name);
+    const rawName = text(e.name);
+    const name = rawName ? fixBrand(rawName) : rawName;
     if (!starts || !ends || !name) continue;
     const addrId = Array.isArray(e.address_id) ? e.address_id[0] : null;
     const p = addrId ? partners.get(addrId) : undefined;
@@ -203,7 +207,7 @@ export async function fetchOdooEvents(since: Date): Promise<OdooEvent[]> {
     out.push({
       odoo_id: e.id,
       name,
-      subtitle: text(e.subtitle),
+      subtitle: fixBrandOrNull(text(e.subtitle)),
       starts_at: starts,
       ends_at: ends,
       timezone: text(e.date_tz),

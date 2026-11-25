@@ -29,7 +29,7 @@ async function openReports(isTeam: boolean) {
   return Number(data ?? 0);
 }
 
-const LOGO_URL = "https://www.tracacon.de/web/image/website/1/logo/TRACACON";
+const LOGO_URL = "https://www.tracacon.de/web/image/website/1/logo/TRACACON"; // Dateiname der Bildadresse bei Odoo, wird nicht angezeigt
 
 export async function SiteHeader() {
   const t = await getTranslations("Nav");
@@ -75,10 +75,10 @@ export async function SiteHeader() {
     <>
       <header className="sticky top-0 z-20 border-b border-line bg-black/90 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-2.5">
-          <Link href="/" className="shrink-0" aria-label="TRACACON">
+          <Link href="/" className="shrink-0" aria-label="Tracacon">
             {/* Logo direkt von der Homepage, damit es immer gleich aussieht */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={LOGO_URL} alt="TRACACON" width={112} height={32} className="h-8 w-auto" />
+            <img src={LOGO_URL} alt="Tracacon" width={112} height={32} className="h-8 w-auto" />
           </Link>
           <nav className="ml-auto flex items-center gap-1 text-sm sm:gap-2">
             <Link href="/termine" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
