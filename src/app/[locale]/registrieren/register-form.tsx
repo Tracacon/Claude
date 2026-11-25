@@ -106,6 +106,10 @@ export function RegisterForm() {
           </label>
           <FormError code={e.acceptTerms} />
         </div>
+        <label className="flex items-start gap-3">
+          <input type="checkbox" name="showSignup" defaultChecked className="mt-1 size-5 accent-brand" />
+          <span className="text-sm text-cream/85">{t("showSignup")}</span>
+        </label>
         <FormError code={e._form} />
         <button type="submit" className="btn-primary w-full" disabled={pending}>
           {pending ? t("submitting") : t("submit")}

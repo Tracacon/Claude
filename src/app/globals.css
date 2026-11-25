@@ -39,6 +39,10 @@ body {
   h1 {
     text-transform: uppercase;
   }
+  /* Gruppen von Feldern dürfen nicht breiter als der Bildschirm werden (lange Eventnamen) */
+  fieldset {
+    min-width: 0;
+  }
 }
 
 /* Bausteine der Oberfläche */
@@ -105,4 +109,10 @@ body {
   body {
     background: #fff !important;
   }
+}
+
+/* News-Balken "Neu dabei": läuft einmal halb durch und beginnt nahtlos von vorn */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }

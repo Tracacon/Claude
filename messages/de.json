@@ -24,7 +24,7 @@
     "myProfile": "Mein Profil ansehen",
     "followers": "Meine Follower",
     "following": "Folge ich",
-    "requests": "Follower-Anfragen",
+    "requests": "Aktivität",
     "badges": "Abzeichen",
     "settings": "Einstellungen",
     "close": "Schließen",
@@ -36,7 +36,8 @@
     "createPostHint": "Fotos und Text teilen",
     "createListing": "Inserat",
     "createListingHint": "Karten verkaufen oder tauschen",
-    "activity": "Follower-Anfragen"
+    "activity": "Aktivität",
+    "activityCount": "Aktivität, {count} neu"
   },
   "Home": {
     "claim": "Trading · Dealing · Connecting",
@@ -479,7 +480,8 @@
     "confirming": "Wird geprüft …",
     "noMail": "Keine E-Mail bekommen? Schau auch im Spam-Ordner nach.",
     "resend": "Code erneut senden",
-    "resent": "Neuer Code ist unterwegs."
+    "resent": "Neuer Code ist unterwegs.",
+    "showSignup": "Andere dürfen sehen, dass ich neu dabei bin (Balken „Neu dabei“). Kannst du jederzeit in den Einstellungen ändern."
   },
   "Reset": {
     "title": "Passwort vergessen",
@@ -588,7 +590,13 @@
     "marketNote": "Hinweis: Deine Inserate bleiben im Marktplatz für alle sichtbar, damit Interessenten sie finden.",
     "save": "Speichern",
     "saved": "Gespeichert.",
-    "cropAvatar": "Ausschnitt wählen"
+    "cropAvatar": "Ausschnitt wählen",
+    "presence": "Sichtbarkeit in der Community",
+    "presenceIntro": "Du entscheidest, was andere von dir mitbekommen.",
+    "showOnline": "Online-Status zeigen",
+    "showOnlineText": "Deine Follower und Leute, denen du folgst, sehen einen grünen Punkt, wenn du gerade in der App bist. Schaltest du das aus, siehst du auch den Online-Status der anderen nicht.",
+    "showSignup": "„Neu dabei“ zeigen",
+    "showSignupText": "In den ersten 14 Tagen erscheinst du im Balken „Neu dabei“ auf der Startseite."
   },
   "Photos": {
     "camera": "Foto aufnehmen",
@@ -757,5 +765,23 @@
     "syncNow": "Jetzt bei Instagram nachsehen",
     "imported": "{count, plural, =0 {Keine neuen Beiträge.} one {# neuer Beitrag übernommen.} other {# neue Beiträge übernommen.}}",
     "pending": "{count, plural, one {# weiterer folgt beim nächsten Mal.} other {# weitere folgen beim nächsten Mal.}}"
+  },
+  "Activity": {
+    "title": "Aktivität",
+    "emptyTitle": "Noch nichts los",
+    "emptyText": "Hier siehst du, wenn dir jemand folgt, eine Anfrage schickt oder deine Beiträge mag und kommentiert.",
+    "follow": "<b>{nickname}</b> folgt dir jetzt.",
+    "followRequest": "<b>{nickname}</b> möchte dir folgen.",
+    "followAccepted": "<b>{nickname}</b> hat deine Anfrage angenommen.",
+    "like": "<b>{nickname}</b> gefällt dein Beitrag.",
+    "comment": "<b>{nickname}</b> hat kommentiert: „{text}“",
+    "unread": "neu",
+    "openPost": "Beitrag öffnen",
+    "onlineNow": "Gerade online",
+    "online": "online",
+    "newMembers": "Neu dabei",
+    "newBadge": "Neu dabei",
+    "welcome": "Willkommen, @{nickname}!",
+    "welcomeRich": "Willkommen, <b>@{nickname}</b>!"
   }
 }

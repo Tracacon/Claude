@@ -93,7 +93,7 @@ export async function register(_prev: RegisterState, formData: FormData): Promis
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
-    options: { data: { locale, nickname: parsed.data.nickname } },
+    options: { data: { locale, nickname: parsed.data.nickname, show_signup: formData.get("showSignup") === "on" } },
   });
 
   if (error) {
@@ -126,6 +126,14 @@ async function finishRegistration(userId: string, nickname: string): Promise<nev
     p_confirm_age: true,
     p_accept_terms: true,
   });
+  if (!error) {
+    // Wahl bei der Registrierung: "Neu dabei" zeigen oder nicht (Standard: zeigen)
+    const { data: u } = await supabase.auth.getUser();
+    if (u.user?.user_metadata?.show_signup === false) {
+      const { error: e2 } = await supabase.rpc("update_presence_settings", { p_show_online: true, p_show_signup: false });
+      if (e2) console.error("update_presence_settings nach Registrierung", e2.message);
+    }
+  }
   if (error) {
     // z. B. Nickname inzwischen vergeben: auf der Begrüßungsseite neu wählen
     console.error("complete_onboarding nach Registrierung", mapDbError(error));

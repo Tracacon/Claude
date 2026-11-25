@@ -24,7 +24,7 @@
     "myProfile": "View my profile",
     "followers": "My followers",
     "following": "Following",
-    "requests": "Follow requests",
+    "requests": "Activity",
     "badges": "Badges",
     "settings": "Settings",
     "close": "Close",
@@ -36,7 +36,8 @@
     "createPostHint": "Share photos and text",
     "createListing": "Listing",
     "createListingHint": "Sell or trade cards",
-    "activity": "Follow requests"
+    "activity": "Activity",
+    "activityCount": "Activity, {count} new"
   },
   "Home": {
     "claim": "Trading · Dealing · Connecting",
@@ -479,7 +480,8 @@
     "confirming": "Checking …",
     "noMail": "No email? Check your spam folder too.",
     "resend": "Send code again",
-    "resent": "A new code is on its way."
+    "resent": "A new code is on its way.",
+    "showSignup": "Others may see that I'm new (the “New” bar). You can change this anytime in settings."
   },
   "Reset": {
     "title": "Forgot password",
@@ -588,7 +590,13 @@
     "marketNote": "Note: your listings stay visible to everyone in the marketplace so buyers can find them.",
     "save": "Save",
     "saved": "Saved.",
-    "cropAvatar": "Choose crop"
+    "cropAvatar": "Choose crop",
+    "presence": "Visibility in the community",
+    "presenceIntro": "You decide what others can see about you.",
+    "showOnline": "Show online status",
+    "showOnlineText": "Your followers and people you follow see a green dot when you're in the app. If you turn this off, you won't see others' online status either.",
+    "showSignup": "Show “New member”",
+    "showSignupText": "During your first 14 days you appear in the “New” bar on the home page."
   },
   "Photos": {
     "camera": "Take photo",
@@ -757,5 +765,23 @@
     "syncNow": "Check Instagram now",
     "imported": "{count, plural, =0 {No new posts.} one {# new post imported.} other {# new posts imported.}}",
     "pending": "{count, plural, one {# more follows next time.} other {# more follow next time.}}"
+  },
+  "Activity": {
+    "title": "Activity",
+    "emptyTitle": "Nothing here yet",
+    "emptyText": "This is where you'll see when someone follows you, sends a request, or likes and comments on your posts.",
+    "follow": "<b>{nickname}</b> started following you.",
+    "followRequest": "<b>{nickname}</b> wants to follow you.",
+    "followAccepted": "<b>{nickname}</b> accepted your request.",
+    "like": "<b>{nickname}</b> liked your post.",
+    "comment": "<b>{nickname}</b> commented: “{text}”",
+    "unread": "new",
+    "openPost": "Open post",
+    "onlineNow": "Online now",
+    "online": "online",
+    "newMembers": "New members",
+    "newBadge": "New",
+    "welcome": "Welcome, @{nickname}!",
+    "welcomeRich": "Welcome, <b>@{nickname}</b>!"
   }
 }
