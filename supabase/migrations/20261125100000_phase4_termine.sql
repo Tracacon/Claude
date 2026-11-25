@@ -137,7 +137,7 @@ begin
      and ends_at >= coalesce((p ->> 'since')::timestamptz, now())
      and not (odoo_id = any (v_ids));
 
-  update public.event_sync set synced_at = now(), error = null;
+  update public.event_sync set synced_at = now(), error = null where id;
   return v_count;
 end;
 $$;
@@ -149,7 +149,7 @@ language sql
 security definer
 set search_path = ''
 as $$
-  update public.event_sync set synced_at = now(), error = left(p_error, 500);
+  update public.event_sync set synced_at = now(), error = left(p_error, 500) where id;
 $$;
 
 -- Stand des Abgleichs (für alle lesbar; Fehlertext nur fürs Team)
