@@ -3,6 +3,8 @@ import { Link } from "@/i18n/navigation";
 import { getMyProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { BottomNav } from "./bottom-nav";
+import { CreateMenu } from "./create-menu";
+import { HeartIcon } from "./icons";
 import { LanguageSwitch } from "./language-switch";
 import { UserMenu, type UserMenuData } from "./user-menu";
 
@@ -85,17 +87,33 @@ export async function SiteHeader() {
             <Link href="/marktplatz" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
               {t("market")}
             </Link>
-            {onboarded && (
-              <Link href="/marktplatz/neu" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
-                {t("sell")}
-              </Link>
-            )}
+            <Link href="/suche" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
+              {t("search")}
+            </Link>
             {onboarded && (
               <Link href="/nachrichten" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
                 {t("messages")}
                 {unread > 0 && (
                   <span className="ml-1 rounded-full bg-brand px-1.5 py-0.5 text-xs font-bold text-night">{unread}</span>
                 )}
+              </Link>
+            )}
+            {onboarded && (
+              <CreateMenu
+                labels={{
+                  create: t("create"),
+                  post: t("createPost"),
+                  postHint: t("createPostHint"),
+                  listing: t("createListing"),
+                  listingHint: t("createListingHint"),
+                  close: t("close"),
+                }}
+              />
+            )}
+            {onboarded && (
+              <Link href="/anfragen" aria-label={t("activity")} className="relative rounded-lg p-1.5 text-cream hover:text-brand sm:hidden">
+                <HeartIcon className="size-[26px]" />
+                {requests > 0 && <span className="absolute right-1 top-1 size-2.5 rounded-full bg-danger" />}
               </Link>
             )}
             {isTeam && (
@@ -134,10 +152,9 @@ export async function SiteHeader() {
         menu={menu}
         labels={{
           home: t("home"),
-          events: t("events"),
           market: t("market"),
-          sell: t("sell"),
           messages: t("messages"),
+          search: t("search"),
           profile: t("profile"),
           login: t("login"),
         }}

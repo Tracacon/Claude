@@ -40,7 +40,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   return (
     <html lang={locale} className="h-full antialiased">
       <body className="flex min-h-full flex-col">
-        <NextIntlClientProvider>
+        <NextIntlClientProvider timeZone="Europe/Berlin">
           <SiteHeader />
           <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-28 pt-6 sm:pb-10 sm:pt-10">{children}</main>
           <SiteFooter />

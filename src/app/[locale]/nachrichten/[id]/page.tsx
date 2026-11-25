@@ -43,7 +43,7 @@ export default async function ConversationPage({ params }: PageProps<"/[locale]/
         <Link href="/nachrichten" className="rounded-lg px-2 py-1 text-cream/70 hover:bg-white/5" aria-label={t("back")}>←</Link>
         <Link href={`/u/${c.other_nickname}`} className="flex min-w-0 flex-1 items-center gap-2">
           <Avatar userId={c.other_id} avatarId={c.other_avatar_id} nickname={c.other_nickname} size="xs" />
-          <h1 className="truncate text-lg font-bold">@{c.other_nickname}</h1>
+          <h1 className="truncate text-lg font-bold normal-case">{c.other_nickname}</h1>
         </Link>
         <ConversationMenu conversationId={c.id} otherId={c.other_id} otherNickname={c.other_nickname} iBlocked={c.i_blocked} />
       </div>

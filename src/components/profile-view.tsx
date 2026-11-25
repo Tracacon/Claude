@@ -7,6 +7,14 @@ import { Link } from "@/i18n/navigation";
 import { eventDay } from "@/lib/event-format";
 import { photoUrl, type ListingSummary } from "@/lib/marketplace";
 import type { VisitedEvent } from "@/lib/profiles";
+import { PostGrid } from "@/components/feed/post-grid";
+import type { GridPost } from "@/lib/feed-shared";
+
+export type ProfileTab = "beitraege" | "inserate" | "abzeichen";
+
+export function parseProfileTab(v: unknown): ProfileTab {
+  return v === "inserate" || v === "abzeichen" ? v : "beitraege";
+}
 import { BADGE_ICONS, type PublicProfile } from "@/lib/social";
 
 /**
@@ -17,6 +25,7 @@ export async function ProfileView({
   profile: p,
   listings,
   events = [],
+  posts = [],
   tab,
   loggedIn,
   basePath,
@@ -25,7 +34,9 @@ export async function ProfileView({
   listings: ListingSummary[];
   /** Besuchte Events (nur im Reiter Abzeichen) */
   events?: VisitedEvent[];
-  tab: "inserate" | "abzeichen";
+  /** Beiträge (nur im Reiter Beiträge) */
+  posts?: GridPost[];
+  tab: ProfileTab;
   loggedIn: boolean;
   basePath: string;
 }) {
@@ -34,6 +45,7 @@ export async function ProfileView({
   const tBadges = await getTranslations("Badges");
   const format = await getFormatter();
   const tEv = await getTranslations("Events");
+  const tFeed = await getTranslations("Feed");
   const locale = await getLocale();
   const userPath = `/u/${p.nickname}`;
 
@@ -57,14 +69,14 @@ export async function ProfileView({
         <div className="flex items-center gap-4 sm:gap-6">
           <Avatar userId={p.id} avatarId={p.avatar_id} nickname={p.nickname} size="lg" />
           <div className="flex flex-1 justify-around">
-            {stat(p.listing_count, t("listings"), `${basePath}?tab=inserate`)}
+            {stat(p.post_count ?? 0, t("posts"), basePath)}
             {stat(p.follower_count, t("followers"), `${userPath}/follower`)}
             {stat(p.following_count, t("followingCount"), `${userPath}/folgt`)}
           </div>
         </div>
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-xl font-bold">@{p.nickname}</h1>
+            <h1 className="text-xl font-bold normal-case">{p.nickname}</h1>
             {p.role !== "member" && (
               <span className="rounded-full bg-brand/15 px-2 py-0.5 text-xs font-semibold text-brand">{tRoles(p.role)}</span>
             )}
@@ -86,7 +98,7 @@ export async function ProfileView({
           {p.is_me ? (
             <>
               <Link href="/einstellungen" className="btn-ghost flex-1">{t("editProfile")}</Link>
-              <Link href="/marktplatz/neu" className="btn-ghost flex-1">+ {t("newListing")}</Link>
+              <Link href="/beitrag/neu" className="btn-ghost flex-1">+ {t("newPost")}</Link>
             </>
           ) : loggedIn && !p.blocked ? (
             <FollowButton userId={p.id} initial={p.my_follow} />
@@ -97,14 +109,14 @@ export async function ProfileView({
       </header>
 
       <nav className="flex border-b border-line text-sm" aria-label={t("sections")}>
-        {(["inserate", "abzeichen"] as const).map((x) => (
+        {(["beitraege", "inserate", "abzeichen"] as const).map((x) => (
           <Link
             key={x}
-            href={x === "inserate" ? basePath : `${basePath}?tab=abzeichen`}
+            href={x === "beitraege" ? basePath : `${basePath}?tab=${x}`}
             aria-current={tab === x ? "page" : undefined}
-            className={`flex-1 border-b-2 py-2.5 text-center font-semibold ${tab === x ? "border-brand text-brand" : "border-transparent text-cream/60"}`}
+            className={`flex-1 border-b-2 py-2.5 text-center font-semibold ${tab === x ? "border-cream text-cream" : "border-transparent text-cream/55"}`}
           >
-            {x === "inserate" ? `▦ ${t("listings")}` : `🏅 ${t("badges")}`}
+            {x === "beitraege" ? `▦ ${t("posts")}` : x === "inserate" ? `🃏 ${t("listings")} (${p.listing_count})` : `🏅 ${t("badges")}`}
           </Link>
         ))}
       </nav>
@@ -115,6 +127,18 @@ export async function ProfileView({
           <p className="font-semibold">{t("privateTitle")}</p>
           <p className="text-sm text-cream/70">{t("privateText", { nickname: p.nickname })}</p>
         </div>
+      ) : tab === "beitraege" ? (
+        posts.length === 0 ? (
+          <div className="card space-y-2 py-10 text-center">
+            <p className="text-3xl" aria-hidden>📷</p>
+            <p className="font-semibold">{p.is_me ? tFeed("profileEmptyMe") : tFeed("profileEmpty")}</p>
+            {p.is_me && <Link href="/beitrag/neu" className="btn-primary">{tFeed("firstPost")}</Link>}
+          </div>
+        ) : (
+          <div className="-mx-4 sm:mx-0">
+            <PostGrid posts={posts} label={(g) => tFeed("gridLabel", { likes: g.like_count, comments: g.comment_count })} />
+          </div>
+        )
       ) : tab === "abzeichen" ? (
         <div className="space-y-3">
           {p.badges.length === 0 ? (

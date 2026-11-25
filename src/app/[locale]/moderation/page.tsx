@@ -19,6 +19,13 @@ type OpenReport = {
   profile_id: string | null;
   profile_nickname: string | null;
   conversation_id: string | null;
+  post_id: string | null;
+  post_caption: string | null;
+  post_author_nickname: string | null;
+  post_hidden: boolean | null;
+  comment_id: string | null;
+  comment_body: string | null;
+  comment_author_nickname: string | null;
   conversation_title: string | null;
   total_count: number;
 };
@@ -61,7 +68,7 @@ export default async function ModerationPage({ params }: PageProps<"/[locale]/mo
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <span className="rounded-full bg-danger/15 px-2.5 py-1 font-semibold text-danger">{tReason(r.reason)}</span>
                 <span className="rounded-full bg-white/10 px-2.5 py-1">
-                  {r.listing_id ? t("listing") : r.conversation_id ? t("conversation") : t("profile")}
+                  {r.listing_id ? t("listing") : r.conversation_id ? t("conversation") : r.post_id ? t("post") : r.comment_id ? t("comment") : t("profile")}
                 </span>
                 <span className="text-cream/50">
                   {t("reportedBy", {
@@ -81,6 +88,20 @@ export default async function ModerationPage({ params }: PageProps<"/[locale]/mo
                   {r.listing_status && r.listing_status !== "active" && (
                     <span className="ml-2 text-xs text-cream/60">({tStatus(r.listing_status)})</span>
                   )}
+                </p>
+              ) : r.post_id ? (
+                <p>
+                  <Link href={`/p/${r.post_id}`} className="font-semibold hover:underline">
+                    {t("viewPost")}
+                  </Link>
+                  {r.post_author_nickname && <span className="text-sm text-cream/60"> · {t("by", { nickname: `@${r.post_author_nickname}` })}</span>}
+                  {r.post_hidden && <span className="ml-2 text-xs text-danger">({t("hiddenPost")})</span>}
+                  {r.post_caption && <span className="mt-1 block whitespace-pre-line text-sm text-cream/80">{r.post_caption.slice(0, 300)}</span>}
+                </p>
+              ) : r.comment_id ? (
+                <p className="text-sm">
+                  <span className="font-semibold">@{r.comment_author_nickname}: </span>
+                  <span className="whitespace-pre-line">{r.comment_body}</span>
                 </p>
               ) : r.conversation_id ? (
                 <p>
@@ -104,6 +125,8 @@ export default async function ModerationPage({ params }: PageProps<"/[locale]/mo
               <ReportActions
                 reportId={r.id}
                 listingId={r.listing_id && r.listing_status !== "removed" ? r.listing_id : null}
+                postId={r.post_id && !r.post_hidden ? r.post_id : null}
+                commentId={r.comment_id}
               />
             </li>
           ))}

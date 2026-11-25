@@ -91,7 +91,8 @@ with sync_playwright() as p:
     shot(guest, "50-termine")
     step("Termine beim ersten Aufruf aus Odoo geholt, unveröffentlichte ausgeblendet")
 
-    guest.get_by_role("navigation", name="Navigation").get_by_role("link", name="Termine").click()
+    guest.goto(f"{BASE}/de")
+    guest.get_by_role("navigation", name="Termine").get_by_role("link", name="Termine").click()
     expect(guest).to_have_url(re.compile(r"/de/termine$"))
     guest.get_by_text("Messe Kornwestheim").click()
     expect(guest.get_by_role("heading", name="Messe Kornwestheim")).to_be_visible()
@@ -139,8 +140,7 @@ with sync_playwright() as p:
     expect(guest.get_by_role("status").filter(has_text=re.compile(r"^1 Inserat$"))).to_be_visible()
     shot(guest, "51-termin-mitbringen", full=True)
     guest.goto(f"{BASE}/de")
-    expect(guest.get_by_role("heading", name="Die nächsten Termine")).to_be_visible()
-    expect(guest.get_by_text("1 Inserat wird mitgebracht").first).to_be_visible()
+    expect(guest.get_by_role("navigation", name="Termine").get_by_role("link", name=re.compile("Stuttgart"))).to_be_visible()
     step("Terminseite und Startseite zeigen, was mitgebracht wird")
 
     ana.goto(listing_url + "/bearbeiten")

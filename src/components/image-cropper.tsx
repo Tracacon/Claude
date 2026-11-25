@@ -4,10 +4,12 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
-export type CropShape = "circle" | "card";
+export type CropShape = "circle" | "card" | "post";
 
 // Kartenformat: 63 × 88 mm (Pokémon, Magic, One Piece …)
 const CARD_RATIO = 63 / 88;
+/** Beitragsfotos wie bei Instagram im Hochformat 4:5 */
+const POST_RATIO = 4 / 5;
 
 type View = { zoom: number; x: number; y: number; rotation: number };
 
@@ -59,8 +61,9 @@ export function ImageCropper({
   if (shape === "circle") {
     fw = fh = Math.max(80, Math.min(maxW, maxH));
   } else {
-    fh = Math.max(100, Math.min(maxH, maxW / CARD_RATIO));
-    fw = fh * CARD_RATIO;
+    const ratio = shape === "post" ? POST_RATIO : CARD_RATIO;
+    fh = Math.max(100, Math.min(maxH, maxW / ratio));
+    fw = fh * ratio;
   }
 
   const iw = img.naturalWidth;
@@ -159,7 +162,7 @@ export function ImageCropper({
         <div
           aria-hidden
           className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-white/90 ${
-            shape === "circle" ? "rounded-full" : "rounded-[4%]"
+            shape === "circle" ? "rounded-full" : shape === "post" ? "rounded-none" : "rounded-[4%]"
           }`}
           style={{ width: fw, height: fh, boxShadow: "0 0 0 9999px rgba(10, 16, 28, 0.72)" }}
         />
@@ -181,7 +184,7 @@ export function ImageCropper({
           className="flex-1 accent-brand"
         />
         <span aria-hidden className="text-sm">+</span>
-        {shape === "card" && (
+        {shape !== "circle" && (
           <button type="button" className="btn-ghost px-3 py-1.5" onClick={() => update({ rotation: view.rotation + 90, x: 0, y: 0 })} aria-label={t("rotate")}>
             ⟳
           </button>

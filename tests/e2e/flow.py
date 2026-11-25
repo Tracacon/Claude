@@ -60,7 +60,8 @@ with sync_playwright() as p:
     a = admin_ctx.new_page()
     a.goto(f"{BASE}/")
     expect(a).to_have_url(re.compile(r"/de$"))
-    expect(a.get_by_role("heading", name="Collect. Connect. Trade.")).to_be_visible()
+    expect(a.get_by_text("Trade · Card · Convention")).to_be_visible()
+    expect(a.get_by_role("navigation", name="Navigation").get_by_role("link", name="Startseite")).to_be_visible()
     shot(a, "01-start")
     step("Startseite leitet auf /de und zeigt den Claim")
 
@@ -95,7 +96,7 @@ with sync_playwright() as p:
     a.get_by_label("Bestätigungscode").fill("123456")
     a.get_by_role("button", name="Konto aktivieren").click()
     expect(a).to_have_url(re.compile(r"/de/profil$"))
-    expect(a.get_by_role("heading", name="@Dani_TCG")).to_be_visible()
+    expect(a.get_by_role("heading", name="Dani_TCG", exact=True)).to_be_visible()
     step("Konto mit Bestätigungscode aktiviert, Profil direkt fertig")
 
     a.get_by_role("link", name="Profil bearbeiten").click()
@@ -136,7 +137,7 @@ with sync_playwright() as p:
     phone.get_by_label("Passwort", exact=True).fill(PASSWORD)
     phone.get_by_role("button", name="Anmelden", exact=True).click()
     expect(phone).to_have_url(re.compile(r"/de/profil$"))
-    expect(phone.get_by_role("heading", name="@Dani_TCG")).to_be_visible()
+    expect(phone.get_by_role("heading", name="Dani_TCG", exact=True)).to_be_visible()
     shot(phone, "07-zweites-geraet")
     step("Anmeldung auf einem zweiten Gerät mit E-Mail und Passwort")
 
@@ -199,7 +200,7 @@ with sync_playwright() as p:
     step("Mitglied sieht keine Verwaltung und wird von /admin weggeleitet")
 
     m.goto(f"{BASE}/de/u/dani_tcg")
-    expect(m.get_by_role("heading", name="@Dani_TCG")).to_be_visible()
+    expect(m.get_by_role("heading", name="Dani_TCG", exact=True)).to_be_visible()
     expect(m.get_by_text("Sammle Pokémon und One Piece.")).to_be_visible()
     expect(m.get_by_text("Admin", exact=True)).to_be_visible()
     shot(m, "04-oeffentliches-profil")

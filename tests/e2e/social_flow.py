@@ -80,7 +80,7 @@ with sync_playwright() as p:
     step("Drei Konten registriert; nach der Registrierung erscheint das eigene Profil")
 
     # --- Profilmenü ---------------------------------------------------------------
-    expect(seller.get_by_role("heading", name="@Sammlerin")).to_be_visible()
+    expect(seller.get_by_role("heading", name="Sammlerin", exact=True)).to_be_visible()
     expect(seller.get_by_role("link", name="Profil bearbeiten")).to_be_visible()
     open_menu(seller)
     for label in ["Meine Inserate", "Nachrichten", "Meine Follower", "Folge ich", "Follower-Anfragen", "Abzeichen", "Einstellungen"]:
@@ -129,7 +129,7 @@ with sync_playwright() as p:
     seller.get_by_role("button", name="Inserat veröffentlichen").click()
     expect(seller).to_have_url(re.compile(r"/de/marktplatz/[0-9a-f-]{36}$"))
     listing_url = seller.url
-    seller.goto(f"{BASE}/de/profil")
+    seller.goto(f"{BASE}/de/profil?tab=inserate")
     expect(seller.get_by_role("link", name=re.compile("Base Set Display"))).to_be_visible()
     step("Inserate erscheinen im Raster auf dem Profil")
 
@@ -168,7 +168,7 @@ with sync_playwright() as p:
     expect(seller.get_by_text("Keine offenen Anfragen.")).to_be_visible()
     step("Folgen erzeugt eine Anfrage, die angenommen wird")
 
-    fan.reload()
+    fan.goto(f"{BASE}/de/u/Sammlerin?tab=inserate")
     expect(fan.get_by_text("Sammle Vintage-Pokémon und tausche gern.")).to_be_visible()
     expect(fan.get_by_role("button", name="Folge ich")).to_be_visible()
     images_loaded(fan, "header img:not([alt=TRACACON])")

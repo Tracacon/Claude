@@ -6,6 +6,7 @@ import { redirect } from "@/i18n/navigation";
 import { takePendingCheckin } from "@/lib/checkin";
 import { requireProfile, requireUser } from "@/lib/auth";
 import { mapDbError } from "@/lib/db-errors";
+import { POST_BUCKET } from "@/lib/feed-shared";
 import { PHOTO_BUCKET } from "@/lib/marketplace";
 import { AVATAR_BUCKET } from "@/lib/social";
 import { createClient } from "@/lib/supabase/server";
@@ -119,6 +120,11 @@ export async function deleteAccount(_prev: FormState, formData: FormData): Promi
   const { data: avatars } = await supabase.storage.from(AVATAR_BUCKET).list(user.id, { limit: 100 });
   if (avatars && avatars.length > 0) {
     await supabase.storage.from(AVATAR_BUCKET).remove(avatars.map((f) => `${user.id}/${f.name}`));
+  }
+
+  const { data: postFiles } = await supabase.storage.from(POST_BUCKET).list(user.id, { limit: 1000 });
+  if (postFiles && postFiles.length > 0) {
+    await supabase.storage.from(POST_BUCKET).remove(postFiles.map((f) => `${user.id}/${f.name}`));
   }
 
   const { error } = await supabase.rpc("delete_own_account");

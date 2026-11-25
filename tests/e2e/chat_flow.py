@@ -89,7 +89,7 @@ with sync_playwright() as p:
     buyer.get_by_role("button", name=re.compile("Nachricht schreiben")).click()
     expect(buyer).to_have_url(re.compile(r"/de/nachrichten/[0-9a-f-]{36}$"))
     conv_url = buyer.url
-    expect(buyer.get_by_role("heading", name="@Anbieterin")).to_be_visible()
+    expect(buyer.get_by_role("heading", name="Anbieterin", exact=True)).to_be_visible()
     expect(buyer.get_by_text("Schreib Anbieterin die erste Nachricht.")).to_be_visible()
     expect(buyer.get_by_text("Gib keine Passwörter oder Bankzugänge weiter")).to_be_visible()
     buyer.get_by_label("Nachricht", exact=True).fill("Hallo! Ist die Elsa noch zu haben?")

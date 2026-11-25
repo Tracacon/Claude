@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { ProfileView } from "@/components/profile-view";
+import { parseProfileTab, ProfileView } from "@/components/profile-view";
+import { getProfilePosts } from "@/lib/feed";
 import { redirect } from "@/i18n/navigation";
 import { getMyProfile } from "@/lib/auth";
 import { getProfileEvents, getProfileListings, getPublicProfile } from "@/lib/profiles";
@@ -19,15 +20,16 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
   const nickname = decodeURIComponent(raw);
   const [profile, me] = await Promise.all([getPublicProfile(nickname), getMyProfile()]);
   if (!profile) notFound();
-  if (profile.is_me) redirect({ href: sp.tab === "abzeichen" ? "/profil?tab=abzeichen" : "/profil", locale });
+  if (profile.is_me) redirect({ href: typeof sp.tab === "string" ? `/profil?tab=${parseProfileTab(sp.tab)}` : "/profil", locale });
 
-  const tab = sp.tab === "abzeichen" ? "abzeichen" : "inserate";
+  const tab = parseProfileTab(sp.tab);
   const listings = tab === "inserate" && profile.can_view ? await getProfileListings(profile.nickname) : [];
   const events = tab === "abzeichen" && profile.can_view ? await getProfileEvents(profile.nickname) : [];
+  const posts = tab === "beitraege" && profile.can_view ? await getProfilePosts(profile.nickname) : [];
   const t = await getTranslations("Listing");
   return (
     <div className="space-y-6">
-      <ProfileView profile={profile} listings={listings} events={events} tab={tab} loggedIn={Boolean(me?.nickname)} basePath={`/u/${profile.nickname}`} />
+      <ProfileView profile={profile} listings={listings} events={events} posts={posts} tab={tab} loggedIn={Boolean(me?.nickname)} basePath={`/u/${profile.nickname}`} />
       {me?.nickname && <ReportForm profileId={profile.id} label={t("reportProfile")} />}
     </div>
   );
