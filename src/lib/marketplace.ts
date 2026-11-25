@@ -87,10 +87,6 @@ export type ListingDetail = {
     card_number: string | null;
     card_rarity: string | null;
     card_image: string | null;
-    variant: Variant | null;
-    grading_company: GradingCompany | null;
-    grading_grade: number | null;
-    sealed_type: SealedType | null;
     city: string | null;
     handover_event: boolean;
     handover_pickup: boolean;
@@ -110,19 +106,10 @@ export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0
 
 // --- Kartendetails ------------------------------------------------------------
 
-export const VARIANTS = ["normal", "holo", "reverse_holo", "first_edition", "promo", "full_art", "alt_art"] as const;
-export const GRADING_COMPANIES = ["psa", "bgs", "cgc", "sgc", "tag", "ace", "other"] as const;
-/** Noten von 10 bis 1 in halben Schritten */
-export const GRADES = Array.from({ length: 19 }, (_, i) => String((20 - i) / 2)) as readonly string[];
-export const SEALED_TYPES = ["booster", "sleeved_booster", "booster_bundle", "display", "etb", "collection", "tin", "blister", "other"] as const;
-/** Arten, bei denen eine einzelne Karte gesucht werden kann */
+/** Arten, bei denen Set-Kürzel und Kartennummer abgefragt werden */
 export const KINDS_WITH_CARD: readonly string[] = ["single", "slab"];
-/** Spiele mit Kartensuche aus der Kartendatenbank */
-export const TCGS_WITH_CARD_SEARCH: readonly string[] = ["pokemon"];
-
-export type Variant = (typeof VARIANTS)[number];
-export type GradingCompany = (typeof GRADING_COMPANIES)[number];
-export type SealedType = (typeof SEALED_TYPES)[number];
+/** Spiele, deren Karten wir über Kürzel und Nummer in der Kartendatenbank nachschlagen */
+export const TCGS_WITH_CARD_LOOKUP: readonly string[] = ["pokemon"];
 
 /** Treffer der Kartensuche */
 export type CardHit = {

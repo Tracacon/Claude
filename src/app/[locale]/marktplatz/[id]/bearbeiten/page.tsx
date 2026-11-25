@@ -7,6 +7,7 @@ import { requireProfile } from "@/lib/auth";
 import { ensureEventsFresh, getEvents, getListingEvents } from "@/lib/events";
 import { getListing } from "@/lib/listings";
 import { centsToInput } from "@/lib/marketplace";
+import { SET_CODES } from "@/lib/set-codes";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/marktplatz/[id]/bearbeiten">): Promise<Metadata> {
   const { locale } = await params;
@@ -51,24 +52,18 @@ export default async function EditListingPage({ params }: PageProps<"/[locale]/m
           handover_shipping: l.handover_shipping,
           photos: data.photos,
           events: chosen.map((e) => e.id),
-          card:
-            l.card_ref && l.card_name
-              ? {
-                  id: l.card_ref.replace(/^tcgdex:/, ""),
-                  name: l.card_name,
-                  name_en: l.card_name_en,
-                  set: l.card_set ?? "",
-                  number: l.card_number ?? "",
-                  image: l.card_image,
-                }
-              : null,
-          variant: l.variant ?? "",
-          grading_company: l.grading_company ?? "",
-          grading_grade: l.grading_grade === null ? "" : String(Number(l.grading_grade)),
-          sealed_type: l.sealed_type ?? "",
+          card_code: cardCodeOf(l.card_ref, l.card_set),
+          card_no: l.card_number ?? "",
         }}
         events={events}
       />
     </div>
   );
+}
+
+/** Set-Kürzel fürs Formular: aus der gespeicherten Karte (Pokémon) oder dem gespeicherten Text */
+function cardCodeOf(ref: string | null, set: string | null) {
+  const setId = ref?.replace(/^tcgdex:/, "").replace(/-[^-]+$/, "");
+  const known = setId ? SET_CODES.find((s) => s.id === setId) : SET_CODES.find((s) => s.name === set);
+  return known?.code ?? set ?? "";
 }

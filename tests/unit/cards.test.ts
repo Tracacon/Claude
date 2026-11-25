@@ -78,6 +78,20 @@ describe("Kartensuche", () => {
     for (const n of ["199", "5", "1000", "SWSH020", "tg05"]) expect(numberVariants(n).length).toBeGreaterThan(1);
   });
 
+  it("zeigt bei englischer Suche den deutschen Namen aus dem deutschen Set", async () => {
+    mockApi({
+      "/de/sets": sets,
+      "/en/sets": sets,
+      "/de/cards": [],
+      "/en/cards": [{ id: "sv08-199", localId: "199", name: "Charizard ex", image: "https://assets.tcgdex.net/en/sv/sv08/199" }],
+      "/de/sets/sv08": { id: "sv08", name: "Stürmische Funken", cards: [{ id: "sv08-199", localId: "199", name: "Glurak-ex", image: "https://assets.tcgdex.net/de/sv/sv08/199" }] },
+    });
+    const hits = await searchCards("charizard");
+    expect(hits).toEqual([
+      { id: "sv08-199", name: "Glurak-ex", name_en: "Charizard ex", set: "Stürmische Funken", number: "199/191", image: "https://assets.tcgdex.net/de/sv/sv08/199/low.webp" },
+    ]);
+  });
+
   it("sucht nicht bei zu kurzer Eingabe", async () => {
     const fetchMock = mockApi({});
     expect(await searchCards("g")).toEqual([]);

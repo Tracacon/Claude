@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { requireProfile } from "@/lib/auth";
-import { getCardInfo } from "@/lib/cards";
+import { getCardInfo, searchByCode } from "@/lib/cards";
 import { mapDbError } from "@/lib/db-errors";
-import { PHOTO_BUCKET, STATUSES, UUID_PATTERN, photoPaths } from "@/lib/marketplace";
+import { PHOTO_BUCKET, STATUSES, TCGS_WITH_CARD_LOOKUP, UUID_PATTERN, photoPaths } from "@/lib/marketplace";
+import { setsForCode } from "@/lib/set-codes";
 import { createClient } from "@/lib/supabase/server";
 import { listingSchema, reportSchema, toFieldErrors, type FieldErrors, type ListingInput } from "@/lib/validation";
 
@@ -16,7 +17,7 @@ export type SimpleState = { ok?: boolean; error?: string };
 const FIELDS = [
   "title", "description", "tcg", "kind", "offer", "price", "negotiable", "condition", "card_language",
   "grading", "city", "handover_event", "handover_pickup", "handover_shipping", "photos",
-  "card_id", "card_json", "variant", "grading_company", "grading_grade", "sealed_type",
+  "card_code", "card_no",
 ] as const;
 
 function readForm(formData: FormData) {
@@ -34,37 +35,29 @@ async function removePhotoFiles(ownerId: string, photoIds: string[]) {
 }
 
 /**
- * Kartendetails speichern. Die Daten der Karte (Name, Set, Nummer, Seltenheit, Bild) kommen direkt
- * aus der Kartendatenbank, nicht aus dem Formular. Ist die Datenbank nicht erreichbar, bleibt die
- * bisher gespeicherte Karte erhalten.
+ * Set-Kürzel und Kartennummer speichern. Bei Pokémon schlägt der Server die Karte in der
+ * Kartendatenbank nach (Name deutsch und englisch, Set, Nummer, Bild), damit die Suche sie findet.
+ * Wird nichts gefunden, bleiben Kürzel bzw. Set-Name und Nummer als Text erhalten.
  */
-async function saveListingDetails(listingId: string, details: ListingInput["details"], keepCard: Record<string, unknown> | null) {
-  let card: Record<string, unknown> = {};
-  if (details.card_id) {
-    const info = await getCardInfo(details.card_id).catch((e) => {
-      console.error("Kartendatenbank", e instanceof Error ? e.message : e);
-      return null;
-    });
-    if (info) card = info;
-    else if (keepCard && keepCard.card_ref === `tcgdex:${details.card_id}`) card = keepCard;
+async function saveCardDetails(listingId: string, tcg: string, card: ListingInput["card"]) {
+  let p: Record<string, unknown> = {};
+  if (card.code || card.number) {
+    const known = card.code ? setsForCode(card.code) : [];
+    p = { card_set: known[0]?.name ?? card.code, card_number: card.number };
+    if (TCGS_WITH_CARD_LOOKUP.includes(tcg) && card.code && card.number) {
+      try {
+        const found = await searchByCode(card.code, card.number);
+        const info = found.hits.length > 0 ? await getCardInfo(found.hits[0].id) : null;
+        if (info) p = info;
+        else if (found.sets[0]) p = { ...p, card_set: found.sets[0].name };
+      } catch (e) {
+        console.error("Kartendatenbank", e instanceof Error ? e.message : e);
+      }
+    }
   }
   const supabase = await createClient();
-  const { error } = await supabase.rpc("set_listing_details", {
-    p_id: listingId,
-    p: { ...card, variant: details.variant, grading_company: details.grading_company, grading_grade: details.grading_grade, sealed_type: details.sealed_type },
-  });
+  const { error } = await supabase.rpc("set_listing_details", { p_id: listingId, p });
   if (error) console.error("set_listing_details", error.message);
-}
-
-/** Bisher gespeicherte Karte eines Inserats (für den Fall, dass die Kartendatenbank nicht antwortet) */
-async function currentCard(listingId: string) {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("listings")
-    .select("card_ref, card_name, card_name_en, card_set, card_number, card_rarity, card_image")
-    .eq("id", listingId)
-    .maybeSingle();
-  return (data as Record<string, unknown> | null) ?? null;
 }
 
 /** Termine, zu denen die Karte mitgebracht wird (Kästchen "events" im Formular) */
@@ -82,11 +75,11 @@ export async function createListing(_prev: ListingFormState, formData: FormData)
   const parsed = listingSchema.safeParse(values);
   if (!parsed.success) return { errors: toFieldErrors(parsed.error), values };
 
-  const { details, ...listing } = parsed.data;
+  const { card, ...listing } = parsed.data;
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("create_listing", { p: listing });
   if (error || !data) return { errors: { _form: error ? mapDbError(error) : "generic" }, values };
-  await saveListingDetails(data as string, details, null);
+  await saveCardDetails(data as string, listing.tcg, card);
   await saveListingEvents(data as string, formData);
 
   revalidatePath("/", "layout");
@@ -102,12 +95,11 @@ export async function updateListing(_prev: ListingFormState, formData: FormData)
   const parsed = listingSchema.safeParse(values);
   if (!parsed.success) return { errors: toFieldErrors(parsed.error), values };
 
-  const { details, ...listing } = parsed.data;
-  const keepCard = details.card_id ? await currentCard(id) : null;
+  const { card, ...listing } = parsed.data;
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("update_listing", { p_id: id, p: listing });
   if (error) return { errors: { _form: mapDbError(error) }, values };
-  await saveListingDetails(id, details, keepCard);
+  await saveCardDetails(id, listing.tcg, card);
 
   await removePhotoFiles(profile.id, (data as string[] | null) ?? []);
   await saveListingEvents(id, formData);

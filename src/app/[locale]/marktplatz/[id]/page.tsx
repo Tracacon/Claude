@@ -36,8 +36,6 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
   const tKind = await getTranslations("Kind");
   const tOffer = await getTranslations("Offer");
   const tCond = await getTranslations("Condition");
-  const tVariant = await getTranslations("Variant");
-  const tSealed = await getTranslations("SealedType");
   const tLang = await getTranslations("CardLanguage");
   const tStatus = await getTranslations("Status");
   const tRoles = await getTranslations("Roles");
@@ -109,28 +107,22 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
       {l.description && <p className="whitespace-pre-line text-cream/90">{l.description}</p>}
 
       <dl className="card grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
-        {l.card_name && (
+        {(l.card_name || l.card_set || l.card_number) && (
           <div className="col-span-2 flex items-center gap-3 sm:col-span-3">
             {l.card_image && (
-              <img src={l.card_image} alt="" loading="lazy" width={48} height={67} className="h-[67px] w-12 shrink-0 rounded object-cover" />
+              <img src={l.card_image} alt="" loading="lazy" width={40} height={56} className="h-14 w-10 shrink-0 rounded object-cover" />
             )}
             <div className="min-w-0">
               <dt className="text-cream/60">{t("cardName")}</dt>
-              <dd className="font-medium">
-                {l.card_name}
-                {l.card_name_en && <span className="text-cream/60"> · {l.card_name_en}</span>}
-              </dd>
-              <dd className="text-cream/75">
-                {[l.card_set, l.card_number, l.card_rarity].filter(Boolean).join(" · ")}
-              </dd>
+              {l.card_name && (
+                <dd className="font-medium">
+                  {l.card_name}
+                  {l.card_name_en && <span className="text-cream/60"> · {l.card_name_en}</span>}
+                </dd>
+              )}
+              <dd className="text-cream/75">{[l.card_set, l.card_number].filter(Boolean).join(" · ")}</dd>
             </div>
           </div>
-        )}
-        {l.variant && (
-          <div><dt className="text-cream/60">{t("variant")}</dt><dd>{tVariant(l.variant)}</dd></div>
-        )}
-        {l.sealed_type && (
-          <div><dt className="text-cream/60">{t("sealedType")}</dt><dd>{tSealed(l.sealed_type)}</dd></div>
         )}
         {l.condition && (
           <div><dt className="text-cream/60">{t("condition")}</dt><dd>{tCond(l.condition)}</dd></div>
