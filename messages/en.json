@@ -645,7 +645,17 @@
     "visitedEmptyMe": "Check in at the entrance of the next event and it shows up here.",
     "visitedEmpty": "No events attended yet.",
     "checkinLoginHint": "Log in or sign up for free. You'll be checked in automatically afterwards.",
-    "kicker": "Upcoming events"
+    "kicker": "Upcoming events",
+    "exportTitle": "For your own poster (e.g. Canva)",
+    "exportIntro": "Download the QR code as an image and copy the text. In Canva: “Uploads” → choose image → drag it onto your poster.",
+    "exportPngWhite": "QR code as image (white background)",
+    "exportPngTransparent": "QR code as image (transparent)",
+    "exportSvg": "QR code as SVG (razor sharp)",
+    "exportTextLabel": "Suggested poster text",
+    "exportCopy": "Copy text",
+    "exportCopied": "Copied",
+    "exportTextWindow": "Check-in opens 2 hours before the start and closes 2 hours after the end.",
+    "exportWarning": "Tip: print the QR code at least about 6 × 6 cm and keep it on a light background so it scans reliably. If you press “Create new code”, the downloaded image stops working – download it again."
   },
   "Feed": {
     "title": "Feed",

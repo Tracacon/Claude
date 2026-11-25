@@ -9,6 +9,7 @@ import { eventWhen } from "@/lib/event-format";
 import { getEvent } from "@/lib/events";
 import { createClient } from "@/lib/supabase/server";
 import { PosterActions } from "./poster-actions";
+import { PosterExport } from "./poster-export";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/team/termine/[id]/aushang">): Promise<Metadata> {
   const { locale } = await params;
@@ -22,6 +23,18 @@ async function appOrigin() {
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost";
   const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https");
   return `${proto}://${host}`;
+}
+
+/** Dateiname aus dem Termin-Namen */
+function slug(name: string) {
+  return (
+    name
+      .toLowerCase()
+      .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 50) || "termin"
+  );
 }
 
 export default async function PosterPage({ params }: PageProps<"/[locale]/team/termine/[id]/aushang">) {
@@ -48,6 +61,20 @@ export default async function PosterPage({ params }: PageProps<"/[locale]/team/t
         <p className="mt-2 text-sm text-cream/70">{t("posterIntro")}</p>
       </div>
       <PosterActions eventId={id} />
+      <PosterExport
+        url={url}
+        fileName={`tracacon-checkin-${slug(e.name)}`}
+        text={[
+          t("posterHeadline"),
+          `${e.name} · ${eventWhen(e, locale)}`,
+          "",
+          `1. ${t("posterStep1")}`,
+          `2. ${t("posterStep2")}`,
+          `3. ${t("posterStep3")}`,
+          "",
+          t("exportTextWindow"),
+        ].join("\n")}
+      />
 
       <article className="mx-auto max-w-xl rounded-3xl bg-white p-8 text-center text-black print:max-w-none print:rounded-none print:p-0">
         <p className="text-sm font-bold uppercase tracking-[0.3em]">TRACACON</p>

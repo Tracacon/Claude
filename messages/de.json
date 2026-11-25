@@ -645,7 +645,17 @@
     "visitedEmptyMe": "Check beim nächsten Event am Eingang ein, dann erscheint es hier.",
     "visitedEmpty": "Noch keine besuchten Events.",
     "checkinLoginHint": "Melde dich an oder registriere dich kostenlos. Danach wirst du automatisch eingecheckt.",
-    "kicker": "Nächste Events"
+    "kicker": "Nächste Events",
+    "exportTitle": "Für dein eigenes Plakat (z. B. Canva)",
+    "exportIntro": "Lade den QR-Code als Bild herunter und kopiere den Text. In Canva: „Hochladen“ → Bild auswählen → auf dein Plakat ziehen.",
+    "exportPngWhite": "QR-Code als Bild (weißer Hintergrund)",
+    "exportPngTransparent": "QR-Code als Bild (durchsichtig)",
+    "exportSvg": "QR-Code als SVG (gestochen scharf)",
+    "exportTextLabel": "Vorschlag für den Plakattext",
+    "exportCopy": "Text kopieren",
+    "exportCopied": "Kopiert",
+    "exportTextWindow": "Check-in möglich ab 2 Stunden vor Beginn bis 2 Stunden nach Ende.",
+    "exportWarning": "Tipp: Den QR-Code nicht kleiner als etwa 6 × 6 cm drucken und auf hellem Hintergrund lassen, dann scannt er zuverlässig. Wenn du „Neuen Code erzeugen“ drückst, funktioniert das heruntergeladene Bild nicht mehr – dann bitte neu herunterladen."
   },
   "Feed": {
     "title": "Feed",

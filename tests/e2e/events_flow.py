@@ -171,6 +171,36 @@ with sync_playwright() as p:
     assert checkin_path(admin) == tns_checkin
     step("Aushang mit QR-Code, Code bleibt beim erneuten Öffnen gleich")
 
+    # Export für eigenes Plakat (Canva)
+    import struct
+    def png_info(path):
+        data = open(path, "rb").read()
+        assert data[:8] == b"\x89PNG\r\n\x1a\n", "kein PNG"
+        w, h = struct.unpack(">II", data[16:24])
+        return w, h, data[25]  # Farbtyp: 6 = mit Durchsichtigkeit
+    with admin.expect_download() as dl:
+        admin.get_by_role("button", name="QR-Code als Bild (weißer Hintergrund)").click()
+    d = dl.value
+    assert d.suggested_filename == "tracacon-checkin-tns-stuttgart-testabend.png", d.suggested_filename
+    w, h, _ = png_info(d.path())
+    assert w == h and w >= 1900, (w, h)
+    with admin.expect_download() as dl:
+        admin.get_by_role("button", name="QR-Code als Bild (durchsichtig)").click()
+    assert dl.value.suggested_filename.endswith("-transparent.png")
+    assert png_info(dl.value.path())[2] == 6, "durchsichtiges PNG erwartet"
+    with admin.expect_download() as dl:
+        admin.get_by_role("button", name="QR-Code als SVG (gestochen scharf)").click()
+    assert "<svg" in open(dl.value.path()).read()
+    text = admin.get_by_label("Vorschlag für den Plakattext").input_value()
+    assert text.startswith("Jetzt einchecken!\nTNS Stuttgart Testabend · "), text
+    assert "1. Handykamera öffnen" in text and "2 Stunden nach Ende" in text, text
+    admin.context.grant_permissions(["clipboard-read", "clipboard-write"])
+    admin.get_by_role("button", name="Text kopieren").click()
+    expect(admin.get_by_role("button", name="✓ Kopiert")).to_be_visible()
+    assert admin.evaluate("navigator.clipboard.readText()") == text
+    shot(admin, "53-aushang-export", full=True)
+    step("QR-Code als PNG (weiß/durchsichtig) und SVG herunterladen, Plakattext kopieren")
+
     # --- Check-in -------------------------------------------------------------------
     ana.goto(BASE + tns_checkin)
     expect(ana).to_have_url(re.compile(r"/de/termine/[0-9a-f-]{36}\?eingecheckt=neu&besuche=1$"))
