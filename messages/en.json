@@ -807,5 +807,154 @@
     "denied": "Notifications are blocked for this site. You can allow them again in your phone or browser settings.",
     "notReady": "Phone notifications are being set up and will be available soon.",
     "hint": "Don't miss a thing: get notified on your phone when someone follows you or likes your posts."
+  },
+  "Install": {
+    "title": "Get the Tracacon App on your phone",
+    "text": "With its own icon on your home screen – like a real app, plus notifications.",
+    "close": "Close",
+    "installButton": "Install now",
+    "more": "Help & other devices",
+    "ios1": "Tap <icon></icon> Share (bottom in Safari, top right in Chrome).",
+    "ios2": "Choose “Add to Home Screen” (you may need to scroll down).",
+    "ios3": "Tap “Add” – done! From now on, open the app from the new icon.",
+    "android1": "Tap the three dots ⋮ at the top right.",
+    "android2": "Choose “Install app” or “Add to Home screen”.",
+    "android3": "Confirm with “Install” – done!",
+    "inApp": "You're in the Instagram, Facebook or TikTok browser, where the app can't be installed. Tap ⋯ at the top right and choose “Open in browser” – then you'll see the instructions.",
+    "inAppTitle": "Opened from Instagram & co.?",
+    "pageTitle": "Tracacon App on your phone",
+    "pageText": "Here's how to put the app on your home screen.",
+    "yourDevice": "How it works on your phone",
+    "desktop": "You're on a computer. Scan the QR code with your phone or open this page there – instructions for iPhone and Android are below.",
+    "installed": "The app is already installed on this device. 🎉",
+    "continue": "Continue to the app"
+  },
+  "Privacy": {
+    "title": "Privacy policy",
+    "updated": "Last updated: 25 November 2026",
+    "draft": "Draft: This privacy policy describes the app as it works today. It should be reviewed by a lawyer before the official launch. The German version is authoritative.",
+    "responsible": "Controller",
+    "responsibleMissing": "Operator details will be added before launch (see imprint).",
+    "sections": [
+      {
+        "h": "In short",
+        "p": [
+          "The Tracacon App is the community app of the Tracacon Trade Card Conventions. We only process data needed for the app's features. We use no advertising, no analytics or tracking tools, and we don't sell data."
+        ]
+      },
+      {
+        "h": "Hosting (Cloudflare)",
+        "p": [
+          "The app runs on Cloudflare (Cloudflare, Inc.). When you use it, Cloudflare processes technically necessary data such as IP address, browser, time and requested page to deliver the app and protect it from attacks. Cloudflare may also process data in the USA and is certified under the EU-US Data Privacy Framework.",
+          "Legal basis: legitimate interest in a secure, working service (Art. 6(1)(f) GDPR)."
+        ]
+      },
+      {
+        "h": "Database and files (Supabase)",
+        "p": [
+          "We store accounts, profiles, content and photos at Supabase in a data centre in Frankfurt (EU). Supabase processes the data on our behalf.",
+          "Legal basis: performance of the user agreement (Art. 6(1)(b) GDPR)."
+        ]
+      },
+      {
+        "h": "Account and sign-in",
+        "p": [
+          "For your account we store your email address, your password (encrypted only), your nickname, your confirmation that you are at least 16, and when you accepted the community rules and this privacy policy. We send confirmation and sign-in codes and password reset codes to your email address.",
+          "Legal basis: Art. 6(1)(b) GDPR."
+        ]
+      },
+      {
+        "h": "Profile, posts and listings",
+        "p": [
+          "We store what you add to your profile (profile photo, city, bio, website, Instagram name), your posts with photos, comments, likes and your listings (with photos, price, condition, set code and card number) so others can see them. You decide whether your profile is public or visible to approved followers only. Marketplace listings are always visible to everyone so buyers can find them.",
+          "Photos are resized and re-saved in your browser before upload, which removes hidden metadata such as the location (GPS).",
+          "Legal basis: Art. 6(1)(b) GDPR."
+        ]
+      },
+      {
+        "h": "Following, messages, blocking and reporting",
+        "p": [
+          "We store who follows whom and which follow requests are open. We store messages about listings so you can talk to each other. If you block someone, we store this so they can no longer contact you.",
+          "If you report a listing, profile, post or conversation, we store the report and the reason. The Tracacon team can view reported content and – only when reported – the conversation concerned, to check for violations of the community rules.",
+          "Legal basis: Art. 6(1)(b) and (f) GDPR (a safe community)."
+        ]
+      },
+      {
+        "h": "In-app notifications",
+        "p": [
+          "When someone follows you, sends you a follow request, accepts your request, or likes or comments on your posts, we create a notification for you containing who did what and when, and whether you have seen it. Notifications are kept until your account is deleted.",
+          "Legal basis: Art. 6(1)(b) GDPR."
+        ]
+      },
+      {
+        "h": "Online status",
+        "p": [
+          "While you use the app, we store the time of your last activity (at most once a minute). From this we show your followers and the people you follow a green “online” dot if you were active in the last 5 minutes. Nobody sees the exact time. You can turn off your online status in the settings; you then won't see others' status either.",
+          "Legal basis: legitimate interest in a lively community (Art. 6(1)(f) GDPR); you can object at any time by turning the setting off."
+        ]
+      },
+      {
+        "h": "“New member”",
+        "p": [
+          "For 14 days after you register, your nickname and profile photo appear in the “New” bar on the home page. You can opt out when registering and turn it off at any time in the settings.",
+          "Legal basis: Art. 6(1)(f) GDPR; object via the setting."
+        ]
+      },
+      {
+        "h": "Phone notifications",
+        "p": [
+          "Only if you explicitly turn on notifications and your device allows it do we store the device address and keys your browser creates for this. We send notifications via the push service of your device or browser maker (for example Apple, Google, Mozilla or Microsoft). The content is encrypted so this service cannot read it.",
+          "You can turn notifications off at any time: in the app we delete the device address immediately; if you turn them off in your device settings, we delete it at the next delivery attempt.",
+          "Legal basis: your consent (Art. 6(1)(a) GDPR), which you can withdraw at any time."
+        ]
+      },
+      {
+        "h": "Adding the app to your phone",
+        "p": [
+          "To let you put the app on your home screen, a small background service is registered in your browser. It only displays notifications and stores no data. If you close the “Get the Tracacon App on your phone” hint, your browser remembers this for 7 days."
+        ]
+      },
+      {
+        "h": "Events and check-in",
+        "p": [
+          "We manage our events in our event software (Odoo) and copy them into the app; none of your data is sent to Odoo. Ticket links lead to EVENTIM, whose privacy policy applies there.",
+          "When you scan the QR code at an event entrance, we store your visit. This earns badges such as “Regular”. Which events you bring cards to is visible to you and others on your listings.",
+          "Legal basis: Art. 6(1)(b) GDPR."
+        ]
+      },
+      {
+        "h": "Card database (TCGdex)",
+        "p": [
+          "When you enter a set code and card number while listing, our server asks the free Pokémon card database TCGdex which card it is. Only the code and number are sent, no data about you. Card images are loaded by your browser directly from TCGdex (assets.tcgdex.net), which technically receives your IP address.",
+          "Legal basis: Art. 6(1)(f) GDPR (easy, accurate listings)."
+        ]
+      },
+      {
+        "h": "Tracacon's Instagram posts",
+        "p": [
+          "We automatically copy image posts from our own Instagram account into the feed. For this our server accesses our Instagram account. None of your data is sent to Instagram."
+        ]
+      },
+      {
+        "h": "Cookies and browser storage",
+        "p": [
+          "We only use technically necessary cookies: one that keeps you signed in and one for your language. In addition there is the hint storage described under “Adding the app to your phone”. There are no tracking or advertising cookies, so no cookie banner is needed (§ 25(2) TDDDG).",
+          "We serve fonts ourselves; there is no connection to Google Fonts."
+        ]
+      },
+      {
+        "h": "How long we keep data",
+        "p": [
+          "We keep your data as long as you have an account. You can delete your account at any time in the settings; we then delete your profile and content. We may keep reports and moderation decisions longer where necessary to protect the community or for legal reasons."
+        ]
+      },
+      {
+        "h": "Your rights",
+        "p": [
+          "You have the right of access, rectification, erasure, restriction of processing and data portability, the right to object to processing and to withdraw consent. Write to us at the address in the imprint.",
+          "You can also lodge a complaint with a data protection authority, for example the State Commissioner for Data Protection and Freedom of Information of Baden-Württemberg."
+        ]
+      }
+    ]
   }
 }

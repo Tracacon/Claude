@@ -4,6 +4,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { SiteFooter } from "@/components/site-footer";
+import { InstallBanner } from "@/components/install-banner";
 import { SiteHeader } from "@/components/site-header";
 import "@fontsource-variable/inter";
 import "@fontsource/chakra-petch/latin-500.css";
@@ -47,6 +48,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
           <SiteHeader />
           <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-28 pt-6 sm:pb-10 sm:pt-10">{children}</main>
           <SiteFooter />
+          <InstallBanner />
         </NextIntlClientProvider>
       </body>
     </html>

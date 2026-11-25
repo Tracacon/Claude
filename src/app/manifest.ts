@@ -6,6 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Tracacon App",
     short_name: "Tracacon",
     description: "Die Community-App der Tracacon Trade Card Conventions. Trading · Dealing · Connecting.",
+    id: "/",
     start_url: "/",
     scope: "/",
     display: "standalone",
