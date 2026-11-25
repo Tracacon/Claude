@@ -4,6 +4,7 @@ import { FeedList } from "@/components/feed/feed-list";
 import { EventStrip } from "@/components/feed/event-strip";
 import { NewMembersBar } from "@/components/feed/new-members-bar";
 import { OnlineStrip } from "@/components/feed/online-strip";
+import { PushSettings } from "@/components/push-settings";
 import { Link } from "@/i18n/navigation";
 import { getMyProfile } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -11,6 +12,7 @@ import { ensureEventsFresh, getEvents } from "@/lib/events";
 import { FEED_PAGE, getFeed } from "@/lib/feed";
 import { ensureInstagramFresh } from "@/lib/instagram";
 import { getNewMembers, getOnlineContacts } from "@/lib/notifications";
+import { isPushConfigured } from "@/lib/push";
 
 /** Startseite = Feed wie bei Instagram */
 export default async function FeedPage({ params }: PageProps<"/[locale]">) {
@@ -46,6 +48,8 @@ export default async function FeedPage({ params }: PageProps<"/[locale]">) {
       {profile && !profile.nickname && (
         <Link href="/willkommen" className="card block text-sm text-brand">{tHome("ctaProfile")} →</Link>
       )}
+
+      {loggedIn && <PushSettings available={isPushConfigured()} compact />}
 
       <NewMembersBar people={newMembers} />
 

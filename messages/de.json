@@ -807,5 +807,154 @@
     "denied": "Mitteilungen sind für diese Seite blockiert. Du kannst sie in den Einstellungen deines Handys bzw. Browsers wieder erlauben.",
     "notReady": "Mitteilungen aufs Handy werden gerade eingerichtet und sind bald verfügbar.",
     "hint": "Nichts mehr verpassen: Lass dich aufs Handy benachrichtigen, wenn dir jemand folgt oder deine Beiträge mag."
+  },
+  "Install": {
+    "title": "Tracacon App aufs Handy holen",
+    "text": "Mit eigenem Symbol auf dem Startbildschirm – wie eine richtige App, plus Mitteilungen.",
+    "close": "Hinweis schließen",
+    "installButton": "Jetzt installieren",
+    "more": "Hilfe & andere Geräte",
+    "ios1": "Tippe auf <icon></icon> Teilen (in Safari unten, in Chrome oben rechts).",
+    "ios2": "Wähle „Zum Home-Bildschirm“ (eventuell etwas nach unten scrollen).",
+    "ios3": "Tippe auf „Hinzufügen“ – fertig! Öffne die App ab jetzt über das neue Symbol.",
+    "android1": "Tippe oben rechts auf die drei Punkte ⋮.",
+    "android2": "Wähle „App installieren“ oder „Zum Startbildschirm hinzufügen“.",
+    "android3": "Bestätige mit „Installieren“ – fertig!",
+    "inApp": "Du bist gerade im Browser von Instagram, Facebook oder TikTok. Dort lässt sich die App nicht installieren. Tippe oben rechts auf ⋯ und wähle „Im Browser öffnen“ – dann erscheint die Anleitung.",
+    "inAppTitle": "Link aus Instagram & Co. geöffnet?",
+    "pageTitle": "Tracacon App aufs Handy",
+    "pageText": "So legst du die App als Symbol auf deinen Startbildschirm.",
+    "yourDevice": "So geht's auf deinem Handy",
+    "desktop": "Du bist gerade am Computer. Scanne den QR-Code mit dem Handy oder öffne diese Seite dort – die Anleitung für iPhone und Android steht unten.",
+    "installed": "Die App ist auf diesem Gerät schon installiert. 🎉",
+    "continue": "Weiter zur App"
+  },
+  "Privacy": {
+    "title": "Datenschutzerklärung",
+    "updated": "Stand: 25. November 2026",
+    "draft": "Entwurf: Diese Datenschutzerklärung beschreibt die App so, wie sie heute funktioniert. Vor dem offiziellen Start sollte sie juristisch geprüft werden.",
+    "responsible": "Verantwortlich",
+    "responsibleMissing": "Die Angaben zum Betreiber werden vor dem Start ergänzt (siehe Impressum).",
+    "sections": [
+      {
+        "h": "Kurz zusammengefasst",
+        "p": [
+          "Die Tracacon App ist die Community-App der Tracacon Trade Card Conventions. Wir verarbeiten nur die Daten, die für die Funktionen der App nötig sind. Wir nutzen keine Werbung, keine Analyse- oder Tracking-Werkzeuge und verkaufen keine Daten."
+        ]
+      },
+      {
+        "h": "Hosting (Cloudflare)",
+        "p": [
+          "Die App läuft bei Cloudflare (Cloudflare, Inc.). Beim Aufruf verarbeitet Cloudflare technisch nötige Angaben wie IP-Adresse, Browser, Uhrzeit und aufgerufene Seite, um die App auszuliefern und vor Angriffen zu schützen. Cloudflare kann Daten auch in den USA verarbeiten und ist nach dem EU-US Data Privacy Framework zertifiziert.",
+          "Rechtsgrundlage: berechtigtes Interesse an einem sicheren, funktionierenden Angebot (Art. 6 Abs. 1 lit. f DSGVO)."
+        ]
+      },
+      {
+        "h": "Datenbank und Dateien (Supabase)",
+        "p": [
+          "Konto, Profil, Inhalte und Fotos speichern wir bei Supabase in einem Rechenzentrum in Frankfurt (EU). Supabase verarbeitet die Daten in unserem Auftrag.",
+          "Rechtsgrundlage: Erfüllung des Nutzungsvertrags (Art. 6 Abs. 1 lit. b DSGVO)."
+        ]
+      },
+      {
+        "h": "Konto und Anmeldung",
+        "p": [
+          "Für dein Konto speichern wir deine E-Mail-Adresse, dein Passwort (nur verschlüsselt), deinen Nickname, deine Bestätigung, dass du mindestens 16 Jahre alt bist, und den Zeitpunkt, zu dem du den Community-Regeln und dieser Datenschutzerklärung zugestimmt hast. An deine E-Mail-Adresse schicken wir Bestätigungs- und Anmeldecodes sowie Codes zum Zurücksetzen des Passworts.",
+          "Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO."
+        ]
+      },
+      {
+        "h": "Profil, Beiträge und Inserate",
+        "p": [
+          "Was du in dein Profil einträgst (Profilbild, Ort, Beschreibung, Website, Instagram-Name), deine Beiträge mit Fotos, Kommentare, „Gefällt mir“-Angaben und deine Inserate (mit Fotos, Preis, Zustand, Set-Kürzel und Kartennummer) speichern wir, damit andere sie sehen können. Du bestimmst, ob dein Profil öffentlich oder nur für bestätigte Follower sichtbar ist. Inserate im Marktplatz sind immer für alle sichtbar, damit Interessenten sie finden.",
+          "Fotos werden schon in deinem Browser verkleinert und neu gespeichert. Dabei werden versteckte Zusatzangaben wie der Aufnahmeort (GPS) entfernt.",
+          "Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO."
+        ]
+      },
+      {
+        "h": "Folgen, Nachrichten, Blockieren und Melden",
+        "p": [
+          "Wir speichern, wer wem folgt und welche Folgeanfragen offen sind. Nachrichten zu Inseraten speichern wir, damit ihr euch austauschen könnt. Wenn du jemanden blockierst, speichern wir das, damit die Person dich nicht mehr kontaktieren kann.",
+          "Meldest du ein Inserat, ein Profil, einen Beitrag oder eine Unterhaltung, speichern wir die Meldung und den Grund. Das Tracacon-Team kann gemeldete Inhalte und – nur bei einer Meldung – die betroffene Unterhaltung einsehen, um Verstöße gegen die Community-Regeln zu prüfen.",
+          "Rechtsgrundlage: Art. 6 Abs. 1 lit. b und f DSGVO (sichere Community)."
+        ]
+      },
+      {
+        "h": "Benachrichtigungen in der App",
+        "p": [
+          "Wenn dir jemand folgt, dir eine Folgeanfrage schickt, deine Anfrage annimmt oder deine Beiträge mag oder kommentiert, legen wir eine Benachrichtigung für dich an. Sie enthält, wer was getan hat und wann, und ob du sie schon gesehen hast. Benachrichtigungen bleiben gespeichert, bis dein Konto gelöscht wird.",
+          "Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO."
+        ]
+      },
+      {
+        "h": "Online-Status",
+        "p": [
+          "Solange du die App nutzt, speichern wir den Zeitpunkt deiner letzten Aktivität (höchstens einmal pro Minute). Daraus zeigen wir deinen Followern und den Personen, denen du folgst, einen grünen Punkt „online“, wenn du in den letzten 5 Minuten aktiv warst. Den genauen Zeitpunkt sieht niemand. Du kannst den Online-Status in den Einstellungen ausschalten; dann siehst du auch den Status der anderen nicht.",
+          "Rechtsgrundlage: berechtigtes Interesse an einer lebendigen Community (Art. 6 Abs. 1 lit. f DSGVO); du kannst jederzeit widersprechen, indem du die Einstellung ausschaltest."
+        ]
+      },
+      {
+        "h": "„Neu dabei“",
+        "p": [
+          "In den ersten 14 Tagen nach deiner Registrierung erscheinen dein Nickname und dein Profilbild im Balken „Neu dabei“ auf der Startseite. Du kannst das schon bei der Registrierung abwählen und jederzeit in den Einstellungen ausschalten.",
+          "Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO; Widerspruch über die Einstellung."
+        ]
+      },
+      {
+        "h": "Mitteilungen aufs Handy",
+        "p": [
+          "Nur wenn du Mitteilungen ausdrücklich einschaltest und dein Gerät es erlaubt, speichern wir die Geräteadresse und die Schlüssel, die dein Browser dafür erzeugt. Die Mitteilung schicken wir über den Mitteilungsdienst deines Geräte- bzw. Browser-Herstellers (zum Beispiel Apple, Google, Mozilla oder Microsoft). Der Inhalt ist dabei verschlüsselt, sodass dieser Dienst ihn nicht lesen kann.",
+          "Du kannst Mitteilungen jederzeit ausschalten: In der App löschen wir die Geräteadresse dann sofort; schaltest du sie in den Einstellungen deines Geräts aus, löschen wir sie beim nächsten Versandversuch.",
+          "Rechtsgrundlage: deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), jederzeit widerrufbar."
+        ]
+      },
+      {
+        "h": "App aufs Handy legen",
+        "p": [
+          "Damit sich die App als Symbol auf deinen Startbildschirm legen lässt, wird in deinem Browser ein kleiner Hintergrund-Dienst angemeldet. Er dient nur dazu, Mitteilungen anzuzeigen, und speichert keine Daten. Schließt du den Hinweis „Tracacon App aufs Handy holen“, merkt sich dein Browser das für 7 Tage."
+        ]
+      },
+      {
+        "h": "Termine und Check-in",
+        "p": [
+          "Unsere Termine pflegen wir in unserer Veranstaltungsverwaltung (Odoo) und übernehmen sie in die App; dabei werden keine Daten von dir an Odoo übermittelt. Ticket-Links führen zu EVENTIM; dort gilt die Datenschutzerklärung von EVENTIM.",
+          "Wenn du beim Event den QR-Code am Eingang scannst, speichern wir deinen Besuch. Daraus entstehen Abzeichen wie „Stammgast“. Zu welchen Events du Karten mitbringst, siehst du und sehen andere bei deinen Inseraten.",
+          "Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO."
+        ]
+      },
+      {
+        "h": "Kartendatenbank (TCGdex)",
+        "p": [
+          "Gibst du beim Inserieren Set-Kürzel und Kartennummer ein, fragt unser Server bei der freien Pokémon-Kartendatenbank TCGdex nach, welche Karte das ist. Dabei werden nur Kürzel und Nummer übermittelt, keine Angaben zu dir. Kartenbilder lädt dein Browser direkt von TCGdex (assets.tcgdex.net); dabei erhält TCGdex technisch bedingt deine IP-Adresse.",
+          "Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (einfaches, genaues Inserieren)."
+        ]
+      },
+      {
+        "h": "Instagram-Beiträge von Tracacon",
+        "p": [
+          "Bildbeiträge von unserem eigenen Instagram-Konto übernehmen wir automatisch in den Feed. Dafür greift unser Server auf unser Instagram-Konto zu. Von dir werden dabei keine Daten an Instagram übermittelt."
+        ]
+      },
+      {
+        "h": "Cookies und Speicher im Browser",
+        "p": [
+          "Wir verwenden nur technisch notwendige Cookies: eines, das dich angemeldet hält, und eines für deine Spracheinstellung. Dazu kommt der Hinweis-Speicher aus dem Abschnitt „App aufs Handy legen“. Es gibt keine Tracking- oder Werbe-Cookies, deshalb brauchen wir kein Cookie-Banner (§ 25 Abs. 2 TDDDG).",
+          "Schriftarten liefern wir selbst aus; es besteht keine Verbindung zu Google Fonts."
+        ]
+      },
+      {
+        "h": "Wie lange wir Daten speichern",
+        "p": [
+          "Deine Daten speichern wir, solange du ein Konto hast. Du kannst dein Konto jederzeit in den Einstellungen löschen; dann löschen wir dein Profil und deine Inhalte. Meldungen und Moderationsentscheidungen können wir länger aufbewahren, soweit das zum Schutz der Community oder aus rechtlichen Gründen nötig ist."
+        ]
+      },
+      {
+        "h": "Deine Rechte",
+        "p": [
+          "Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Datenübertragbarkeit sowie das Recht, der Verarbeitung zu widersprechen und erteilte Einwilligungen zu widerrufen. Schreib uns dafür an die Adresse im Impressum.",
+          "Du kannst dich außerdem bei einer Datenschutz-Aufsichtsbehörde beschweren, zum Beispiel beim Landesbeauftragten für den Datenschutz und die Informationsfreiheit Baden-Württemberg."
+        ]
+      }
+    ]
   }
 }
