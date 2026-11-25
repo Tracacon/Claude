@@ -75,11 +75,15 @@ export function parseCardQuery(input: string) {
   return { name, number, total };
 }
 
-/** Schreibweisen einer Nummer in der Datenbank: "5" kann als "5", "05" oder "005" geführt sein */
-function numberVariants(n: string) {
-  if (!/^\d+$/.test(n)) return [n, n.toUpperCase()];
+/**
+ * Schreibweisen einer Nummer in der Datenbank: "5" kann als "5", "05" oder "005" geführt sein.
+ * Achtung: TCGdex findet mit "eq:" bei nur einem einzigen Wert nichts, deshalb immer mehrere Werte.
+ */
+export function numberVariants(n: string) {
+  // Mit Buchstaben (z. B. "SWSH020"): Groß- und Kleinschreibung ergeben immer mindestens zwei Werte
+  if (!/^\d+$/.test(n)) return [...new Set([n, n.toUpperCase(), n.toLowerCase()])];
   const plain = String(Number(n));
-  return [...new Set([plain, plain.padStart(2, "0"), plain.padStart(3, "0"), n])];
+  return [...new Set([plain, plain.padStart(2, "0"), plain.padStart(3, "0"), plain.padStart(4, "0"), `0${plain}`, n])];
 }
 
 function filterQuery(name: string, number: string | null) {
