@@ -9,6 +9,8 @@
     "binding": "ASSETS"
   },
   "observability": { "enabled": true },
+  // Im Cloudflare-Dashboard eingetragene Werte (z. B. Impressumsangaben OPERATOR_…) beim Veröffentlichen behalten
+  "keep_vars": true,
   // Odoo (Termine) und Instagram. Die Geheimnisse ODOO_API_KEY, SUPABASE_SECRET_KEY und
   // INSTAGRAM_TOKEN werden nur im Cloudflare-Dashboard als "Secret" eingetragen, nie hier.
   // Optional: "INSTAGRAM_AUTHOR" = Nickname, unter dem die Instagram-Beiträge erscheinen
