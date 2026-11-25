@@ -42,6 +42,11 @@ export default async function NewListingPage({ params, searchParams }: PageProps
           handover_shipping: false,
           photos: [],
           events: preset,
+          card: null,
+          variant: "",
+          grading_company: "",
+          grading_grade: "",
+          sealed_type: "",
         }}
         events={events}
       />

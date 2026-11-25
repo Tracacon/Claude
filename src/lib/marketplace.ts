@@ -80,6 +80,17 @@ export type ListingDetail = {
     condition: Condition | null;
     card_language: string | null;
     grading: string | null;
+    card_ref: string | null;
+    card_name: string | null;
+    card_name_en: string | null;
+    card_set: string | null;
+    card_number: string | null;
+    card_rarity: string | null;
+    card_image: string | null;
+    variant: Variant | null;
+    grading_company: GradingCompany | null;
+    grading_grade: number | null;
+    sealed_type: SealedType | null;
     city: string | null;
     handover_event: boolean;
     handover_pickup: boolean;
@@ -96,3 +107,44 @@ export type ListingDetail = {
 };
 
 export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+// --- Kartendetails ------------------------------------------------------------
+
+export const VARIANTS = ["normal", "holo", "reverse_holo", "first_edition", "promo", "full_art", "alt_art"] as const;
+export const GRADING_COMPANIES = ["psa", "bgs", "cgc", "sgc", "tag", "ace", "other"] as const;
+/** Noten von 10 bis 1 in halben Schritten */
+export const GRADES = Array.from({ length: 19 }, (_, i) => String((20 - i) / 2)) as readonly string[];
+export const SEALED_TYPES = ["booster", "sleeved_booster", "booster_bundle", "display", "etb", "collection", "tin", "blister", "other"] as const;
+/** Arten, bei denen eine einzelne Karte gesucht werden kann */
+export const KINDS_WITH_CARD: readonly string[] = ["single", "slab"];
+/** Spiele mit Kartensuche aus der Kartendatenbank */
+export const TCGS_WITH_CARD_SEARCH: readonly string[] = ["pokemon"];
+
+export type Variant = (typeof VARIANTS)[number];
+export type GradingCompany = (typeof GRADING_COMPANIES)[number];
+export type SealedType = (typeof SEALED_TYPES)[number];
+
+/** Treffer der Kartensuche */
+export type CardHit = {
+  /** Kennung in der Kartendatenbank, z. B. "sv03.5-199" */
+  id: string;
+  name: string;
+  /** Englischer Name, falls anders als der deutsche */
+  name_en: string | null;
+  set: string;
+  /** Nummer wie auf der Karte, z. B. "199/165" */
+  number: string;
+  /** Kleines Bild der Karte */
+  image: string | null;
+};
+
+/** Gespeicherte Kartendaten eines Inserats */
+export type CardInfo = {
+  card_ref: string;
+  card_name: string;
+  card_name_en: string | null;
+  card_set: string;
+  card_number: string;
+  card_rarity: string | null;
+  card_image: string | null;
+};
