@@ -706,7 +706,10 @@
     "share_post": "Teilen",
     "gridLabel": "Beitrag: {likes} Gefällt mir, {comments} Kommentare",
     "profileEmpty": "Noch keine Beiträge.",
-    "profileEmptyMe": "Teile Fotos deiner Sammlung, Pulls und Tauschbinder."
+    "profileEmptyMe": "Teile Fotos deiner Sammlung, Pulls und Tauschbinder.",
+    "postsOf": "Beiträge von {nickname}",
+    "explorePosts": "Beiträge entdecken",
+    "streamEnd": "Das waren alle Beiträge."
   },
   "Search": {
     "title": "Suchen",

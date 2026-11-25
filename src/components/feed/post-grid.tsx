@@ -4,12 +4,21 @@ import { Link } from "@/i18n/navigation";
 import { postPhotoUrl, type GridPost } from "@/lib/feed-shared";
 
 /** Raster aus quadratischen Vorschaubildern wie im Instagram-Profil */
-export function PostGrid({ posts, label }: { posts: GridPost[]; label: (p: GridPost) => string }) {
+export function PostGrid({
+  posts,
+  label,
+  list,
+}: {
+  posts: GridPost[];
+  label: (p: GridPost) => string;
+  /** Aus welcher Liste weitergescrollt wird (Profil oder Entdecken) */
+  list?: "profil" | "entdecken";
+}) {
   return (
     <ul className="grid grid-cols-3 gap-0.5 sm:gap-1">
       {posts.map((p) => (
         <li key={p.id}>
-          <Link href={`/p/${p.id}`} aria-label={label(p)} className="group relative block aspect-square overflow-hidden bg-night-3">
+          <Link href={list ? { pathname: `/p/${p.id}`, query: { liste: list } } : `/p/${p.id}`} aria-label={label(p)} className="group relative block aspect-square overflow-hidden bg-night-3">
             {p.cover_photo_id && (
               <img src={postPhotoUrl(p.author_id, p.cover_photo_id, "thumb")} alt="" loading="lazy" className="h-full w-full object-cover" />
             )}

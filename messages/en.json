@@ -706,7 +706,10 @@
     "share_post": "Share",
     "gridLabel": "Post: {likes} likes, {comments} comments",
     "profileEmpty": "No posts yet.",
-    "profileEmptyMe": "Share photos of your collection, pulls and trade binders."
+    "profileEmptyMe": "Share photos of your collection, pulls and trade binders.",
+    "postsOf": "Posts by {nickname}",
+    "explorePosts": "Explore posts",
+    "streamEnd": "That's all the posts."
   },
   "Search": {
     "title": "Search",

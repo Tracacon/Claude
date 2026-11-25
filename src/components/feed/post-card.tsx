@@ -22,7 +22,7 @@ export function PostCard({
   loggedIn: boolean;
   isTeam: boolean;
   priority?: boolean;
-  /** Einzelansicht: ganzer Text, kein Link "Alle Kommentare" */
+  /** Einzelansicht: kein Link "Alle Kommentare" (Kommentare stehen darunter) */
   full?: boolean;
 }) {
   const t = useTranslations("Feed");
@@ -33,7 +33,7 @@ export function PostCard({
   const [likes, setLikes] = useState(post.like_count);
   const [burst, setBurst] = useState(false);
   const [slide, setSlide] = useState(0);
-  const [expanded, setExpanded] = useState(full);
+  const [expanded, setExpanded] = useState(false);
   const [, startTransition] = useTransition();
   const track = useRef<HTMLDivElement>(null);
   const lastTap = useRef(0);

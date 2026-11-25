@@ -5,8 +5,8 @@ import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { requireProfile, requireRole } from "@/lib/auth";
 import { mapDbError } from "@/lib/db-errors";
-import { getFeed } from "@/lib/feed";
-import { CAPTION_MAX, COMMENT_MAX, POST_BUCKET, POST_PHOTOS_MAX, type FeedItem } from "@/lib/feed-shared";
+import { getFeed, getPost } from "@/lib/feed";
+import { CAPTION_MAX, COMMENT_MAX, POST_BUCKET, POST_PHOTOS_MAX, type FeedItem, type PostItem } from "@/lib/feed-shared";
 import { UUID_PATTERN } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/server";
 import { moderationReasonSchema, reportSchema } from "@/lib/validation";
@@ -17,6 +17,13 @@ export type PostState = { ok?: boolean; error?: string };
 export async function loadMoreFeed(before: string): Promise<FeedItem[]> {
   if (Number.isNaN(Date.parse(before))) return [];
   return getFeed(before);
+}
+
+/** Beiträge zum Weiterscrollen (Liste aus Profil oder Entdecken) nachladen */
+export async function loadPosts(ids: string[]): Promise<PostItem[]> {
+  const clean = (Array.isArray(ids) ? ids : []).filter((x) => typeof x === "string" && UUID_PATTERN.test(x)).slice(0, 6);
+  const posts = await Promise.all(clean.map((id) => getPost(id)));
+  return posts.filter((p): p is PostItem => p !== null);
 }
 
 /** Beitrag veröffentlichen. Die Fotos hat der Browser vorher in den eigenen Ordner geladen. */
