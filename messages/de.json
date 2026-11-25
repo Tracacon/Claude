@@ -956,5 +956,12 @@
         ]
       }
     ]
+  },
+  "Errors": {
+    "title": "Da ist etwas schiefgegangen.",
+    "text": "Das lag nicht an dir. Versuch es bitte gleich noch einmal.",
+    "retry": "Nochmal versuchen",
+    "home": "Zur Startseite",
+    "code": "Fehlercode: {code}"
   }
 }
