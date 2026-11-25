@@ -205,7 +205,10 @@
     "sync_failed": "The events couldn't be saved.",
     "photo_required": "Choose at least one photo.",
     "caption_too_long": "The caption is too long (max. 2,200 characters).",
-    "comment_invalid": "Comments must be 1 to 500 characters."
+    "comment_invalid": "Comments must be 1 to 500 characters.",
+    "instagram_not_configured": "Instagram isn't set up yet.",
+    "instagram_token": "Instagram rejects the key. Please create a new one and add it at Cloudflare.",
+    "instagram_failed": "Something went wrong with Instagram. Details are shown above."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -698,7 +701,10 @@
     "share_post": "Share",
     "gridLabel": "Post: {likes} likes, {comments} comments",
     "profileEmpty": "No posts yet.",
-    "profileEmptyMe": "Share photos of your collection, pulls and trade binders."
+    "profileEmptyMe": "Share photos of your collection, pulls and trade binders.",
+    "viaInstagram": "via Instagram",
+    "playOnInstagram": "Play video on Instagram",
+    "openInstagram": "View on Instagram"
   },
   "Search": {
     "title": "Search",
@@ -712,5 +718,15 @@
     "searchMarket": "Search the marketplace for “{q}”",
     "explore": "Explore",
     "exploreEmpty": "Community posts will show up here soon."
+  },
+  "Instagram": {
+    "title": "Instagram",
+    "intro": "New posts from your Instagram automatically show up in everyone's feed. The app checks at most every 30 minutes.",
+    "notConfigured": "Not set up yet: the INSTAGRAM_TOKEN secret is missing at Cloudflare.",
+    "total": "{count, plural, one {# post imported} other {# posts imported}}",
+    "syncing": "Checking …",
+    "syncNow": "Check Instagram now",
+    "imported": "{count, plural, =0 {No new posts.} one {# new post imported.} other {# new posts imported.}}",
+    "pending": "{count, plural, one {# more follows next time.} other {# more follow next time.}}"
   }
 }

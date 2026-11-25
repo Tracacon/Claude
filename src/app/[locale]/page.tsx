@@ -7,6 +7,7 @@ import { getMyProfile } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/env";
 import { ensureEventsFresh, getEvents } from "@/lib/events";
 import { FEED_PAGE, getFeed } from "@/lib/feed";
+import { ensureInstagramFresh } from "@/lib/instagram";
 
 /** Startseite = Feed wie bei Instagram */
 export default async function FeedPage({ params }: PageProps<"/[locale]">) {
@@ -16,7 +17,7 @@ export default async function FeedPage({ params }: PageProps<"/[locale]">) {
   const t = await getTranslations("Feed");
   const tHome = await getTranslations("Home");
   const configured = isSupabaseConfigured();
-  await ensureEventsFresh();
+  await Promise.all([ensureEventsFresh(), ensureInstagramFresh()]);
   const [profile, events, items] = await Promise.all([getMyProfile(), getEvents(false, 12), getFeed()]);
   const loggedIn = Boolean(profile?.nickname);
   const isTeam = profile?.role === "team" || profile?.role === "admin";

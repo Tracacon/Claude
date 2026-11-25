@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { mapDbError } from "@/lib/db-errors";
 import { syncEvents } from "@/lib/events";
+import { syncInstagram } from "@/lib/instagram";
 import { UUID_PATTERN } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/server";
 
@@ -29,4 +30,14 @@ export async function renewCheckinCode(_prev: CodeState, formData: FormData): Pr
   if (error) return { error: mapDbError(error) };
   revalidatePath(`/team/termine/${id}/aushang`);
   return { ok: true };
+}
+
+export type InstagramState = { ok?: boolean; imported?: number; pending?: number; error?: string };
+
+/** Team: sofort bei Instagram nach neuen Beiträgen sehen */
+export async function syncInstagramNow(): Promise<InstagramState> {
+  await requireRole("team", "admin");
+  const r = await syncInstagram();
+  revalidatePath("/", "layout");
+  return r.ok ? { ok: true, imported: r.imported, pending: r.pending } : { error: r.error };
 }

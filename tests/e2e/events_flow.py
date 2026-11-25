@@ -155,7 +155,7 @@ with sync_playwright() as p:
     admin.get_by_role("button", name="Mein Profil").click()
     admin.get_by_role("menu").get_by_role("link", name="Termine & Check-in").click()
     expect(admin.get_by_role("heading", name="Termine und Check-in")).to_be_visible()
-    expect(admin.get_by_text("Zuletzt abgeglichen")).to_be_visible()
+    expect(admin.get_by_text("Zuletzt abgeglichen").first).to_be_visible()
     expect(admin.get_by_text("Interner Planungstermin")).to_be_visible()  # Team sieht auch ausgeblendete
     admin.get_by_role("button", name="Jetzt aus Odoo holen").click()
     expect(admin.get_by_text("3 Termine übernommen")).to_be_visible(timeout=15000)

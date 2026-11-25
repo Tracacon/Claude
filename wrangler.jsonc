@@ -9,8 +9,10 @@
     "binding": "ASSETS"
   },
   "observability": { "enabled": true },
-  // Odoo (Termine). Die Geheimnisse ODOO_API_KEY und SUPABASE_SECRET_KEY werden nur im
-  // Cloudflare-Dashboard als "Secret" eingetragen, nie hier.
+  // Odoo (Termine) und Instagram. Die Geheimnisse ODOO_API_KEY, SUPABASE_SECRET_KEY und
+  // INSTAGRAM_TOKEN werden nur im Cloudflare-Dashboard als "Secret" eingetragen, nie hier.
+  // Optional: "INSTAGRAM_AUTHOR" = Nickname, unter dem die Instagram-Beiträge erscheinen
+  // (sonst die erste Verwaltung).
   "vars": {
     "ODOO_URL": "https://tracacon.odoo.com",
     "ODOO_PUBLIC_URL": "https://www.tracacon.de"

@@ -26,6 +26,9 @@ const KNOWN = [
   "too_many_photos",
   "caption_too_long",
   "comment_invalid",
+  "instagram_not_configured",
+  "instagram_token",
+  "instagram_failed",
 ] as const;
 
 const ALIASES: Record<string, string> = {

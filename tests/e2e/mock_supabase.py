@@ -47,6 +47,38 @@ sync_state = {"synced_at": None, "error": None}
 odoo_calls: list[str] = []
 
 
+IG_TOKEN = "ig-test-token"
+ig_state = {"token": None, "token_refreshed_at": None, "synced_at": None, "error": None, "imported_count": 0}
+ig_refreshes: list[str] = []
+ig_enabled = {"on": False}  # nur im Instagram-Test eingeschaltet
+
+
+def jpeg(color):
+    import io
+    from PIL import Image
+    buf = io.BytesIO()
+    Image.new("RGB", (1080, 1350), color).save(buf, "JPEG")
+    return buf.getvalue()
+
+
+IG_IMAGES = {"/ig/a.jpg": (230, 90, 40), "/ig/b.jpg": (40, 160, 90), "/ig/c.jpg": (120, 60, 200), "/ig/reel.jpg": (20, 20, 20)}
+
+
+def ig_media():
+    base = "http://127.0.0.1:54321"
+    return [
+        {"id": "ig3", "caption": "Trade Night heute ab 18 Uhr! #pokemon", "media_type": "CAROUSEL_ALBUM", "permalink": "https://www.instagram.com/p/IG3/",
+         "timestamp": "2026-11-24T17:00:00+0000",
+         "children": {"data": [{"media_type": "IMAGE", "media_url": base + "/ig/a.jpg"}, {"media_type": "IMAGE", "media_url": base + "/ig/b.jpg"}]}},
+        {"id": "ig2", "caption": "Neuer Reel aus der Halle", "media_type": "VIDEO", "thumbnail_url": base + "/ig/reel.jpg",
+         "media_url": base + "/ig/reel.mp4", "permalink": "https://www.instagram.com/reel/IG2/", "timestamp": "2026-11-22T12:00:00+0000"},
+        {"id": "ig1", "caption": "Danke für die tolle Messe!", "media_type": "IMAGE", "media_url": base + "/ig/c.jpg",
+         "permalink": "https://www.instagram.com/p/IG1/", "timestamp": "2026-11-20T10:00:00+0000"},
+        {"id": "ig0", "caption": "Ganz alter Beitrag", "media_type": "IMAGE", "media_url": base + "/ig/c.jpg",
+         "permalink": "https://www.instagram.com/p/IG0/", "timestamp": "2026-11-01T10:00:00+0000"},
+    ]
+
+
 def odoo_time(hours):
     return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time() + hours * 3600))
 
@@ -96,7 +128,8 @@ def photos_of(pid):
 def post_item(po, uid):
     a = profiles[po["author_id"]]
     return {"type": "post", "id": po["id"], "created_at": po["created_at"], "sort_at": max(po["created_at"], po.get("highlighted_at") or ""),
-            "caption": po["caption"], "highlighted": bool(po.get("highlighted_at")), "hidden": po["hidden"],
+            "caption": po["caption"], "highlighted": bool(po.get("highlighted_at")) and po.get("source", "app") == "app", "hidden": po["hidden"],
+            "source": po.get("source", "app"), "external_url": po.get("external_url"), "is_video": po.get("is_video", False),
             "author": {"id": a["id"], "nickname": a["nickname"], "avatar_id": a["avatar_id"], "role": a["role"]},
             "photos": photos_of(po["id"]), "like_count": sum(1 for (p_, _) in post_likes if p_ == po["id"]),
             "comment_count": sum(1 for c in comments.values() if c["post_id"] == po["id"]),
@@ -344,6 +377,24 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(200, sent_codes)
         if url.path == "/test/odoo-calls":
             return self.send(200, odoo_calls)
+        if url.path in IG_IMAGES:
+            data = jpeg(IG_IMAGES[url.path])
+            self.send_response(200)
+            self.send_header("Content-Type", "image/jpeg")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+        q = parse_qs(url.query)
+        if url.path == "/refresh_access_token":
+            ig_refreshes.append(q.get("access_token", [""])[0])
+            return self.send(200, {"access_token": IG_TOKEN + "-verlaengert", "token_type": "bearer", "expires_in": 5184000})
+        if url.path.endswith("/me/media"):
+            if q.get("access_token", [""])[0] not in (IG_TOKEN, IG_TOKEN + "-verlaengert"):
+                return self.send(400, {"error": {"message": "Invalid OAuth access token", "code": 190}})
+            return self.send(200, {"data": ig_media() if ig_enabled["on"] else []})
+        if url.path == "/test/ig-refreshes":
+            return self.send(200, ig_refreshes)
         return self.send(404, {"message": "not found"})
 
     def do_POST(self):
@@ -370,9 +421,11 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(200, {"signedURL": f"/object/sign/{bucket}/{path}?token={sign_token(bucket, path)}"})
         if url.path.startswith("/storage/v1/object/"):
             u = self.me()
+            if not u and self.headers.get("Authorization", "") == f"Bearer {SERVICE_KEY}":
+                u = {"id": "service"}
             bucket, path = url.path.split("/storage/v1/object/", 1)[1].split("/", 1)
             body = self.raw_body()
-            if not can_write(u, bucket, path):
+            if u and u["id"] != "service" and not can_write(u, bucket, path) or not u:
                 return self.send(403, {"statusCode": "403", "error": "Unauthorized", "message": "new row violates row-level security policy"})
             if len(body) > 2097152:
                 return self.send(413, {"statusCode": "413", "error": "Payload too large", "message": "too large"})
@@ -431,6 +484,9 @@ class Handler(BaseHTTPRequestHandler):
             return self.rpc(url.path.rsplit("/", 1)[1], data)
         if url.path.startswith("/json/2/"):
             return self.odoo(url.path.split("/json/2/", 1)[1], data)
+        if url.path == "/test/ig":
+            ig_enabled["on"] = bool(data.get("on"))
+            return self.send(200, {})
         if url.path == "/test/odoo":
             # Termin verschieben: {"id": 8, "hours": -1} lässt ihn jetzt beginnen
             for e in odoo_events:
@@ -582,7 +638,7 @@ class Handler(BaseHTTPRequestHandler):
         return self.send(200, out)
 
     def rpc_inner(self, name, data):
-        if name in ("sync_events", "sync_events_failed"):
+        if name in ("sync_events", "sync_events_failed", "instagram_state", "import_instagram_post", "instagram_sync_done"):
             if self.headers.get("Authorization", "") != f"Bearer {SERVICE_KEY}":
                 return self.send(401, {"code": "42501", "message": "permission denied for function " + name})
             return self.service_rpc(name, data)
@@ -656,6 +712,32 @@ class Handler(BaseHTTPRequestHandler):
         return self.send(404, {"message": "unknown rpc"})
 
     def service_rpc(self, name, data):
+        if name == "instagram_state":
+            nick = profile_by_nick(data.get("p_author_nickname") or "")
+            admin = sorted((p for p in profiles.values() if p["role"] == "admin" and p["nickname"]), key=lambda p: p["created_at"])
+            author = nick or (admin[0] if admin else None)
+            return self.send(200, {"token": ig_state["token"], "token_refreshed_at": ig_state["token_refreshed_at"],
+                                   "synced_at": ig_state["synced_at"], "author_id": author["id"] if author else None,
+                                   "known": [po["external_id"] for po in posts.values() if po.get("source") == "instagram"]})
+        if name == "import_instagram_post":
+            p = data["p"]
+            ex = next((po for po in posts.values() if po.get("external_id") == p["external_id"]), None)
+            if ex:
+                return self.send(200, ex["id"])
+            pid = str(uuid.uuid4())
+            ts = p["created_at"].replace("+0000", "Z")
+            posts[pid] = {"id": pid, "author_id": p["author_id"], "caption": p["caption"], "created_at": ts, "highlighted_at": ts,
+                          "hidden": False, "source": "instagram", "external_id": p["external_id"], "external_url": p["external_url"],
+                          "is_video": p["is_video"]}
+            for i, f in enumerate(p["photos"]):
+                post_photos[f] = {"post_id": pid, "position": i}
+            ig_state["imported_count"] += 1
+            return self.send(200, pid)
+        if name == "instagram_sync_done":
+            ig_state.update(synced_at=now_iso(), error=data.get("p_error"))
+            if data.get("p_token"):
+                ig_state.update(token=data["p_token"], token_refreshed_at=now_iso())
+            return self.send(204)
         if name == "sync_events_failed":
             sync_state.update(synced_at=now_iso(), error=data["p_error"])
             return self.send(204)
@@ -1115,6 +1197,10 @@ class Handler(BaseHTTPRequestHandler):
                 if r.get("comment_id") == c["id"] and r["status"] == "open":
                     r.update(status="resolved", comment_id=None, post_id=c["post_id"])
             return self.send(204)
+        if name == "instagram_sync_status":
+            if not is_team(u["id"]):
+                raise RpcError(403, "42501", "forbidden")
+            return self.send(200, {k: ig_state[k] for k in ("synced_at", "error", "imported_count", "token_refreshed_at")})
         if name == "set_listing_events":
             l = listings.get(data["p_listing"])
             if not l or l["owner_id"] != u["id"]:

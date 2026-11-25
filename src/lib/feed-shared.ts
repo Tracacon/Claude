@@ -15,6 +15,10 @@ export type PostItem = {
   caption: string;
   highlighted: boolean;
   hidden: boolean;
+  /** "instagram" bei automatisch übernommenen Beiträgen */
+  source?: "app" | "instagram";
+  external_url?: string | null;
+  is_video?: boolean;
   author: FeedAuthor;
   photos: string[];
   like_count: number;
