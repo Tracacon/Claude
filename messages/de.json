@@ -440,7 +440,17 @@
     "cardSet": "Set",
     "cardNumber": "Nummer",
     "cardName": "Karte",
-    "stepBack": "Zurück"
+    "stepBack": "Zurück",
+    "codeTitle": "Schnell über Set-Kürzel und Nummer",
+    "codeLabel": "Set-Kürzel",
+    "codePlaceholder": "z. B. MEW",
+    "numberLabel": "Nummer",
+    "numberPlaceholder": "z. B. 199",
+    "codeHint": "Kürzel nicht im Kopf? Tipp den Set-Namen (z. B. „151“ oder „Fatale Flammen“), dann schlagen wir dir das Kürzel vor.",
+    "codeUnknown": "Dieses Kürzel kennen wir nicht. Tipp den Set-Namen, dann zeigen wir dir das passende Kürzel.",
+    "codeSet": "{code} = {name}",
+    "codeNoHit": "In diesem Set gibt es keine Karte mit dieser Nummer.",
+    "orByName": "Oder über den Namen suchen"
   },
   "Moderation": {
     "title": "Moderation",

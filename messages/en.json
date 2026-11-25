@@ -440,7 +440,17 @@
     "cardSet": "Set",
     "cardNumber": "Number",
     "cardName": "Card",
-    "stepBack": "Back"
+    "stepBack": "Back",
+    "codeTitle": "Quick: set code and number",
+    "codeLabel": "Set code",
+    "codePlaceholder": "e.g. MEW",
+    "numberLabel": "Number",
+    "numberPlaceholder": "e.g. 199",
+    "codeHint": "Don't know the code? Type the set name (German names, e.g. “151”) and we'll suggest it.",
+    "codeUnknown": "We don't know this code. Type the set name and we'll show you the matching code.",
+    "codeSet": "{code} = {name}",
+    "codeNoHit": "There is no card with this number in this set.",
+    "orByName": "Or search by name"
   },
   "Moderation": {
     "title": "Moderation",
