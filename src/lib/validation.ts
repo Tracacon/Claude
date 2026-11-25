@@ -10,6 +10,7 @@ import {
   REPORT_REASONS,
   TCGS,
   UUID_PATTERN,
+  offerHasPrice,
   parseEuroToCents,
 } from "@/lib/marketplace";
 
@@ -168,8 +169,8 @@ export const listingSchema = z
       .pipe(z.array(z.string()).max(MAX_PHOTOS, { message: "too_many_photos" })),
   })
   .transform((v, ctx) => {
-    const cents = v.offer === "trade" ? null : parseEuroToCents(v.price);
-    if (v.offer !== "trade" && (cents === null || Number.isNaN(cents))) {
+    const cents = offerHasPrice(v.offer) ? parseEuroToCents(v.price) : null;
+    if (offerHasPrice(v.offer) && (cents === null || Number.isNaN(cents))) {
       ctx.addIssue({ code: "custom", path: ["price"], message: cents === null ? "price_required" : "invalid_price" });
       return z.NEVER;
     }
@@ -189,7 +190,7 @@ export const listingSchema = z
     const card = { code: withCard ? v.card_code : null, number: withCard ? v.card_no : null };
     const { price: _price, card_code: _code, card_no: _no, ...rest } = v;
     void [_price, _code, _no];
-    return { ...rest, price_cents: cents, negotiable: v.offer === "trade" ? false : v.negotiable, card };
+    return { ...rest, price_cents: cents, negotiable: offerHasPrice(v.offer) ? v.negotiable : false, card };
   });
 
 export type ListingInput = z.output<typeof listingSchema>;

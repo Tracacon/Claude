@@ -238,7 +238,8 @@
   "Offer": {
     "sell": "For sale",
     "trade": "Trade",
-    "sell_or_trade": "Sale or trade"
+    "sell_or_trade": "Sale or trade",
+    "gift": "Give away"
   },
   "Condition": {
     "mint": "Mint (M)",
@@ -303,7 +304,8 @@
     "tradeOnly": "Trade",
     "vb": "OBO",
     "noPhoto": "No photo",
-    "sell": "Sell"
+    "sell": "Sell",
+    "giftOnly": "Free"
   },
   "Listing": {
     "newTitle": "Create listing",
