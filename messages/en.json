@@ -783,5 +783,29 @@
     "newBadge": "New",
     "welcome": "Welcome, @{nickname}!",
     "welcomeRich": "Welcome, <b>@{nickname}</b>!"
+  },
+  "Push": {
+    "title": "Tracacon App",
+    "follow": "{nickname} started following you.",
+    "followRequest": "{nickname} wants to follow you.",
+    "followAccepted": "{nickname} accepted your request.",
+    "like": "{nickname} liked your post.",
+    "comment": "{nickname} commented: “{text}”",
+    "many": "You have {count} new notifications.",
+    "test": "It works! This is what Tracacon App notifications look like.",
+    "settingsTitle": "Phone notifications",
+    "settingsText": "Get a notification on your phone when someone follows you, sends a request, or likes and comments on your posts. This applies to this device; turn it on separately on other devices.",
+    "enable": "Turn on notifications",
+    "disable": "Turn off",
+    "on": "On for this device",
+    "testButton": "Send test",
+    "enabled": "Turned on. Tap “Send test” to try it.",
+    "testSent": "Test sent – the notification should appear shortly.",
+    "error": "That didn't work. Please try again.",
+    "unsupported": "This browser can't receive notifications.",
+    "iosInstall": "On iPhone, notifications only work if the app is on your home screen: in Safari tap the share icon, then “Add to Home Screen”. Then open the app from the icon and turn notifications on here.",
+    "denied": "Notifications are blocked for this site. You can allow them again in your phone or browser settings.",
+    "notReady": "Phone notifications are being set up and will be available soon.",
+    "hint": "Don't miss a thing: get notified on your phone when someone follows you or likes your posts."
   }
 }

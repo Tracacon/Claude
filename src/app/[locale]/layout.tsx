@@ -23,6 +23,9 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
     title: { default: t("title"), template: `%s · ${t("title")}` },
     description: t("description"),
     robots: { index: false, follow: false }, // bis zum offiziellen Start
+    applicationName: "Tracacon App",
+    appleWebApp: { capable: true, title: "Tracacon", statusBarStyle: "black" },
+    icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
   };
 }
 

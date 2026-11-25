@@ -3,11 +3,13 @@ import type { Metadata } from "next";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { Avatar } from "@/components/avatar";
 import { FollowButton } from "@/components/follow-button";
+import { PushSettings } from "@/components/push-settings";
 import { RequestButtons } from "@/components/social-buttons";
 import { Link } from "@/i18n/navigation";
 import { requireProfile } from "@/lib/auth";
 import { postPhotoUrl } from "@/lib/feed-shared";
 import { getNotifications, markNotificationsRead, type AppNotification } from "@/lib/notifications";
+import { isPushConfigured } from "@/lib/push";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/aktivitaet">): Promise<Metadata> {
   const { locale } = await params;
@@ -42,6 +44,7 @@ export default async function ActivityPage({ params }: PageProps<"/[locale]/akti
   return (
     <div className="mx-auto max-w-xl space-y-4">
       <h1 className="text-2xl font-bold">{t("title")}</h1>
+      <PushSettings available={isPushConfigured()} compact />
       {items.length === 0 ? (
         <div className="card space-y-2 text-center">
           <p className="font-display text-lg font-semibold">{t("emptyTitle")}</p>
