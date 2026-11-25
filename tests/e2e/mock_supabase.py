@@ -393,8 +393,9 @@ class Handler(BaseHTTPRequestHandler):
         if url.path == "/refresh_access_token":
             ig_refreshes.append(q.get("access_token", [""])[0])
             return self.send(200, {"access_token": IG_TOKEN + "-verlaengert", "token_type": "bearer", "expires_in": 5184000})
-        if url.path.endswith("/me/media"):
-            if q.get("access_token", [""])[0] not in (IG_TOKEN, IG_TOKEN + "-verlaengert"):
+        if url.path.endswith("/me/media") or url.path == "/v23.0/17841477767684437/media":
+            ok = ("EAA-test",) if not url.path.endswith("/me/media") else (IG_TOKEN, IG_TOKEN + "-verlaengert")
+            if q.get("access_token", [""])[0] not in ok:
                 return self.send(400, {"error": {"message": "Invalid OAuth access token", "code": 190}})
             return self.send(200, {"data": ig_media() if ig_enabled["on"] else []})
         if url.path == "/test/ig-refreshes":
