@@ -711,15 +711,16 @@
   "Search": {
     "title": "Search",
     "label": "Search term",
-    "placeholder": "Search",
+    "placeholder": "Search members, events, cards",
     "events": "Events",
     "market": "Marketplace",
-    "people": "People",
-    "noPeople": "No people found.",
+    "people": "Members",
+    "noPeople": "No members found.",
     "followers": "{count, plural, one {# follower} other {# followers}}",
     "searchMarket": "Search the marketplace for “{q}”",
     "explore": "Explore",
-    "exploreEmpty": "Community posts will show up here soon."
+    "exploreEmpty": "Community posts will show up here soon.",
+    "hint": "Type a name – matching members show up right away."
   },
   "Instagram": {
     "title": "Instagram",
