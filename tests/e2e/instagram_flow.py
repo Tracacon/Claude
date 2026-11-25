@@ -64,16 +64,16 @@ with sync_playwright() as p:
             break
     carousel = guest.get_by_role("article").filter(has_text="Trade Night heute ab 18 Uhr!")
     expect(carousel).to_be_visible()
-    expect(carousel.get_by_text("über Instagram")).to_be_visible()
-    expect(carousel.get_by_text("1/2")).to_be_visible()
-    expect(carousel.get_by_role("link", name="Auf Instagram ansehen")).to_have_attribute("href", "https://www.instagram.com/p/IG3/")
-    reel = guest.get_by_role("article").filter(has_text="Neuer Reel aus der Halle")
-    expect(reel.get_by_role("link", name="Video auf Instagram abspielen")).to_have_attribute("href", "https://www.instagram.com/reel/IG2/")
+    expect(carousel.get_by_text("1/2")).to_be_visible()  # Video im Karussell übersprungen
+    expect(carousel.get_by_text("Instagram")).to_have_count(0)
+    expect(guest.locator('a[href*="instagram.com"]')).to_have_count(0)  # kein Verweis auf Instagram
+    expect(guest.get_by_text("Neuer Reel aus der Halle")).to_have_count(0)  # Reels werden nicht übernommen
     expect(guest.get_by_text("Danke für die tolle Messe!")).to_be_visible()
+    expect(guest.get_by_text("Noch ein Foto")).to_be_visible()
     expect(guest.get_by_text("Ganz alter Beitrag")).to_have_count(0)  # höchstens 3 je Durchlauf
     guest.wait_for_function("() => [...document.querySelectorAll('article img')].some(i => i.complete && i.naturalWidth > 0)")
     shot(guest, "70-instagram-feed")
-    step("Feed übernimmt automatisch neue Instagram-Beiträge: Karussell, Reel mit Play-Link, Foto")
+    step("Feed übernimmt automatisch Bildbeiträge als eigene Beiträge, ohne Instagram-Hinweis; Reels nicht")
 
     refreshes = json.loads(urllib.request.urlopen("http://127.0.0.1:54321/test/ig-refreshes").read())
     assert refreshes == ["ig-test-token"], refreshes
@@ -88,7 +88,7 @@ with sync_playwright() as p:
     step("Team holt den Rest; doppelte Beiträge entstehen nicht")
 
     admin.goto(f"{BASE}/de/profil")
-    expect(admin.get_by_role("link", name=re.compile(r"^4\s*Beiträge"))).to_be_visible()
+    expect(admin.get_by_role("link", name=re.compile(r"^4\s*Beiträge"))).to_be_visible()  # 3 + 1 ältere, ohne Reel
     step("Beiträge stehen im Profil des Team-Kontos")
 
     browser.close()

@@ -701,10 +701,7 @@
     "share_post": "Share",
     "gridLabel": "Post: {likes} likes, {comments} comments",
     "profileEmpty": "No posts yet.",
-    "profileEmptyMe": "Share photos of your collection, pulls and trade binders.",
-    "viaInstagram": "via Instagram",
-    "playOnInstagram": "Play video on Instagram",
-    "openInstagram": "View on Instagram"
+    "profileEmptyMe": "Share photos of your collection, pulls and trade binders."
   },
   "Search": {
     "title": "Search",
@@ -721,7 +718,7 @@
   },
   "Instagram": {
     "title": "Instagram",
-    "intro": "New posts from your Instagram automatically show up in everyone's feed. The app checks at most every 30 minutes.",
+    "intro": "New photo posts from your Instagram automatically appear as posts of the team profile in everyone's feed. Videos and reels are skipped. The app checks at most every 30 minutes.",
     "notConfigured": "Not set up yet: the INSTAGRAM_TOKEN secret is missing at Cloudflare.",
     "total": "{count, plural, one {# post imported} other {# posts imported}}",
     "syncing": "Checking …",

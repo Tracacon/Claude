@@ -69,11 +69,15 @@ def ig_media():
     return [
         {"id": "ig3", "caption": "Trade Night heute ab 18 Uhr! #pokemon", "media_type": "CAROUSEL_ALBUM", "permalink": "https://www.instagram.com/p/IG3/",
          "timestamp": "2026-11-24T17:00:00+0000",
-         "children": {"data": [{"media_type": "IMAGE", "media_url": base + "/ig/a.jpg"}, {"media_type": "IMAGE", "media_url": base + "/ig/b.jpg"}]}},
+         "children": {"data": [{"media_type": "IMAGE", "media_url": base + "/ig/a.jpg"},
+                               {"media_type": "VIDEO", "media_url": base + "/ig/clip.mp4", "thumbnail_url": base + "/ig/reel.jpg"},
+                               {"media_type": "IMAGE", "media_url": base + "/ig/b.jpg"}]}},
         {"id": "ig2", "caption": "Neuer Reel aus der Halle", "media_type": "VIDEO", "thumbnail_url": base + "/ig/reel.jpg",
          "media_url": base + "/ig/reel.mp4", "permalink": "https://www.instagram.com/reel/IG2/", "timestamp": "2026-11-22T12:00:00+0000"},
         {"id": "ig1", "caption": "Danke für die tolle Messe!", "media_type": "IMAGE", "media_url": base + "/ig/c.jpg",
          "permalink": "https://www.instagram.com/p/IG1/", "timestamp": "2026-11-20T10:00:00+0000"},
+        {"id": "ig1b", "caption": "Noch ein Foto", "media_type": "IMAGE", "media_url": base + "/ig/a.jpg",
+         "permalink": "https://www.instagram.com/p/IG1B/", "timestamp": "2026-11-19T10:00:00+0000"},
         {"id": "ig0", "caption": "Ganz alter Beitrag", "media_type": "IMAGE", "media_url": base + "/ig/c.jpg",
          "permalink": "https://www.instagram.com/p/IG0/", "timestamp": "2026-11-01T10:00:00+0000"},
     ]

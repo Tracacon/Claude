@@ -4,7 +4,7 @@
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useRef, useState, useTransition } from "react";
 import { Avatar } from "@/components/avatar";
-import { CommentIcon, HeartIcon, InstagramIcon, PlayIcon, ShareIcon } from "@/components/icons";
+import { CommentIcon, HeartIcon, ShareIcon } from "@/components/icons";
 import { Link, useRouter } from "@/i18n/navigation";
 import { toggleLike } from "@/lib/actions/posts";
 import { postPhotoUrl, type PostItem } from "@/lib/feed-shared";
@@ -92,7 +92,6 @@ export function PostCard({
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold">{post.author.nickname}</span>
             {post.highlighted && <span className="block text-xs text-brand">✦ {t("highlighted")}</span>}
-            {post.source === "instagram" && <span className="block text-xs text-cream/60">{t("viaInstagram")}</span>}
             {post.hidden && <span className="block text-xs text-danger">{t("hidden")}</span>}
           </span>
         </Link>
@@ -122,20 +121,6 @@ export function PostCard({
             {slide + 1}/{post.photos.length}
           </span>
         )}
-        {post.is_video && post.external_url && (
-          <a
-            href={post.external_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            aria-label={t("playOnInstagram")}
-            className="absolute inset-0 flex items-center justify-center"
-          >
-            <span className="flex size-16 items-center justify-center rounded-full bg-night/70 text-white backdrop-blur">
-              <PlayIcon className="size-8 translate-x-0.5" />
-            </span>
-          </a>
-        )}
         {burst && (
           <span aria-hidden className="pointer-events-none absolute inset-0 flex items-center justify-center text-white drop-shadow-lg">
             <HeartIcon className="size-24 animate-ping" filled />
@@ -154,11 +139,6 @@ export function PostCard({
           <button type="button" onClick={() => void share()} aria-label={t("share")} className="text-cream">
             <ShareIcon className="size-6" />
           </button>
-          {post.external_url && (
-            <a href={post.external_url} target="_blank" rel="noopener noreferrer" aria-label={t("openInstagram")} className="text-cream">
-              <InstagramIcon className="size-6" />
-            </a>
-          )}
           {post.photos.length > 1 && (
             <span className="mx-auto flex gap-1 pr-16" aria-hidden>
               {post.photos.map((ph, i) => (

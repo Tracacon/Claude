@@ -701,10 +701,7 @@
     "share_post": "Teilen",
     "gridLabel": "Beitrag: {likes} Gefällt mir, {comments} Kommentare",
     "profileEmpty": "Noch keine Beiträge.",
-    "profileEmptyMe": "Teile Fotos deiner Sammlung, Pulls und Tauschbinder.",
-    "viaInstagram": "über Instagram",
-    "playOnInstagram": "Video auf Instagram abspielen",
-    "openInstagram": "Auf Instagram ansehen"
+    "profileEmptyMe": "Teile Fotos deiner Sammlung, Pulls und Tauschbinder."
   },
   "Search": {
     "title": "Suchen",
@@ -721,7 +718,7 @@
   },
   "Instagram": {
     "title": "Instagram",
-    "intro": "Neue Beiträge von eurem Instagram erscheinen automatisch für alle im Feed. Die App sieht höchstens alle 30 Minuten nach.",
+    "intro": "Neue Bildbeiträge von eurem Instagram erscheinen automatisch als Beiträge des Team-Profils bei allen im Feed. Videos und Reels werden nicht übernommen. Die App sieht höchstens alle 30 Minuten nach.",
     "notConfigured": "Noch nicht eingerichtet: Bei Cloudflare fehlt das Geheimnis INSTAGRAM_TOKEN.",
     "total": "{count, plural, one {# Beitrag übernommen} other {# Beiträge übernommen}}",
     "syncing": "Sehe nach …",

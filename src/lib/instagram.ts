@@ -4,7 +4,8 @@ import { POST_BUCKET } from "@/lib/feed-shared";
 import { hasServiceKey, serviceClient } from "@/lib/service";
 
 /**
- * Übernimmt die Beiträge des TRACACON-Instagram-Kontos in den Feed.
+ * Übernimmt die Bildbeiträge des TRACACON-Instagram-Kontos als eigene Beiträge in den Feed
+ * (Fotos und Text werden kopiert, ohne Verweis auf Instagram).
  * Offizielle Schnittstelle von Instagram (Instagram API mit Instagram-Anmeldung), nur lesend.
  * Zugangsschlüssel: Cloudflare-Geheimnis INSTAGRAM_TOKEN; verlängerte Schlüssel speichert die App selbst.
  */
@@ -47,15 +48,16 @@ async function getJson(url: string) {
   return data;
 }
 
-/** Bilder eines Beitrags (bei Videos das Titelbild) */
+/** Nur Bildbeiträge: einzelne Fotos und die Fotos aus Karussells. Videos und Reels werden übersprungen. */
 function imagesOf(m: Media): string[] {
-  const pick = (x: { media_type: string; media_url?: string; thumbnail_url?: string }) =>
-    x.media_type === "VIDEO" ? x.thumbnail_url : x.media_url;
-  if (m.media_type === "CAROUSEL_ALBUM" && m.children?.data?.length) {
-    return m.children.data.map(pick).filter((u): u is string => Boolean(u)).slice(0, 10);
+  if (m.media_type === "IMAGE") return m.media_url ? [m.media_url] : [];
+  if (m.media_type === "CAROUSEL_ALBUM") {
+    return (m.children?.data ?? [])
+      .filter((c) => c.media_type === "IMAGE" && c.media_url)
+      .map((c) => c.media_url as string)
+      .slice(0, 10);
   }
-  const u = pick(m);
-  return u ? [u] : [];
+  return [];
 }
 
 export type InstagramResult = { ok: true; imported: number; pending: number } | { ok: false; error: string };
@@ -88,7 +90,7 @@ export async function syncInstagram(): Promise<InstagramResult> {
 
     const fields = "id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,children{media_type,media_url,thumbnail_url}";
     const list = await getJson(`${API}/${VERSION}/me/media?fields=${encodeURIComponent(fields)}&limit=30&access_token=${encodeURIComponent(token)}`);
-    const media = ((list.data as Media[]) ?? []).filter((m) => !state.known.includes(m.id));
+    const media = ((list.data as Media[]) ?? []).filter((m) => !state.known.includes(m.id) && imagesOf(m).length > 0);
 
     let imported = 0;
     for (const m of media.slice(0, MAX_NEW_PER_RUN)) {
@@ -119,7 +121,7 @@ export async function syncInstagram(): Promise<InstagramResult> {
           external_url: m.permalink ?? null,
           caption: m.caption ?? "",
           created_at: m.timestamp ? m.timestamp.replace(/\+0000$/, "Z") : null,
-          is_video: m.media_type === "VIDEO",
+          is_video: false,
           photos: photoIds,
         },
       });
