@@ -85,7 +85,8 @@ with sync_playwright() as p:
     step("Admin und Verkäuferin angemeldet")
 
     # --- Inserat mit Fotos anlegen -------------------------------------------
-    seller.get_by_role("link", name="Inserieren", exact=True).click()
+    seller.get_by_role("button", name="Erstellen").click()
+    seller.get_by_role("dialog", name="Erstellen").get_by_role("link", name=re.compile("^Inserat")).click()
     expect(seller).to_have_url(re.compile(r"/de/marktplatz/neu$"))
     expect(seller.get_by_text("Pflicht: ein Foto der Vorderseite und eins der Rückseite.")).to_be_visible()
     seller.get_by_role("button", name=re.compile("Vorderseite")).click()
@@ -303,7 +304,7 @@ with sync_playwright() as p:
     expect(guest.get_by_role("heading", name="Marketplace")).to_be_visible()
     expect(guest.get_by_text("1 listing", exact=True)).to_be_visible()
     guest.goto(f"{BASE}/de")
-    expect(guest.get_by_role("heading", name="Neu im Marktplatz")).to_be_visible()
+    expect(guest.get_by_role("article", name=re.compile("^Inserat von")).first).to_be_visible()
     shot(guest, "16-start")
     step("Englische Oberfläche und neue Inserate auf der Startseite")
 

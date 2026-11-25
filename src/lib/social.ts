@@ -22,6 +22,7 @@ export type PublicProfile = {
   city: string | null;
   website: string | null;
   listing_count: number;
+  post_count?: number;
   follower_count: number;
   following_count: number;
   my_follow: FollowState;

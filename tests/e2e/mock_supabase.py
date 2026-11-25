@@ -32,7 +32,11 @@ messages: list[dict] = []
 blocks: set[tuple[str, str]] = set()
 
 
-PUBLIC_BUCKETS = ("listing-photos", "avatars")
+PUBLIC_BUCKETS = ("listing-photos", "avatars", "post-photos")
+posts: dict[str, dict] = {}
+post_photos: dict[str, dict] = {}  # foto_id -> {post_id, position}
+post_likes: set[tuple[str, str]] = set()  # (post_id, user_id)
+comments: dict[str, dict] = {}
 SERVICE_KEY = "sb_secret_test"
 ODOO_KEY = "odoo-test-key"
 events: dict[str, dict] = {}  # id -> event (wie public.events)
@@ -80,6 +84,32 @@ def ev_public(e, uid):
         "checked_in": (e["id"], uid) in checkins}
 
 
+def can_view_post(uid, po):
+    return bool(po) and (not po["hidden"] or po["author_id"] == uid or is_team(uid)) and can_view(uid, po["author_id"]) \
+        and (uid is None or is_team(uid) or not blocked_between(uid, po["author_id"]))
+
+
+def photos_of(pid):
+    return [f for f, ph in sorted(post_photos.items(), key=lambda kv: kv[1]["position"]) if ph["post_id"] == pid]
+
+
+def post_item(po, uid):
+    a = profiles[po["author_id"]]
+    return {"type": "post", "id": po["id"], "created_at": po["created_at"], "sort_at": max(po["created_at"], po.get("highlighted_at") or ""),
+            "caption": po["caption"], "highlighted": bool(po.get("highlighted_at")), "hidden": po["hidden"],
+            "author": {"id": a["id"], "nickname": a["nickname"], "avatar_id": a["avatar_id"], "role": a["role"]},
+            "photos": photos_of(po["id"]), "like_count": sum(1 for (p_, _) in post_likes if p_ == po["id"]),
+            "comment_count": sum(1 for c in comments.values() if c["post_id"] == po["id"]),
+            "liked": (po["id"], uid) in post_likes, "is_mine": po["author_id"] == uid}
+
+
+def grid_row(po):
+    ph = photos_of(po["id"])
+    return {"id": po["id"], "author_id": po["author_id"], "cover_photo_id": ph[0] if ph else None, "photo_count": len(ph),
+            "like_count": sum(1 for (p_, _) in post_likes if p_ == po["id"]),
+            "comment_count": sum(1 for c in comments.values() if c["post_id"] == po["id"]), "created_at": po["created_at"]}
+
+
 def visits(uid):
     return sum(1 for (_, u) in checkins if u == uid)
 follows: dict[tuple[str, str], str] = {}  # (follower, following) -> pending/accepted
@@ -103,7 +133,7 @@ def sign_token(bucket, path):
 def can_write(u, bucket, path):
     if not u:
         return False
-    if bucket in ("listing-photos", "avatars"):
+    if bucket in ("listing-photos", "avatars", "post-photos"):
         return path.startswith(u["id"] + "/")
     if bucket == "chat-photos":
         c = conversations.get(path.split("/", 1)[0])
@@ -497,6 +527,7 @@ class Handler(BaseHTTPRequestHandler):
                 "avatar_id": p["avatar_id"] if cv else None, "bio": p["bio"] if cv else None,
                 "city": p["city"] if cv else None, "website": p["website"] if cv else None,
                 "listing_count": sum(1 for l in listings.values() if l["owner_id"] == p["id"] and l["status"] in ("active", "reserved")),
+                "post_count": sum(1 for po in posts.values() if po["author_id"] == p["id"] and not po["hidden"]),
                 "follower_count": sum(1 for (a, b), st in follows.items() if b == p["id"] and st == "accepted"),
                 "following_count": sum(1 for (a, b), st in follows.items() if a == p["id"] and st == "accepted"),
                 "my_follow": follows.get((uid, p["id"]), "none"), "follows_me": follows.get((p["id"], uid)) == "accepted",
@@ -559,7 +590,70 @@ class Handler(BaseHTTPRequestHandler):
             return self.public_rpc(name, data)
         if name in ("list_events", "get_event", "event_listings", "listing_event_list", "event_sync_state", "profile_events"):
             return self.event_rpc(name, data)
+        if name in ("feed", "get_post", "post_comments", "profile_posts", "explore_posts", "search_profiles"):
+            return self.feed_rpc(name, data)
         return self.private_rpc(name, data)
+
+    def feed_rpc(self, name, data):
+        me = self.me()
+        uid = me["id"] if me else None
+        if name == "feed":
+            follows_any = any(a == uid and st == "accepted" for (a, b), st in follows.items())
+            items = []
+            for po in posts.values():
+                if po["hidden"] or not can_view_post(uid, po):
+                    continue
+                a = profiles[po["author_id"]]
+                if (po["author_id"] == uid or po.get("highlighted_at") or follows.get((uid, po["author_id"])) == "accepted"
+                        or (not follows_any and a["profile_visibility"] == "public")):
+                    items.append(post_item(po, uid))
+            for l in listings.values():
+                if l["status"] != "active" or l["owner_id"] == uid or (uid and blocked_between(uid, l["owner_id"])):
+                    continue
+                if follows_any and follows.get((uid, l["owner_id"])) != "accepted":
+                    continue
+                o = profiles[l["owner_id"]]
+                items.append({"type": "listing", "id": l["id"], "created_at": l["created_at"], "sort_at": l["created_at"],
+                              "title": l["title"], "tcg": l["tcg"], "kind": l["kind"], "offer": l["offer"],
+                              "price_cents": l["price_cents"], "negotiable": l["negotiable"], "city": l.get("city"),
+                              "author": {"id": o["id"], "nickname": o["nickname"], "avatar_id": o["avatar_id"] if can_view(uid, o["id"]) else None,
+                                         "role": o["role"]},
+                              "photos": listing_photos(l["id"]), "is_mine": False})
+            before = data.get("p_before") or "9999"
+            items = sorted((i for i in items if i["sort_at"] < before), key=lambda i: i["sort_at"], reverse=True)
+            return self.send(200, items[: data.get("p_limit") or 10])
+        if name == "get_post":
+            po = posts.get(data["p_id"])
+            return self.send(200, post_item(po, uid) if can_view_post(uid, po) else None)
+        if name == "post_comments":
+            po = posts.get(data["p_post"])
+            if not can_view_post(uid, po):
+                return self.send(200, [])
+            rows = sorted((c for c in comments.values() if c["post_id"] == po["id"]), key=lambda c: c["created_at"])
+            return self.send(200, [{"id": c["id"], "body": c["body"], "created_at": c["created_at"], "author_id": c["author_id"],
+                                    "author_nickname": profiles[c["author_id"]]["nickname"],
+                                    "author_avatar_id": profiles[c["author_id"]]["avatar_id"],
+                                    "can_delete": uid in (c["author_id"], po["author_id"]) or is_team(uid)} for c in rows])
+        if name == "profile_posts":
+            p = profile_by_nick(data["p_nickname"])
+            if not p or not can_view(uid, p["id"]):
+                return self.send(200, [])
+            rows = [po for po in posts.values() if po["author_id"] == p["id"] and (not po["hidden"] or po["author_id"] == uid or is_team(uid))]
+            rows.sort(key=lambda x: x["created_at"], reverse=True)
+            return self.send(200, [grid_row(po) for po in rows])
+        if name == "explore_posts":
+            rows = [po for po in posts.values() if not po["hidden"] and can_view_post(uid, po)
+                    and (profiles[po["author_id"]]["profile_visibility"] == "public" or po.get("highlighted_at"))]
+            rows.sort(key=lambda x: (bool(x.get("highlighted_at")), x["created_at"]), reverse=True)
+            return self.send(200, [grid_row(po) for po in rows[:30]])
+        if name == "search_profiles":
+            q = (data.get("p_query") or "").strip().lower()
+            rows = [p for p in profiles.values() if q and p["nickname"] and q in p["nickname"].lower()]
+            rows.sort(key=lambda p: (p["nickname"].lower() != q, not p["nickname"].lower().startswith(q), p["nickname"]))
+            return self.send(200, [{"id": p["id"], "nickname": p["nickname"], "avatar_id": p["avatar_id"] if can_view(uid, p["id"]) else None,
+                                    "role": p["role"], "follower_count": sum(1 for (a, b), st in follows.items() if b == p["id"] and st == "accepted")}
+                                   for p in rows[:20]])
+        return self.send(404, {"message": "unknown rpc"})
 
     def service_rpc(self, name, data):
         if name == "sync_events_failed":
@@ -734,6 +828,11 @@ class Handler(BaseHTTPRequestHandler):
                              "profile_id": pr["id"] if pr else None, "profile_nickname": pr["nickname"] if pr else None,
                              "conversation_id": r.get("conversation_id"),
                              "conversation_title": conversations[r["conversation_id"]]["listing_title"] if r.get("conversation_id") in conversations else None,
+                             "post_id": r.get("post_id"), "post_caption": posts[r["post_id"]]["caption"] if r.get("post_id") in posts else None,
+                             "post_author_nickname": profiles[posts[r["post_id"]]["author_id"]]["nickname"] if r.get("post_id") in posts else None,
+                             "post_hidden": posts[r["post_id"]]["hidden"] if r.get("post_id") in posts else None,
+                             "comment_id": r.get("comment_id"), "comment_body": comments[r["comment_id"]]["body"] if r.get("comment_id") in comments else None,
+                             "comment_author_nickname": profiles[comments[r["comment_id"]]["author_id"]]["nickname"] if r.get("comment_id") in comments else None,
                              "total_count": len(open_r)})
             return self.send(200, rows)
         if name == "moderate_listing":
@@ -930,6 +1029,92 @@ class Handler(BaseHTTPRequestHandler):
             old = me["avatar_id"]
             me["avatar_id"] = data.get("p_avatar_id")
             return self.send(200, old)
+        if name == "create_post":
+            if not me["nickname"]:
+                raise RpcError(403, "42501", "onboarding_required")
+            ph = data.get("p_photos") or []
+            if not ph:
+                raise RpcError(400, "22023", "photo_required")
+            for f in ph:
+                if f"post-photos/{u['id']}/{f}.jpg" not in files or f in post_photos:
+                    raise RpcError(400, "22023", "photo_missing")
+            pid = str(uuid.uuid4())
+            posts[pid] = {"id": pid, "author_id": u["id"], "caption": (data.get("p_caption") or "").strip(), "created_at": now_iso(),
+                          "highlighted_at": None, "hidden": False}
+            for i, f in enumerate(ph):
+                post_photos[f] = {"post_id": pid, "position": i}
+            return self.send(200, pid)
+        if name == "delete_post":
+            po = posts.get(data["p_id"])
+            if not po or po["author_id"] != u["id"]:
+                raise RpcError(404, "P0002", "not_found")
+            ids = photos_of(po["id"])
+            for f in ids:
+                post_photos.pop(f)
+            posts.pop(po["id"])
+            return self.send(200, ids)
+        if name == "toggle_like":
+            po = posts.get(data["p_post"])
+            if not can_view_post(u["id"], po) or po["hidden"]:
+                raise RpcError(404, "P0002", "not_found")
+            key = (po["id"], u["id"])
+            if key in post_likes:
+                post_likes.discard(key)
+            else:
+                post_likes.add(key)
+            return self.send(200, {"liked": key in post_likes, "like_count": sum(1 for (p_, _) in post_likes if p_ == po["id"])})
+        if name == "add_comment":
+            po = posts.get(data["p_post"])
+            if not po or po["hidden"] or not can_view_post(u["id"], po):
+                raise RpcError(404, "P0002", "not_found")
+            body = (data.get("p_body") or "").strip()
+            if not 1 <= len(body) <= 500:
+                raise RpcError(400, "22023", "comment_invalid")
+            cid = str(uuid.uuid4())
+            comments[cid] = {"id": cid, "post_id": po["id"], "author_id": u["id"], "body": body, "created_at": now_iso()}
+            return self.send(200, cid)
+        if name == "delete_comment":
+            c = comments.get(data["p_id"])
+            if not c or not (u["id"] in (c["author_id"], posts[c["post_id"]]["author_id"]) or is_team(u["id"])):
+                raise RpcError(404, "P0002", "not_found")
+            comments.pop(c["id"])
+            return self.send(204)
+        if name in ("report_post", "report_comment"):
+            key = "post_id" if name == "report_post" else "comment_id"
+            target = data.get("p_post") or data.get("p_comment")
+            if any(r["reporter_id"] == u["id"] and r["status"] == "open" and r.get(key) == target for r in reports.values()):
+                raise RpcError(409, "23505", "already_reported")
+            rid = str(uuid.uuid4())
+            reports[rid] = {"id": rid, "reporter_id": u["id"], "listing_id": None, "profile_id": None, "conversation_id": None,
+                            "post_id": None, "comment_id": None, key: target, "reason": data["p_reason"],
+                            "details": data.get("p_details"), "status": "open", "created_at": now_iso()}
+            return self.send(204)
+        if name == "set_post_highlight":
+            if not is_team(u["id"]):
+                raise RpcError(403, "42501", "forbidden")
+            posts[data["p_id"]]["highlighted_at"] = now_iso() if data["p_on"] else None
+            return self.send(204)
+        if name == "moderate_post":
+            if not is_team(u["id"]):
+                raise RpcError(403, "42501", "forbidden")
+            po = posts[data["p_id"]]
+            po["hidden"] = bool(data["p_hide"])
+            if po["hidden"]:
+                po["highlighted_at"] = None
+                for r in reports.values():
+                    if r.get("post_id") == po["id"] and r["status"] == "open":
+                        r["status"] = "resolved"
+            return self.send(204)
+        if name == "moderate_comment":
+            if not is_team(u["id"]):
+                raise RpcError(403, "42501", "forbidden")
+            c = comments.pop(data["p_id"], None)
+            if not c:
+                raise RpcError(404, "P0002", "not_found")
+            for r in reports.values():
+                if r.get("comment_id") == c["id"] and r["status"] == "open":
+                    r.update(status="resolved", comment_id=None, post_id=c["post_id"])
+            return self.send(204)
         if name == "set_listing_events":
             l = listings.get(data["p_listing"])
             if not l or l["owner_id"] != u["id"]:

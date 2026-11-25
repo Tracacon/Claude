@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { ProfileView } from "@/components/profile-view";
+import { parseProfileTab, ProfileView } from "@/components/profile-view";
+import { getProfilePosts } from "@/lib/feed";
 import { requireProfile } from "@/lib/auth";
 import { getProfileEvents, getProfileListings, getPublicProfile } from "@/lib/profiles";
 
@@ -19,8 +20,9 @@ export default async function MyProfilePage({ params, searchParams }: PageProps<
   const sp = await searchParams;
   const profile = await getPublicProfile(me.nickname!);
   if (!profile) notFound();
-  const tab = sp.tab === "abzeichen" ? "abzeichen" : "inserate";
+  const tab = parseProfileTab(sp.tab);
   const listings = tab === "inserate" ? await getProfileListings(me.nickname!) : [];
   const events = tab === "abzeichen" ? await getProfileEvents(me.nickname!) : [];
-  return <ProfileView profile={profile} listings={listings} events={events} tab={tab} loggedIn basePath="/profil" />;
+  const posts = tab === "beitraege" ? await getProfilePosts(me.nickname!) : [];
+  return <ProfileView profile={profile} listings={listings} events={events} posts={posts} tab={tab} loggedIn basePath="/profil" />;
 }

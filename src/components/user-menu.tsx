@@ -138,15 +138,17 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
         onClick={() => setOpen(true)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className={`relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] ${
-          pathname.startsWith("/profil") || pathname.startsWith("/einstellungen") ? "text-brand" : "text-cream/70"
-        }`}
+        aria-label={L.profile}
+        className="relative flex flex-1 items-center justify-center py-3"
       >
-        <span className="relative">
-          <Face data={data} size="size-6" />
-          {data.requests > 0 && <span className="absolute -right-1 -top-1 size-2.5 rounded-full bg-brand" />}
+        <span
+          className={`relative rounded-full ${
+            pathname.startsWith("/profil") || pathname.startsWith("/einstellungen") ? "ring-2 ring-cream ring-offset-1 ring-offset-black" : ""
+          }`}
+        >
+          <Face data={data} size="size-[26px]" />
+          {data.requests > 0 && <span className="absolute -right-1 -top-1 size-2.5 rounded-full bg-danger" />}
         </span>
-        {L.profile}
       </button>
       {open && (
         <>

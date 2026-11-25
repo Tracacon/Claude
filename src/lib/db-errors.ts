@@ -22,6 +22,10 @@ const KNOWN = [
   "checkin_not_open",
   "checkin_closed",
   "too_many_events",
+  "photo_required",
+  "too_many_photos",
+  "caption_too_long",
+  "comment_invalid",
 ] as const;
 
 const ALIASES: Record<string, string> = {
