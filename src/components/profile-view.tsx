@@ -13,6 +13,17 @@ import type { GridPost } from "@/lib/feed-shared";
 
 export type ProfileTab = "beitraege" | "inserate" | "abzeichen";
 
+/** Filter im Reiter Inserate */
+export type OfferFilter = "alle" | "tausch" | "verkauf" | "verschenken";
+const OFFER_FILTERS: Record<Exclude<OfferFilter, "alle">, string[]> = {
+  tausch: ["trade", "sell_or_trade"],
+  verkauf: ["sell", "sell_or_trade"],
+  verschenken: ["gift"],
+};
+export function parseOfferFilter(v: unknown): OfferFilter {
+  return v === "tausch" || v === "verkauf" || v === "verschenken" ? v : "alle";
+}
+
 export function parseProfileTab(v: unknown): ProfileTab {
   return v === "inserate" || v === "abzeichen" ? v : "beitraege";
 }
@@ -30,6 +41,7 @@ export async function ProfileView({
   tab,
   loggedIn,
   basePath,
+  offerFilter = "alle",
 }: {
   profile: PublicProfile;
   listings: ListingSummary[];
@@ -40,6 +52,7 @@ export async function ProfileView({
   tab: ProfileTab;
   loggedIn: boolean;
   basePath: string;
+  offerFilter?: OfferFilter;
 }) {
   const t = await getTranslations("Social");
   const tRoles = await getTranslations("Roles");
@@ -187,8 +200,32 @@ export async function ProfileView({
       ) : listings.length === 0 ? (
         <p className="card py-8 text-center text-sm text-cream/70">{p.is_me ? t("noListingsMe") : t("noListings")}</p>
       ) : (
+        <div className="space-y-3">
+          {/* Filter: alle, nur Tausch, nur Verkauf, nur Verschenken */}
+          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0" role="group" aria-label={t("offerFilter")}>
+            {(["alle", "tausch", "verkauf", "verschenken"] as const).map((f) => {
+              const n = f === "alle" ? listings.length : listings.filter((l) => OFFER_FILTERS[f].includes(l.offer)).length;
+              return (
+                <Link
+                  key={f}
+                  href={f === "alle" ? `${basePath}?tab=inserate` : `${basePath}?tab=inserate&angebot=${f}`}
+                  aria-current={offerFilter === f ? "true" : undefined}
+                  className={`shrink-0 rounded-full border px-3 py-1.5 text-sm ${
+                    offerFilter === f ? "border-brand bg-brand/15 font-semibold text-brand" : "border-line text-cream/75"
+                  }`}
+                >
+                  {t(`offer_${f}`)} ({n})
+                </Link>
+              );
+            })}
+          </div>
+          {(() => {
+            const shown = offerFilter === "alle" ? listings : listings.filter((l) => OFFER_FILTERS[offerFilter].includes(l.offer));
+            return shown.length === 0 ? (
+              <p className="card py-8 text-center text-sm text-cream/70">{t("noListingsFilter")}</p>
+            ) : (
         <ul className="grid grid-cols-3 gap-1 sm:gap-2">
-          {listings.map((l) => (
+          {shown.map((l) => (
             <li key={l.id}>
               <Link href={`/marktplatz/${l.id}`} className="group relative block aspect-[3/4] overflow-hidden rounded-md bg-night-3 sm:rounded-xl">
                 {l.cover_photo_id ? (
@@ -203,6 +240,9 @@ export async function ProfileView({
             </li>
           ))}
         </ul>
+            );
+          })()}
+        </div>
       )}
     </div>
   );

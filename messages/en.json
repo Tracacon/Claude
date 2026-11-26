@@ -502,6 +502,12 @@
   },
   "Social": {
     "follow": "Follow",
+    "offerFilter": "Filter listings",
+    "offer_alle": "All",
+    "offer_tausch": "For trade",
+    "offer_verkauf": "For sale",
+    "offer_verschenken": "Free",
+    "noListingsFilter": "No listings in this selection right now.",
     "following": "Following",
     "requested": "Requested",
     "unfollowHint": "Tap again to unfollow or withdraw",
@@ -776,6 +782,8 @@
     "followAccepted": "<b>{nickname}</b> accepted your request.",
     "like": "<b>{nickname}</b> liked your post.",
     "comment": "<b>{nickname}</b> commented: “{text}”",
+    "tradeInterest": "<b>{nickname}</b> is interested in trading for “{title}”",
+    "openListing": "Open listing",
     "unread": "new",
     "openPost": "Open post",
     "onlineNow": "Online now",
@@ -792,6 +800,7 @@
     "followAccepted": "{nickname} accepted your request.",
     "like": "{nickname} liked your post.",
     "comment": "{nickname} commented: “{text}”",
+    "tradeInterest": "{nickname} is interested in trading for “{title}”",
     "many": "You have {count} new notifications.",
     "test": "It works! This is what Tracacon App notifications look like.",
     "settingsTitle": "Phone notifications",
@@ -996,5 +1005,18 @@
     "checkins": "{n} check-ins",
     "reportsOpen": "Open reports",
     "none": "No data yet."
+  },
+  "Interest": {
+    "button": "Interested in trading",
+    "active": "Trade interest shown",
+    "hint": "The owner will see your profile and your trade cards and can make you an offer.",
+    "activeHint": "Tap again to withdraw your interest.",
+    "count": "{count, plural, one {# person is} other {# people are}} interested in trading",
+    "ownerTitle": "Trade interest ({count})",
+    "ownerIntro": "These members are interested in your listing. Below you can see what they offer for trade – tap a card and message them directly.",
+    "ownerEmpty": "Nobody yet. Members can tap “Interested in trading” on your listing – then you'll see here what they offer for trade.",
+    "tradeCount": "{count, plural, =0 {no trade cards} one {# card for trade} other {# cards for trade}}",
+    "noCards": "Not offering anything for trade right now – just send a message.",
+    "allCards": "See all trade cards →"
   }
 }

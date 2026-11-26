@@ -2,7 +2,7 @@ import "server-only";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
-export type NotificationKind = "follow" | "follow_request" | "follow_accepted" | "like" | "comment";
+export type NotificationKind = "follow" | "follow_request" | "follow_accepted" | "like" | "comment" | "trade_interest";
 
 export type AppNotification = {
   id: string;
@@ -14,6 +14,10 @@ export type AppNotification = {
   post_author_id: string | null;
   post_cover_id: string | null;
   comment: string | null;
+  listing_id: string | null;
+  listing_title: string | null;
+  listing_owner_id: string | null;
+  listing_cover_id: string | null;
   my_follow: "pending" | "accepted" | null;
   request_open: boolean;
 };

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { parseProfileTab, ProfileView } from "@/components/profile-view";
+import { parseOfferFilter, parseProfileTab, ProfileView } from "@/components/profile-view";
 import { getProfilePosts } from "@/lib/feed";
 import { redirect } from "@/i18n/navigation";
 import { getMyProfile } from "@/lib/auth";
@@ -29,7 +29,7 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
   const t = await getTranslations("Listing");
   return (
     <div className="space-y-6">
-      <ProfileView profile={profile} listings={listings} events={events} posts={posts} tab={tab} loggedIn={Boolean(me?.nickname)} basePath={`/u/${profile.nickname}`} />
+      <ProfileView profile={profile} listings={listings} events={events} posts={posts} tab={tab} offerFilter={parseOfferFilter(sp.angebot)} loggedIn={Boolean(me?.nickname)} basePath={`/u/${profile.nickname}`} />
       {me?.nickname && <ReportForm profileId={profile.id} label={t("reportProfile")} />}
     </div>
   );

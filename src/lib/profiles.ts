@@ -17,7 +17,7 @@ export const getPublicProfile = cache(async (nickname: string): Promise<PublicPr
 
 export async function getProfileListings(nickname: string): Promise<ListingSummary[]> {
   const supabase = await createClient();
-  const { data } = await supabase.rpc("profile_listings", { p_nickname: nickname, p_limit: 60, p_offset: 0 });
+  const { data } = await supabase.rpc("profile_listings", { p_nickname: nickname, p_limit: 120, p_offset: 0 });
   return (data ?? []) as ListingSummary[];
 }
 

@@ -8,6 +8,7 @@ import { RequestButtons } from "@/components/social-buttons";
 import { Link } from "@/i18n/navigation";
 import { requireProfile } from "@/lib/auth";
 import { postPhotoUrl } from "@/lib/feed-shared";
+import { photoUrl } from "@/lib/marketplace";
 import { getNotifications, markNotificationsRead, type AppNotification } from "@/lib/notifications";
 import { isPushConfigured } from "@/lib/push";
 
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/aktivita
   return { title: t("title") };
 }
 
-/** Aktivität: neue Follower, Folgeanfragen, Likes und Kommentare. */
+/** Aktivität: neue Follower, Folgeanfragen, Likes, Kommentare und Tauschinteresse. */
 export default async function ActivityPage({ params }: PageProps<"/[locale]/aktivitaet">) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -38,6 +39,7 @@ export default async function ActivityPage({ params }: PageProps<"/[locale]/akti
       case "follow_accepted": return t.rich("followAccepted", { nickname, b });
       case "like": return t.rich("like", { nickname, b });
       case "comment": return t.rich("comment", { nickname, b, text: n.comment ?? "" });
+      case "trade_interest": return t.rich("tradeInterest", { nickname, b, title: n.listing_title ?? "" });
     }
   };
 
@@ -70,6 +72,14 @@ export default async function ActivityPage({ params }: PageProps<"/[locale]/akti
                 <RequestButtons userId={n.actor.id} />
               ) : (n.kind === "follow" || n.kind === "follow_accepted") && n.my_follow !== "accepted" ? (
                 <FollowButton userId={n.actor.id} initial={n.my_follow ?? "none"} compact />
+              ) : n.kind === "trade_interest" && n.listing_id ? (
+                <Link href={`/marktplatz/${n.listing_id}#tauschinteresse`} className="shrink-0" aria-label={t("openListing")}>
+                  {n.listing_cover_id && n.listing_owner_id ? (
+                    <img src={photoUrl(n.listing_owner_id, n.listing_cover_id, "thumb")} alt="" className="size-11 rounded-md object-cover" loading="lazy" />
+                  ) : (
+                    <span className="grid size-11 place-items-center rounded-md bg-night-3 text-lg" aria-hidden>🔁</span>
+                  )}
+                </Link>
               ) : n.post_id && n.post_author_id && n.post_cover_id ? (
                 <Link href={`/p/${n.post_id}${n.kind === "comment" ? "#kommentare" : ""}`} className="shrink-0" aria-label={t("openPost")}>
                   <img src={postPhotoUrl(n.post_author_id, n.post_cover_id, "thumb")} alt="" className="size-11 rounded-md object-cover" loading="lazy" />

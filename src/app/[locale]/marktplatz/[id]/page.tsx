@@ -13,6 +13,8 @@ import { photoUrl } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteListing, ModerateListing, ReportForm, StartConversation, StatusSwitch } from "./listing-actions";
 import { BrandText } from "@/components/brand-text";
+import { InterestButton } from "@/components/interest-button";
+import { getInterestedPeople, getInterestState } from "@/lib/interests";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/marktplatz/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -50,6 +52,11 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
   }
 
   const bringTo = publicVisible || isOwner ? await getListingEvents(l.id) : [];
+  const [interest, interested] = await Promise.all([
+    publicVisible || isOwner ? getInterestState(l.id) : Promise.resolve({ mine: false, count: 0 }),
+    isOwner ? getInterestedPeople(l.id) : Promise.resolve([]),
+  ]);
+  const tInt = await getTranslations("Interest");
   const tEv = await getTranslations("Events");
 
   const handover = [
@@ -177,7 +184,62 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
           ) : (
             <StartConversation listingId={l.id} label={t("writeMessage")} />
           )}
+          {user && <InterestButton listingId={l.id} ownerId={l.owner_id} initial={interest.mine} />}
+          {interest.count > 0 && <p className="text-sm text-cream/70">🔁 {tInt("count", { count: interest.count })}</p>}
           <p className="text-xs text-cream/60">{t("safety")}</p>
+        </section>
+      )}
+
+      {isOwner && l.status !== "removed" && (
+        <section id="tauschinteresse" className="card scroll-mt-28 space-y-3">
+          <h2 className="font-semibold">🔁 {tInt("ownerTitle", { count: interested.length })}</h2>
+          {interested.length === 0 ? (
+            <p className="text-sm text-cream/70">{tInt("ownerEmpty")}</p>
+          ) : (
+            <>
+              <p className="text-sm text-cream/70">{tInt("ownerIntro")}</p>
+              <ul className="space-y-4">
+                {interested.map((p) => (
+                  <li key={p.id} className="space-y-2 border-t border-line pt-3 first:border-0 first:pt-0">
+                    <div className="flex items-center gap-3">
+                      <Link href={`/u/${p.nickname}`} className="shrink-0" aria-label={`@${p.nickname}`}>
+                        <Avatar userId={p.id} avatarId={p.avatar_id} nickname={p.nickname} />
+                      </Link>
+                      <div className="min-w-0 flex-1">
+                        <Link href={`/u/${p.nickname}`} className="font-semibold hover:underline">@{p.nickname}</Link>
+                        <p className="text-xs text-cream/60">
+                          {tInt("tradeCount", { count: Number(p.trade_count) })} · {format.relativeTime(new Date(p.since), new Date())}
+                        </p>
+                      </div>
+                    </div>
+                    {p.cards.length > 0 ? (
+                      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+                        {p.cards.map((c) => (
+                          <Link key={c.id} href={`/marktplatz/${c.id}`} className="w-20 shrink-0" title={c.title}>
+                            <span className="block aspect-[3/4] overflow-hidden rounded-md bg-night-3">
+                              {c.cover_id ? (
+                                <img src={photoUrl(c.owner_id, c.cover_id, "thumb")} alt={c.title} loading="lazy" className="h-full w-full object-cover" />
+                              ) : (
+                                <span className="flex h-full items-center justify-center p-1 text-center text-[10px] text-cream/60">{c.title}</span>
+                              )}
+                            </span>
+                            <span className="mt-1 block truncate text-[11px] text-cream/80">{c.title}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-cream/60">{tInt("noCards")}</p>
+                    )}
+                    {Number(p.trade_count) > p.cards.length && (
+                      <Link href={`/u/${p.nickname}?tab=inserate&angebot=tausch`} className="text-sm text-brand hover:underline">
+                        {tInt("allCards")}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </section>
       )}
 

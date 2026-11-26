@@ -502,6 +502,12 @@
   },
   "Social": {
     "follow": "Folgen",
+    "offerFilter": "Inserate filtern",
+    "offer_alle": "Alle",
+    "offer_tausch": "Zum Tausch",
+    "offer_verkauf": "Zum Verkauf",
+    "offer_verschenken": "Zu verschenken",
+    "noListingsFilter": "In dieser Auswahl gibt es gerade keine Inserate.",
     "following": "Folge ich",
     "requested": "Angefragt",
     "unfollowHint": "Erneut tippen zum Entfolgen bzw. Zurückziehen",
@@ -776,6 +782,8 @@
     "followAccepted": "<b>{nickname}</b> hat deine Anfrage angenommen.",
     "like": "<b>{nickname}</b> gefällt dein Beitrag.",
     "comment": "<b>{nickname}</b> hat kommentiert: „{text}“",
+    "tradeInterest": "<b>{nickname}</b> hat Tauschinteresse an „{title}“",
+    "openListing": "Inserat öffnen",
     "unread": "neu",
     "openPost": "Beitrag öffnen",
     "onlineNow": "Gerade online",
@@ -792,6 +800,7 @@
     "followAccepted": "{nickname} hat deine Anfrage angenommen.",
     "like": "{nickname} gefällt dein Beitrag.",
     "comment": "{nickname} hat kommentiert: „{text}“",
+    "tradeInterest": "{nickname} hat Tauschinteresse an „{title}“",
     "many": "Du hast {count} neue Benachrichtigungen.",
     "test": "Test geklappt! So sehen Mitteilungen der Tracacon App aus.",
     "settingsTitle": "Mitteilungen aufs Handy",
@@ -996,5 +1005,18 @@
     "checkins": "{n} Check-ins",
     "reportsOpen": "Offene Meldungen",
     "none": "Noch keine Daten."
+  },
+  "Interest": {
+    "button": "Tauschinteresse",
+    "active": "Tauschinteresse gezeigt",
+    "hint": "Der Anbieter sieht dann dein Profil und deine Tauschkarten und kann dir ein Angebot machen.",
+    "activeHint": "Nochmal tippen, um das Interesse zurückzuziehen.",
+    "count": "{count, plural, one {# Person hat} other {# Personen haben}} Tauschinteresse",
+    "ownerTitle": "Tauschinteresse ({count})",
+    "ownerIntro": "Diese Mitglieder interessieren sich für dein Inserat. Darunter siehst du, was sie selbst zum Tausch anbieten – tippe eine Karte an und schreib ihnen direkt.",
+    "ownerEmpty": "Noch niemand. Mitglieder können bei deinem Inserat „Tauschinteresse“ antippen – dann siehst du hier, was sie zum Tausch anbieten.",
+    "tradeCount": "{count, plural, =0 {keine Tauschkarten} one {# Karte zum Tausch} other {# Karten zum Tausch}}",
+    "noCards": "Bietet gerade nichts zum Tausch an – schreib einfach eine Nachricht.",
+    "allCards": "Alle Tauschkarten ansehen →"
   }
 }
