@@ -20,9 +20,16 @@ export default async function EventsPage({ params, searchParams }: PageProps<"/[
   await ensureEventsFresh();
   const [upcoming, past] = await Promise.all([getEvents(false), getEvents(true, 20)]);
   const checkinError = typeof sp.checkin === "string" ? sp.checkin : null;
-  const labels = (n: number, checked: boolean) => ({
+  const labels = (n: number, checked: boolean, e?: (typeof upcoming)[number]) => ({
     listings: t("listingCount", { count: n }),
     checkedIn: checked ? t("youWereThere") : "",
+    dealers: e?.dealer_count ? t("dealerCount", { count: e.dealer_count }) : undefined,
+    tables:
+      e?.tables && e.tables.total > 0
+        ? e.tables.on_sale && e.tables.free > 0
+          ? t("tablesFree", { count: e.tables.free })
+          : t("tablesSoldOut")
+        : undefined,
   });
 
   return (
@@ -45,7 +52,7 @@ export default async function EventsPage({ params, searchParams }: PageProps<"/[
         <ul className="space-y-3">
           {upcoming.map((e) => (
             <li key={e.id} className="flex">
-              <EventCard event={e} locale={locale} labels={labels(e.listing_count, e.checked_in)} />
+              <EventCard event={e} locale={locale} labels={labels(e.listing_count, e.checked_in, e)} />
             </li>
           ))}
         </ul>

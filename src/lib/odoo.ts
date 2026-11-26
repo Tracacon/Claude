@@ -1,5 +1,15 @@
 import "server-only";
 import { fixBrand } from "@/lib/brand";
+import {
+  buildDealers,
+  coverUrl,
+  dealerTables,
+  parseDescription,
+  type EventDetails,
+  type OdooAnswer,
+  type OdooDealerProfile,
+  type OdooRegistration,
+} from "@/lib/event-details";
 
 /**
  * Liest Termine aus der Odoo-App „Veranstaltungen“ (Modell event.event).
@@ -24,6 +34,8 @@ export type OdooEvent = {
   ticket_url: string | null;
   website_url: string | null;
   published: boolean;
+  /** Nur bei kommenden Terminen; fehlt es, bleiben die gespeicherten Angaben erhalten. */
+  details?: EventDetails;
 };
 
 export class OdooError extends Error {
@@ -171,7 +183,7 @@ export async function fetchOdooEvents(since: Date): Promise<OdooEvent[]> {
   const ticketFields = Object.entries(fields)
     .filter(([name, f]) => name.startsWith("x_") && ["char", "text"].includes(f.type) && /eventim|ticket/i.test(`${name} ${f.string ?? ""}`))
     .map(([name]) => name);
-  const wanted = ["name", "subtitle", "date_begin", "date_end", "date_tz", "address_id", "is_published", "website_url", "description", "note"];
+  const wanted = ["name", "subtitle", "date_begin", "date_end", "date_tz", "address_id", "is_published", "website_url", "description", "note", "cover_properties"];
   const read = [...wanted.filter((f) => f in fields), ...ticketFields];
 
   const sinceStr = since.toISOString().slice(0, 19).replace("T", " ");
@@ -219,5 +231,103 @@ export async function fetchOdooEvents(since: Date): Promise<OdooEvent[]> {
       published: "is_published" in fields ? e.is_published === true : true,
     });
   }
+
+  // Titelbild, Beschreibung, Händler und Händlertische für kommende Termine (wie auf tracacon.de)
+  const upcoming = out.filter((e) => new Date(e.ends_at).getTime() >= Date.now() - 86400_000);
+  if (upcoming.length) {
+    const rawById = new Map(raw.map((e) => [e.id, e]));
+    let extras: Map<number, Pick<EventDetails, "dealers" | "tables">> | null = null;
+    try {
+      extras = await fetchDealerExtras(call, upcoming.map((e) => e.odoo_id), cfg.publicUrl);
+    } catch (e) {
+      // Ohne Händler trotzdem weitermachen; die zuletzt gespeicherte Liste bleibt dann erhalten
+      console.warn("Odoo-Händler", e instanceof Error ? e.message : e);
+    }
+    for (const e of upcoming) {
+      const r = rawById.get(e.odoo_id);
+      if (!r) continue;
+      const details: EventDetails = {
+        cover_url: coverUrl(r.cover_properties, cfg.publicUrl),
+        description: parseDescription(r.description, cfg.publicUrl, e.name).map((b) => ({
+          ...b,
+          parts: b.parts.map((p) => ({ ...p, text: fixBrand(p.text) })),
+        })),
+      };
+      if (extras) Object.assign(details, extras.get(e.odoo_id) ?? { dealers: [], tables: null });
+      else continue; // Teilangaben würden die gespeicherte Händlerliste löschen
+      e.details = details;
+    }
+  }
   return out;
+}
+
+type Many2oneId = [number, string] | false | number;
+const m2oId = (v: Many2oneId | undefined) => (Array.isArray(v) ? v[0] : typeof v === "number" ? v : null);
+
+/** Händler (Tischbuchungen + Händlerprofile) und Händlertische für mehrere Termine auf einmal */
+async function fetchDealerExtras(call: Caller, eventIds: number[], publicUrl: string) {
+  const regsRaw = (await call("event.registration", "search_read", {
+    domain: [["event_id", "in", eventIds], ["state", "in", ["open", "done"]], ["email", "!=", false]],
+    fields: ["event_id", "email", "company_name"],
+    order: "id asc",
+    limit: 5000,
+  })) as (Record<string, unknown> & { id: number; event_id: Many2oneId })[];
+  const regs: OdooRegistration[] = regsRaw.map((r) => ({
+    id: r.id,
+    event_id: m2oId(r.event_id) ?? 0,
+    email: typeof r.email === "string" ? r.email : null,
+    company_name: typeof r.company_name === "string" ? r.company_name : null,
+  }));
+
+  let answers: OdooAnswer[] = [];
+  if (regs.length) {
+    const rows = (await call("event.registration.answer", "search_read", {
+      domain: [["registration_id", "in", regs.map((r) => r.id)]],
+      fields: ["registration_id", "question_id", "value_answer_id", "value_text_box"],
+      limit: 50000,
+    })) as Record<string, unknown>[];
+    answers = rows.map((a) => ({
+      registration_id: m2oId(a.registration_id as Many2oneId) ?? 0,
+      question_id: m2oId(a.question_id as Many2oneId),
+      value_answer_id: m2oId(a.value_answer_id as Many2oneId),
+      value_text_box: typeof a.value_text_box === "string" ? a.value_text_box : null,
+    }));
+  }
+
+  const profileFields = [
+    "x_name", "x_email", "x_link", "x_zustimmung", "x_ausgeblendet", "x_weitere_tcgs",
+    "x_pokemon", "x_onepiece", "x_lorcana", "x_magic", "x_yugioh", "x_dragonball", "x_digimon", "x_riftbound", "x_cyberpunk",
+    "x_einzelkarten", "x_sealed", "x_graded",
+  ];
+  const profiles = (await call("x_haendlerprofil", "search_read", {
+    domain: [["x_ausgeblendet", "=", false], ["x_email", "!=", false]],
+    fields: profileFields,
+    order: "id asc",
+    limit: 2000,
+  })) as OdooDealerProfile[];
+
+  const logoIds = new Map<number, number>();
+  if (profiles.length) {
+    const atts = (await call("ir.attachment", "search_read", {
+      domain: [["res_model", "=", "x_haendlerprofil"], ["res_field", "=", "x_logo"], ["res_id", "in", profiles.map((p) => p.id)], ["public", "=", true]],
+      fields: ["res_id"],
+      limit: 2000,
+    })) as { id: number; res_id: number }[];
+    for (const a of atts) logoIds.set(a.res_id, a.id);
+  }
+
+  const tickets = (await call("event.event.ticket", "search_read", {
+    domain: [["event_id", "in", eventIds]],
+    fields: ["event_id", "seats_max", "seats_available", "sale_available", "is_sold_out"],
+    limit: 1000,
+  })) as { event_id: Many2oneId; seats_max?: unknown; seats_available?: unknown; sale_available?: unknown; is_sold_out?: unknown }[];
+
+  const result = new Map<number, Pick<EventDetails, "dealers" | "tables">>();
+  for (const id of eventIds) {
+    result.set(id, {
+      dealers: buildDealers(regs.filter((r) => r.event_id === id), answers, profiles, logoIds, publicUrl),
+      tables: dealerTables(tickets.filter((t) => m2oId(t.event_id) === id)),
+    });
+  }
+  return result;
 }
