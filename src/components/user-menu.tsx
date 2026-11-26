@@ -16,7 +16,7 @@ export type UserMenuData = {
   reports: number;
   labels: Record<
     | "menu" | "myProfile" | "myListings" | "messages" | "followers" | "following" | "requests"
-    | "badges" | "settings" | "moderation" | "teamEvents" | "admin" | "logout" | "profile" | "close",
+    | "badges" | "settings" | "moderation" | "teamStats" | "teamEvents" | "admin" | "logout" | "profile" | "close",
     string
   >;
 };
@@ -93,6 +93,7 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
       <div className="my-1 border-t border-line" />
       {item("/einstellungen", "⚙", L.settings)}
       {(data.role === "team" || data.role === "admin") && item("/moderation", "⚑", L.moderation, data.reports)}
+      {(data.role === "team" || data.role === "admin") && item("/team/zahlen", "📊", L.teamStats)}
       {(data.role === "team" || data.role === "admin") && item("/team/termine", "📅", L.teamEvents)}
       {data.role === "admin" && item("/admin", "🛡", L.admin)}
       <form action={signOut}>

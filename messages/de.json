@@ -29,6 +29,7 @@
     "settings": "Einstellungen",
     "close": "Schließen",
     "events": "Termine",
+    "teamStats": "Zahlen",
     "teamEvents": "Termine & Check-in",
     "search": "Suchen",
     "create": "Erstellen",
@@ -957,11 +958,43 @@
       }
     ]
   },
-  "Errors": {
+  "ErrorPage": {
     "title": "Da ist etwas schiefgegangen.",
     "text": "Das lag nicht an dir. Versuch es bitte gleich noch einmal.",
     "retry": "Nochmal versuchen",
     "home": "Zur Startseite",
     "code": "Fehlercode: {code}"
+  },
+  "Stats": {
+    "title": "Zahlen",
+    "intro": "Stand: {when}. Nur Summen, keine Namen. „Woche“ heißt immer: die letzten 7 Tage.",
+    "unavailable": "Die Zahlen konnten gerade nicht geladen werden.",
+    "community": "Community",
+    "members": "Mitglieder",
+    "newThisWeek": "{n} neu in den letzten 7 Tagen",
+    "vsPrev": "{n} zur Vorwoche",
+    "activeWeek": "Aktiv (7 Tage)",
+    "activeToday": "{n} heute, {now} gerade online",
+    "follows": "Neue Verbindungen",
+    "last7": "letzte 7 Tage",
+    "pushUsers": "Mitteilungen an",
+    "pushHint": "Mitglieder mit Handy-Mitteilungen",
+    "weeklyTitle": "Neue Mitglieder pro Woche",
+    "weeklyHint": "Die letzten 12 Wochen, jeweils ab Montag. Die letzte Säule ist die laufende Woche.",
+    "activity": "Aktivität",
+    "listingsNew": "Neue Inserate",
+    "listingsActive": "{n} gerade aktiv",
+    "posts": "Neue Beiträge",
+    "messages": "Nachrichten",
+    "chatsNew": "{n} neue Unterhaltungen",
+    "interactions": "Likes und Kommentare",
+    "likesComments": "{likes} Likes, {comments} Kommentare",
+    "gamesTitle": "Aktive Inserate nach Spiel",
+    "offersTitle": "Aktive Inserate nach Angebot",
+    "done": "{n} Inserate in den letzten 7 Tagen als erledigt markiert",
+    "eventsTitle": "Check-ins bei den letzten Terminen",
+    "checkins": "{n} Check-ins",
+    "reportsOpen": "Offene Meldungen",
+    "none": "Noch keine Daten."
   }
 }

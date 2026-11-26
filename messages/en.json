@@ -29,6 +29,7 @@
     "settings": "Settings",
     "close": "Close",
     "events": "Events",
+    "teamStats": "Numbers",
     "teamEvents": "Events & check-in",
     "search": "Search",
     "create": "Create",
@@ -957,11 +958,43 @@
       }
     ]
   },
-  "Errors": {
+  "ErrorPage": {
     "title": "Something went wrong.",
     "text": "It's not your fault. Please try again in a moment.",
     "retry": "Try again",
     "home": "Go to home",
     "code": "Error code: {code}"
+  },
+  "Stats": {
+    "title": "Numbers",
+    "intro": "As of {when}. Totals only, no names. “Week” always means the last 7 days.",
+    "unavailable": "The numbers could not be loaded right now.",
+    "community": "Community",
+    "members": "Members",
+    "newThisWeek": "{n} new in the last 7 days",
+    "vsPrev": "{n} vs. previous week",
+    "activeWeek": "Active (7 days)",
+    "activeToday": "{n} today, {now} online now",
+    "follows": "New connections",
+    "last7": "last 7 days",
+    "pushUsers": "Notifications on",
+    "pushHint": "members with phone notifications",
+    "weeklyTitle": "New members per week",
+    "weeklyHint": "The last 12 weeks, each starting Monday. The last bar is the current week.",
+    "activity": "Activity",
+    "listingsNew": "New listings",
+    "listingsActive": "{n} active now",
+    "posts": "New posts",
+    "messages": "Messages",
+    "chatsNew": "{n} new conversations",
+    "interactions": "Likes and comments",
+    "likesComments": "{likes} likes, {comments} comments",
+    "gamesTitle": "Active listings by game",
+    "offersTitle": "Active listings by offer",
+    "done": "{n} listings marked as done in the last 7 days",
+    "eventsTitle": "Check-ins at recent events",
+    "checkins": "{n} check-ins",
+    "reportsOpen": "Open reports",
+    "none": "No data yet."
   }
 }

@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 
 /** Freundliche Fehlerseite, falls beim Laden einer Seite etwas schiefgeht. */
 export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-  const t = useTranslations("Errors");
+  const t = useTranslations("ErrorPage");
   useEffect(() => {
     // Landet im Cloudflare-Protokoll und im Wochenbericht
     console.error("Seitenfehler", error.digest ?? "", error.message);
