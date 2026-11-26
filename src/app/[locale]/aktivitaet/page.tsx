@@ -43,6 +43,13 @@ export default async function ActivityPage({ params }: PageProps<"/[locale]/akti
     }
   };
 
+  /** Wohin das Antippen des Textes führt: Inserat, Beitrag oder Profil. */
+  const target = (n: AppNotification): string | null => {
+    if (n.kind === "trade_interest") return n.listing_id ? `/marktplatz/${n.listing_id}#tauschinteresse` : null;
+    if (n.kind === "like" || n.kind === "comment") return n.post_id ? `/p/${n.post_id}${n.kind === "comment" ? "#kommentare" : ""}` : null;
+    return `/u/${n.actor.nickname}`;
+  };
+
   return (
     <div className="mx-auto max-w-xl space-y-4">
       <h1 className="text-2xl font-bold">{t("title")}</h1>
@@ -59,15 +66,25 @@ export default async function ActivityPage({ params }: PageProps<"/[locale]/akti
               <Link href={`/u/${n.actor.nickname}`} className="shrink-0" aria-label={`@${n.actor.nickname}`}>
                 <Avatar userId={n.actor.id} avatarId={n.actor.avatar_id} nickname={n.actor.nickname} />
               </Link>
-              <div className="min-w-0 flex-1 text-sm">
-                <p className="break-words">
-                  {text(n)}{" "}
-                  <time dateTime={n.created_at} className="whitespace-nowrap text-cream/50">
-                    {format.relativeTime(new Date(n.created_at), now)}
-                  </time>
-                </p>
-                {!n.read && <span className="sr-only">{t("unread")}</span>}
-              </div>
+              {(() => {
+                const body = (
+                  <>
+                    <p className="break-words">
+                      {text(n)}{" "}
+                      <time dateTime={n.created_at} className="whitespace-nowrap text-cream/50">
+                        {format.relativeTime(new Date(n.created_at), now)}
+                      </time>
+                    </p>
+                    {!n.read && <span className="sr-only">{t("unread")}</span>}
+                  </>
+                );
+                const href = target(n);
+                return href ? (
+                  <Link href={href} className="min-w-0 flex-1 text-sm">{body}</Link>
+                ) : (
+                  <div className="min-w-0 flex-1 text-sm">{body}</div>
+                );
+              })()}
               {n.kind === "follow_request" && n.request_open ? (
                 <RequestButtons userId={n.actor.id} />
               ) : (n.kind === "follow" || n.kind === "follow_accepted") && n.my_follow !== "accepted" ? (
