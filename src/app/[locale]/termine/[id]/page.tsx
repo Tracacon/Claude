@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- Titelbild kommt direkt von tracacon.de */
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -9,11 +10,15 @@ import { eventSheet, eventWhen } from "@/lib/event-format";
 import { ensureEventsFresh, getEvent, getEventListings } from "@/lib/events";
 import { PAGE_SIZE } from "@/lib/marketplace";
 import { BrandText } from "@/components/brand-text";
+import { EventDealers } from "@/components/event-dealers";
+import { ShareButton } from "@/components/share-button";
+import { googleCalendarUrl, type DescBlock, type TextPart } from "@/lib/event-details";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/termine/[id]">): Promise<Metadata> {
   const { id } = await params;
   const e = await getEvent(id);
-  return { title: e?.name ?? "Tracacon" };
+  const cover = e?.details?.cover_url;
+  return { title: e?.name ?? "Tracacon", ...(cover ? { openGraph: { images: [cover] } } : {}) };
 }
 
 const REGULAR_STEPS = [3, 10, 25];
@@ -39,6 +44,17 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
   const newStep = sp.eingecheckt === "neu" && REGULAR_STEPS.includes(visits) ? visits : null;
   const sheet = eventSheet(e, locale);
   const where = [e.venue, e.address].filter(Boolean).join(", ");
+  const details = e.details ?? {};
+  const dealers = details.dealers ?? [];
+  const tables = details.tables ?? null;
+  // Knöpfe aus der Odoo-Beschreibung, die es oben schon gibt (Tickets), nicht doppelt zeigen
+  const isTicketLink = (href?: string) => !!href && (href === e.ticket_url || /eventim/i.test(href));
+  const description = (details.description ?? []).filter(
+    (b) => !(b.parts.length === 1 && b.parts[0].href && isTicketLink(b.parts[0].href)),
+  );
+  const box = description.filter((b) => b.box);
+  const rest = description.filter((b) => !b.box);
+  const calendarEvent = { name: e.name, starts_at: e.starts_at, ends_at: e.ends_at, venue: e.venue, address: e.address, url: e.website_url ?? "" };
 
   return (
     <div className="space-y-6">
@@ -52,7 +68,14 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
         </section>
       )}
 
-      <section className="card space-y-4">
+      <section className="card space-y-4 overflow-hidden">
+        {details.cover_url && (
+          <img
+            src={details.cover_url}
+            alt=""
+            className="-mx-5 -mt-5 aspect-[16/7] w-[calc(100%+2.5rem)] max-w-none object-cover sm:-mx-6 sm:-mt-6 sm:w-[calc(100%+3rem)]"
+          />
+        )}
         <div className="flex items-start gap-4">
           <span aria-hidden className="flex w-16 shrink-0 flex-col items-center rounded-xl bg-brand py-2 font-display text-on-brand">
             <span className="text-xs font-bold uppercase">{sheet.month}</span>
@@ -81,6 +104,15 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
               🎟️ {t("tickets")}
             </a>
           )}
+          {!e.is_past && (
+            <>
+              <a href={`/${locale}/termine/${e.id}/kalender`} className="btn-ghost">📅 {t("calendarIcs")}</a>
+              <a href={googleCalendarUrl(calendarEvent)} target="_blank" rel="noopener noreferrer" className="btn-ghost">
+                {t("calendarGoogle")}
+              </a>
+            </>
+          )}
+          <ShareButton title={e.name} path={`/termine/${e.id}`} label={t("share")} copied={t("copied")} />
           {e.website_url && (
             <a href={e.website_url} target="_blank" rel="noopener noreferrer" className="btn-ghost">
               {t("website")}
@@ -104,6 +136,55 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
           {e.checkin_count > 0 && ` · ${t("checkinCount", { count: e.checkin_count })}`}
         </p>
       </section>
+
+      {description.length > 0 && (
+        <section className="card space-y-3" aria-label={t("about")}>
+          {box.length > 0 && (
+            <div className="space-y-1.5 rounded-xl border border-brand/40 bg-brand/[0.07] p-4">
+              <DescBlocks blocks={box} />
+            </div>
+          )}
+          <DescBlocks blocks={rest} />
+        </section>
+      )}
+
+      {(dealers.length > 0 || !e.is_past) && (
+        <section className="space-y-3" id="haendler">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <span className="kicker">{t("dealersKicker")}</span>
+              <h2 className="text-xl font-bold">{t("dealersTitle")}</h2>
+            </div>
+            {dealers.length > 0 && <span className="text-sm text-cream/60">{t("dealersCount", { count: dealers.length })}</span>}
+          </div>
+          {tables && tables.total > 0 && !e.is_past && (
+            <p className="flex flex-wrap items-center gap-3 text-sm">
+              {tables.on_sale && tables.free > 0 ? (
+                <>
+                  <span className="rounded-full bg-ok/20 px-3 py-1 text-ok">{t("tablesFree", { count: tables.free })}</span>
+                  {e.website_url && (
+                    <a href={e.website_url} target="_blank" rel="noopener noreferrer" className="link">{t("tablesBook")} →</a>
+                  )}
+                </>
+              ) : (
+                <span className="rounded-full bg-white/10 px-3 py-1 text-cream/80">{t("tablesSoldOut")}</span>
+              )}
+            </p>
+          )}
+          {dealers.length > 0 ? (
+            <EventDealers
+              dealers={dealers}
+              labels={{
+                all: t("filterAll"),
+                filter: t("filterLabel"),
+                products: { singles: t("productSingles"), sealed: t("productSealed"), graded: t("productGraded") },
+              }}
+            />
+          ) : (
+            <p className="card text-cream/70">{t("dealersSoon")}</p>
+          )}
+        </section>
+      )}
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-2">
@@ -143,4 +224,44 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
       <Link href="/termine" className="link inline-block text-sm">← {t("allEvents")}</Link>
     </div>
   );
+}
+
+function Parts({ parts }: { parts: TextPart[] }) {
+  return (
+    <>
+      {parts.map((p, i) => {
+        const text = p.bold ? <b className="font-semibold text-cream">{p.text}</b> : p.text;
+        return p.href ? (
+          <a key={i} href={p.href} target="_blank" rel="noopener noreferrer" className="link">{text}</a>
+        ) : (
+          <span key={i} className="whitespace-pre-line">{text}</span>
+        );
+      })}
+    </>
+  );
+}
+
+/** Beschreibung aus Odoo: Überschriften, Absätze und Aufzählungen (nur Text, kein HTML) */
+function DescBlocks({ blocks }: { blocks: DescBlock[] }) {
+  const out: React.ReactNode[] = [];
+  for (let i = 0; i < blocks.length; i++) {
+    const b = blocks[i];
+    if (b.type === "li") {
+      const items: DescBlock[] = [];
+      while (i < blocks.length && blocks[i].type === "li") items.push(blocks[i++]);
+      i--;
+      out.push(
+        <ul key={i} className="list-disc space-y-1 pl-5 text-sm text-cream/85 marker:text-brand">
+          {items.map((li, j) => (
+            <li key={j}><Parts parts={li.parts} /></li>
+          ))}
+        </ul>,
+      );
+    } else if (b.type === "h") {
+      out.push(<h3 key={i} className="pt-1 font-display text-lg font-semibold"><Parts parts={b.parts} /></h3>);
+    } else {
+      out.push(<p key={i} className="text-sm leading-relaxed text-cream/85"><Parts parts={b.parts} /></p>);
+    }
+  }
+  return <>{out}</>;
 }

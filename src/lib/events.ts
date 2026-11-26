@@ -2,6 +2,7 @@ import "server-only";
 import { after } from "next/server";
 import { cache } from "react";
 import { isSupabaseConfigured } from "@/lib/env";
+import type { DealerTables, EventDetails } from "@/lib/event-details";
 import { UUID_PATTERN, type ListingSummary } from "@/lib/marketplace";
 import { fetchOdooEvents, odooConfig, OdooError } from "@/lib/odoo";
 import { serviceClient, serviceKey } from "@/lib/service";
@@ -20,9 +21,13 @@ export type EventSummary = {
   listing_count: number;
   checkin_count: number;
   checked_in: boolean;
+  cover_url?: string | null;
+  dealer_count?: number;
+  tables?: DealerTables | null;
 };
 
 export type EventDetail = EventSummary & {
+  details: EventDetails | null;
   address: string | null;
   website_url: string | null;
   published: boolean;
@@ -95,7 +100,7 @@ export const getEvents = cache(async (past = false, limit = 30): Promise<EventSu
     console.error("list_events", error.message);
     return [];
   }
-  return (data as EventSummary[]).map((e) => ({ ...e, listing_count: Number(e.listing_count), checkin_count: Number(e.checkin_count) }));
+  return (data as EventSummary[]).map((e) => ({ ...e, listing_count: Number(e.listing_count), checkin_count: Number(e.checkin_count), dealer_count: Number(e.dealer_count ?? 0) }));
 });
 
 export const getEvent = cache(async (id: string): Promise<EventDetail | null> => {
