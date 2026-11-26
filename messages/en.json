@@ -310,6 +310,7 @@
     "giftOnly": "Free"
   },
   "Listing": {
+    "backToList": "Back",
     "newTitle": "Create listing",
     "editTitle": "Edit listing",
     "photos": "Photos",
