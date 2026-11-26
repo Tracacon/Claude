@@ -34,6 +34,8 @@ export const viewport: Viewport = {
   themeColor: "#0a0d11",
   width: "device-width",
   initialScale: 1,
+  // Ohne "cover" meldet das iPhone den Bereich am Home-Balken nicht, und die untere Leiste rutscht darauf
+  viewportFit: "cover",
 };
 
 export default async function LocaleLayout({ children, params }: LayoutProps<"/[locale]">) {
@@ -46,7 +48,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider timeZone="Europe/Berlin">
           <SiteHeader />
-          <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-28 pt-6 sm:pb-10 sm:pt-10">{children}</main>
+          <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+6rem)] pt-6 sm:pb-10 sm:pt-10">{children}</main>
           <SiteFooter />
           <InstallBanner />
         </NextIntlClientProvider>

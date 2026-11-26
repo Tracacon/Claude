@@ -261,7 +261,7 @@ export function ChatThread({
 
       {canSend ? (
         <form
-          className="sticky bottom-20 z-10 -mx-4 border-t border-line bg-night/95 px-4 py-3 backdrop-blur sm:bottom-0"
+          className="sticky bottom-[calc(env(safe-area-inset-bottom)+3.2rem)] z-10 -mx-4 border-t border-line bg-night/95 px-4 py-3 backdrop-blur sm:bottom-0"
           onSubmit={(e) => {
             e.preventDefault();
             void send();

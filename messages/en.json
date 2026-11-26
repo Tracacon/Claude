@@ -38,7 +38,8 @@
     "createListing": "Listing",
     "createListingHint": "Sell or trade cards",
     "activity": "Activity",
-    "activityCount": "Activity, {count} new"
+    "activityCount": "Activity, {count} new",
+    "back": "Back"
   },
   "Home": {
     "claim": "Trading · Dealing · Connecting",

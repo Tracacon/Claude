@@ -2,7 +2,9 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getNewMembers, touchPresence } from "@/lib/notifications";
 import { getUserMenu } from "@/lib/user-menu-data";
+import { BackButton } from "./back-button";
 import { BottomNav } from "./bottom-nav";
+import { NavTracker } from "./nav-tracker";
 import { CreateMenu } from "./create-menu";
 import { HeartIcon } from "./icons";
 import { LanguageSwitch } from "./language-switch";
@@ -19,8 +21,10 @@ export async function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-20 border-b border-line bg-black/90 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-2.5">
+      <NavTracker />
+      <header className="sticky top-0 z-20 border-b border-line bg-black/90 pt-[env(safe-area-inset-top)] backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-2.5 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
+          <BackButton label={t("back")} />
           <Link href="/" className="shrink-0" aria-label="Tracacon">
             {/* Logo direkt von der Homepage, damit es immer gleich aussieht */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
