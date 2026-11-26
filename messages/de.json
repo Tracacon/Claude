@@ -38,7 +38,8 @@
     "createListing": "Inserat",
     "createListingHint": "Karten verkaufen oder tauschen",
     "activity": "Aktivität",
-    "activityCount": "Aktivität, {count} neu"
+    "activityCount": "Aktivität, {count} neu",
+    "back": "Zurück"
   },
   "Home": {
     "claim": "Trading · Dealing · Connecting",

@@ -79,7 +79,7 @@ export function Comments({ postId, comments, loggedIn }: { postId: string; comme
         </ul>
       )}
       {loggedIn ? (
-        <form action={action} className="sticky bottom-[calc(env(safe-area-inset-bottom)+3.5rem)] flex items-end gap-2 border-t border-line bg-night py-3 sm:bottom-0">
+        <form action={action} className="sticky bottom-[calc(env(safe-area-inset-bottom)+3.2rem)] flex items-end gap-2 border-t border-line bg-night py-3 sm:bottom-0">
           <input type="hidden" name="postId" value={postId} />
           <label htmlFor="comment" className="sr-only">{t("addComment")}</label>
           <textarea
