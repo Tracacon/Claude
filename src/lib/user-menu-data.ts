@@ -47,6 +47,7 @@ export const getUserMenu = cache(async () => {
             badges: t("badges"),
             settings: t("settings"),
             moderation: t("moderation"),
+            teamStats: t("teamStats"),
             teamEvents: t("teamEvents"),
             admin: t("admin"),
             logout: t("logout"),
