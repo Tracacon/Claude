@@ -31,7 +31,7 @@ describe("Handy-Mitteilungen", () => {
     await t.as(ben, "select public.follow_user($1)", [ana]);
     const r1 = await asServer<{ claim_push: { items: { kind: string; actor: string }[]; subscriptions: unknown[]; locale: string } }>(
       "select public.claim_push($1)", [ana]);
-    expect(r1.rows[0].claim_push.items).toEqual([{ kind: "follow", actor: "Ben", post_id: null, comment: null }]);
+    expect(r1.rows[0].claim_push.items).toEqual([{ kind: "follow", actor: "Ben", post_id: null, comment: null, listing_id: null, listing_title: null }]);
     expect(r1.rows[0].claim_push.subscriptions).toHaveLength(1);
     const r2 = await asServer<{ claim_push: { items: unknown[] } }>("select public.claim_push($1)", [ana]);
     expect(r2.rows[0].claim_push.items).toEqual([]);

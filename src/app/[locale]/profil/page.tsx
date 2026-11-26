@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { parseProfileTab, ProfileView } from "@/components/profile-view";
+import { parseOfferFilter, parseProfileTab, ProfileView } from "@/components/profile-view";
 import { UserMenu } from "@/components/user-menu";
 import { getProfilePosts } from "@/lib/feed";
 import { requireProfile } from "@/lib/auth";
@@ -35,7 +35,7 @@ export default async function MyProfilePage({ params, searchParams }: PageProps<
           <UserMenu data={menu} variant="sheet" />
         </div>
       )}
-      <ProfileView profile={profile} listings={listings} events={events} posts={posts} tab={tab} loggedIn basePath="/profil" />
+      <ProfileView profile={profile} listings={listings} events={events} posts={posts} tab={tab} offerFilter={parseOfferFilter(sp.angebot)} loggedIn basePath="/profil" />
     </div>
   );
 }

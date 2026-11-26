@@ -11,7 +11,14 @@ import { hasServiceKey, serviceClient } from "@/lib/service";
  */
 
 type Sub = { endpoint: string; p256dh: string; auth: string };
-type Item = { kind: "follow" | "follow_request" | "follow_accepted" | "like" | "comment"; actor: string; post_id: string | null; comment: string | null };
+type Item = {
+  kind: "follow" | "follow_request" | "follow_accepted" | "like" | "comment" | "trade_interest";
+  actor: string;
+  post_id: string | null;
+  comment: string | null;
+  listing_id?: string | null;
+  listing_title?: string | null;
+};
 type Message = { title: string; body: string; url: string; tag: string };
 
 export function isPushConfigured() {
@@ -53,12 +60,17 @@ async function messagesFor(items: Item[], locale: string): Promise<Message[]> {
     return [{ title: t("title"), body: t("many", { count: items.length }), url: "/aktivitaet", tag: "aktivitaet" }];
   }
   return items.map((i) => {
-    const url = i.post_id ? `/p/${i.post_id}${i.kind === "comment" ? "#kommentare" : ""}` : i.kind === "follow_request" ? "/aktivitaet" : `/u/${i.actor}`;
+    const url =
+      i.kind === "trade_interest" && i.listing_id ? `/marktplatz/${i.listing_id}#tauschinteresse`
+      : i.post_id ? `/p/${i.post_id}${i.kind === "comment" ? "#kommentare" : ""}`
+      : i.kind === "follow_request" ? "/aktivitaet"
+      : `/u/${i.actor}`;
     const body =
       i.kind === "follow" ? t("follow", { nickname: i.actor })
       : i.kind === "follow_request" ? t("followRequest", { nickname: i.actor })
       : i.kind === "follow_accepted" ? t("followAccepted", { nickname: i.actor })
       : i.kind === "like" ? t("like", { nickname: i.actor })
+      : i.kind === "trade_interest" ? t("tradeInterest", { nickname: i.actor, title: i.listing_title ?? "" })
       : t("comment", { nickname: i.actor, text: i.comment ?? "" });
     return { title: t("title"), body, url, tag: `${i.kind}-${i.actor}` };
   });
