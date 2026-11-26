@@ -13,6 +13,7 @@ import { photoUrl } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteListing, ModerateListing, ReportForm, StartConversation, StatusSwitch } from "./listing-actions";
 import { BrandText } from "@/components/brand-text";
+import { BackLink } from "@/components/back-link";
 import { InterestButton } from "@/components/interest-button";
 import { getInterestedPeople, getInterestState } from "@/lib/interests";
 
@@ -57,6 +58,18 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
     isOwner ? getInterestedPeople(l.id) : Promise.resolve([]),
   ]);
   const tInt = await getTranslations("Interest");
+  // Tauschinteresse gibt es nur bei Inseraten, die man tauschen kann
+  const tradable = l.offer === "trade" || l.offer === "sell_or_trade";
+  const showInterest = tradable && publicVisible && !isOwner;
+  const interestControl = showInterest ? (
+    user ? (
+      <InterestButton listingId={l.id} ownerId={l.owner_id} initial={interest.mine} />
+    ) : (
+      <Link href="/anmelden" className="rounded-full border border-white/25 bg-night/80 px-4 py-2.5 text-sm font-bold text-cream shadow-lg backdrop-blur">
+        🔁 {tInt("button")}
+      </Link>
+    )
+  ) : null;
   const tEv = await getTranslations("Events");
 
   const handover = [
@@ -67,6 +80,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
 
   return (
     <article className="space-y-5">
+      <BackLink fallback="/marktplatz" label={t("backToList")} />
       {l.status === "removed" && (
         <div role="alert" className="card border-danger/50">
           <p className="font-semibold text-danger">{t("removedTitle")}</p>
@@ -78,6 +92,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
       {!publicVisible && l.status !== "removed" && <p className="card text-sm text-cream/70">{t("notVisible")}</p>}
 
       {photos.length > 0 && (
+        <div className="relative">
         <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
           {photos.map((p, i) => (
             <a
@@ -96,7 +111,10 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
             </a>
           ))}
         </div>
+        {interestControl && <div className="pointer-events-none absolute bottom-5 right-[24%] sm:right-[54%] [&>*]:pointer-events-auto">{interestControl}</div>}
+        </div>
       )}
+      {photos.length === 0 && interestControl && <div className="flex justify-end">{interestControl}</div>}
 
       <header className="space-y-2">
         <div className="flex flex-wrap gap-2 text-xs">
@@ -184,13 +202,12 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
           ) : (
             <StartConversation listingId={l.id} label={t("writeMessage")} />
           )}
-          {user && <InterestButton listingId={l.id} ownerId={l.owner_id} initial={interest.mine} />}
-          {interest.count > 0 && <p className="text-sm text-cream/70">🔁 {tInt("count", { count: interest.count })}</p>}
+          {tradable && interest.count > 0 && <p className="text-sm text-cream/70">🔁 {tInt("count", { count: interest.count })}</p>}
           <p className="text-xs text-cream/60">{t("safety")}</p>
         </section>
       )}
 
-      {isOwner && l.status !== "removed" && (
+      {isOwner && l.status !== "removed" && (tradable || interested.length > 0) && (
         <section id="tauschinteresse" className="card scroll-mt-28 space-y-3">
           <h2 className="font-semibold">🔁 {tInt("ownerTitle", { count: interested.length })}</h2>
           {interested.length === 0 ? (

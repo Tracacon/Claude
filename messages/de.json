@@ -310,6 +310,7 @@
     "giftOnly": "Zu verschenken"
   },
   "Listing": {
+    "backToList": "Zurück",
     "newTitle": "Inserat erstellen",
     "editTitle": "Inserat bearbeiten",
     "photos": "Fotos",
