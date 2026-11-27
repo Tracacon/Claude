@@ -645,10 +645,13 @@
     "apply": "Apply",
     "zoom": "Zoom",
     "rotate": "Rotate 90 degrees",
-    "cardHint": "Move the card into the frame · pinch to zoom",
+    "cardHint": "Move the card into the frame · pinch to zoom and turn",
     "cropFront": "Crop front",
     "cropBack": "Crop back",
-    "cropCard": "Crop photo"
+    "cropCard": "Crop photo",
+    "straighten": "Straighten",
+    "straightenReset": "Reset",
+    "straightenHint": "Lower slider: straighten a crooked photo. On a phone you can also turn it with two fingers."
   },
   "Events": {
     "title": "Events",
