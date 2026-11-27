@@ -93,6 +93,28 @@ export function ImageCropper({
   const [adjusting, setAdjusting] = useState(false);
   const canRotate = shape !== "circle";
   const [adjust, setAdjust] = useState<Adjust>(NO_ADJUST);
+  // Verkleinerte Kopie für die Anzeige (große Handyfotos überfordern sonst manche Browser)
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
+  useEffect(() => {
+    const max = 1800;
+    const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    if (k >= 1) return;
+    const c = document.createElement("canvas");
+    c.width = Math.round(img.naturalWidth * k);
+    c.height = Math.round(img.naturalHeight * k);
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    let url: string | null = null;
+    c.toBlob((b) => {
+      if (!b) return;
+      url = URL.createObjectURL(b);
+      setPreviewSrc(url);
+    }, "image/jpeg", 0.9);
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [img]);
   const [panel, setPanel] = useState<"crop" | "adjust">("crop");
   const adjusted = JSON.stringify(adjust) !== JSON.stringify(NO_ADJUST);
 
@@ -122,9 +144,12 @@ export function ImageCropper({
   const iw = img.naturalWidth;
   const ih = img.naturalHeight;
 
+  /** Farbe für leere Flächen, wenn das Foto kleiner gezoomt ist als der Rahmen */
+  const fill = shape === "card" ? "#ffffff" : "#0a0d11";
+
   /**
-   * Das gedrehte Foto muss den Rahmen immer ganz ausfüllen (keine weißen Ecken).
-   * Dafür muss der Rahmen, ins Foto zurückgedreht, ins Foto passen.
+   * zoom = 1: das (gedrehte) Foto füllt den Rahmen ganz aus.
+   * Kleiner als 1 (bis minZoom): Rauszoomen, bis das ganze Foto in den Rahmen passt.
    */
   function geometry(v: View) {
     const phi = ((v.rotation + v.tilt) * Math.PI) / 180;
@@ -133,7 +158,10 @@ export function ImageCropper({
     const needW = fw * c + fh * sn;
     const needH = fw * sn + fh * c;
     const base = Math.max(needW / iw, needH / ih);
-    return { phi, needW, needH, scale: base * v.zoom };
+    // Ganzes Foto sichtbar: gedrehter Umriss des Fotos passt in den Rahmen
+    const fit = Math.min(fw / (iw * c + ih * sn), fh / (iw * sn + ih * c));
+    const minZoom = Math.min(1, fit / base);
+    return { phi, needW, needH, minZoom, scale: base * v.zoom };
   }
 
   const scale = geometry(view).scale;
@@ -143,22 +171,20 @@ export function ImageCropper({
     // Verschiebung in Fotorichtung umrechnen, begrenzen, zurückrechnen
     const cos = Math.cos(phi);
     const sin = Math.sin(phi);
-    const mu = Math.max(0, (sc * iw - needW) / 2);
-    const mv = Math.max(0, (sc * ih - needH) / 2);
+    // Größer als der Rahmen: Rand darf nicht sichtbar werden. Kleiner: Foto bleibt im Rahmen.
+    const mu = Math.abs(sc * iw - needW) / 2;
+    const mv = Math.abs(sc * ih - needH) / 2;
     const u = Math.min(mu, Math.max(-mu, v.x * cos + v.y * sin));
     const w = Math.min(mv, Math.max(-mv, -v.x * sin + v.y * cos));
     return { ...v, x: u * cos - w * sin, y: u * sin + w * cos };
   }
 
   function update(next: Partial<View>) {
-    setView((v) =>
-      clamp({
-        ...v,
-        ...next,
-        zoom: Math.min(5, Math.max(1, next.zoom ?? v.zoom)),
-        tilt: Math.min(MAX_TILT, Math.max(-MAX_TILT, next.tilt ?? v.tilt)),
-      }),
-    );
+    setView((v) => {
+      const n = { ...v, ...next, tilt: Math.min(MAX_TILT, Math.max(-MAX_TILT, next.tilt ?? v.tilt)) };
+      const { minZoom } = geometry(n);
+      return clamp({ ...n, zoom: Math.min(5, Math.max(minZoom, next.zoom ?? v.zoom)) });
+    });
   }
 
   function onPointerDown(e: React.PointerEvent) {
@@ -208,7 +234,7 @@ export function ImageCropper({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const k = output.width / fw;
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = fill;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.imageSmoothingQuality = "high";
     ctx.translate(output.width / 2 + view.x * k, output.height / 2 + view.y * k);
@@ -245,15 +271,19 @@ export function ImageCropper({
         onPointerCancel={onPointerUp}
         onWheel={(e) => update({ zoom: view.zoom * (e.deltaY < 0 ? 1.08 : 1 / 1.08) })}
       >
+        {/* Füllfarbe im Rahmen (sichtbar, wenn rausgezoomt) */}
+        <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ width: fw, height: fh, background: fill }} />
         <img
-          src={src}
+          src={previewSrc ?? src}
           alt=""
           draggable={false}
           className="pointer-events-none absolute left-1/2 top-1/2 max-w-none"
           style={{
-            width: iw,
-            height: ih,
-            transform: `translate(-50%, -50%) translate(${view.x}px, ${view.y}px) rotate(${view.rotation + view.tilt}deg) scale(${scale})`,
+            // In Bildschirmgröße zeigen (nicht in Originalgröße skaliert): sonst wird das Foto
+            // mit Helligkeit/Kontrast auf manchen Geräten (Safari) schwarz
+            width: iw * scale,
+            height: ih * scale,
+            transform: `translate(-50%, -50%) translate(${view.x}px, ${view.y}px) rotate(${view.rotation + view.tilt}deg)`,
             filter: adjusted ? cssFilter(adjust) : undefined,
           }}
         />
@@ -337,7 +367,7 @@ export function ImageCropper({
           <span aria-hidden className="w-12 text-sm text-cream/70">🔍</span>
           <input
             type="range"
-            min={1}
+            min={Math.floor(geometry(view).minZoom * 100) / 100}
             max={5}
             step={0.01}
             value={view.zoom}
