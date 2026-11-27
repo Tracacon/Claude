@@ -11,11 +11,16 @@ const CARD_RATIO = 63 / 88;
 /** Beitragsfotos wie bei Instagram im Hochformat 4:5 */
 const POST_RATIO = 4 / 5;
 
-type View = { zoom: number; x: number; y: number; rotation: number };
+/** rotation: Vierteldrehungen (0, 90, 180 …); tilt: feines Geraderichten in Grad */
+type View = { zoom: number; x: number; y: number; rotation: number; tilt: number };
+
+/** Höchstens so weit lässt sich ein schiefes Foto gerade drehen */
+const MAX_TILT = 20;
 
 /**
  * Bildausschnitt wählen wie in Instagram: Bild mit dem Finger verschieben, mit zwei Fingern
- * (oder Regler / Mausrad) zoomen, bei Karten zusätzlich drehen. Ergebnis ist eine Zeichenfläche.
+ * (oder Regler / Mausrad) zoomen, bei Karten und Beiträgen zusätzlich drehen: in Vierteldrehungen
+ * und fein zum Geraderichten (Regler oder Drehen mit zwei Fingern). Ergebnis ist eine Zeichenfläche.
  */
 export function ImageCropper({
   src,
@@ -39,9 +44,11 @@ export function ImageCropper({
   const t = useTranslations("Photos");
   const boxRef = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState({ w: 320, h: 420 });
-  const [view, setView] = useState<View>({ zoom: 1, x: 0, y: 0, rotation: 0 });
+  const [view, setView] = useState<View>({ zoom: 1, x: 0, y: 0, rotation: 0, tilt: 0 });
   const pointers = useRef(new Map<number, { x: number; y: number }>());
-  const pinch = useRef<{ dist: number; zoom: number } | null>(null);
+  const pinch = useRef<{ dist: number; zoom: number; angle: number; tilt: number } | null>(null);
+  const [adjusting, setAdjusting] = useState(false);
+  const canRotate = shape !== "circle";
 
   // Größe der Arbeitsfläche messen
   useEffect(() => {
@@ -68,23 +75,44 @@ export function ImageCropper({
 
   const iw = img.naturalWidth;
   const ih = img.naturalHeight;
-  const quarter = ((view.rotation % 360) + 360) % 180 !== 0;
-  const rw = quarter ? ih : iw;
-  const rh = quarter ? iw : ih;
-  const baseScale = Math.max(fw / rw, fh / rh);
-  const scale = baseScale * view.zoom;
+
+  /**
+   * Das gedrehte Foto muss den Rahmen immer ganz ausfüllen (keine weißen Ecken).
+   * Dafür muss der Rahmen, ins Foto zurückgedreht, ins Foto passen.
+   */
+  function geometry(v: View) {
+    const phi = ((v.rotation + v.tilt) * Math.PI) / 180;
+    const c = Math.abs(Math.cos(phi));
+    const sn = Math.abs(Math.sin(phi));
+    const needW = fw * c + fh * sn;
+    const needH = fw * sn + fh * c;
+    const base = Math.max(needW / iw, needH / ih);
+    return { phi, needW, needH, scale: base * v.zoom };
+  }
+
+  const scale = geometry(view).scale;
 
   function clamp(v: View): View {
-    const q = ((v.rotation % 360) + 360) % 180 !== 0;
-    const w = (q ? ih : iw) * Math.max(fw / (q ? ih : iw), fh / (q ? iw : ih)) * v.zoom;
-    const h = (q ? iw : ih) * Math.max(fw / (q ? ih : iw), fh / (q ? iw : ih)) * v.zoom;
-    const mx = Math.max(0, (w - fw) / 2);
-    const my = Math.max(0, (h - fh) / 2);
-    return { ...v, x: Math.min(mx, Math.max(-mx, v.x)), y: Math.min(my, Math.max(-my, v.y)) };
+    const { phi, needW, needH, scale: sc } = geometry(v);
+    // Verschiebung in Fotorichtung umrechnen, begrenzen, zurückrechnen
+    const cos = Math.cos(phi);
+    const sin = Math.sin(phi);
+    const mu = Math.max(0, (sc * iw - needW) / 2);
+    const mv = Math.max(0, (sc * ih - needH) / 2);
+    const u = Math.min(mu, Math.max(-mu, v.x * cos + v.y * sin));
+    const w = Math.min(mv, Math.max(-mv, -v.x * sin + v.y * cos));
+    return { ...v, x: u * cos - w * sin, y: u * sin + w * cos };
   }
 
   function update(next: Partial<View>) {
-    setView((v) => clamp({ ...v, ...next, zoom: Math.min(5, Math.max(1, next.zoom ?? v.zoom)) }));
+    setView((v) =>
+      clamp({
+        ...v,
+        ...next,
+        zoom: Math.min(5, Math.max(1, next.zoom ?? v.zoom)),
+        tilt: Math.min(MAX_TILT, Math.max(-MAX_TILT, next.tilt ?? v.tilt)),
+      }),
+    );
   }
 
   function onPointerDown(e: React.PointerEvent) {
@@ -92,7 +120,13 @@ export function ImageCropper({
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.current.size === 2) {
       const [a, b] = [...pointers.current.values()];
-      pinch.current = { dist: Math.hypot(a.x - b.x, a.y - b.y), zoom: view.zoom };
+      pinch.current = {
+        dist: Math.hypot(a.x - b.x, a.y - b.y),
+        zoom: view.zoom,
+        angle: Math.atan2(b.y - a.y, b.x - a.x),
+        tilt: view.tilt,
+      };
+      setAdjusting(true);
     }
   }
 
@@ -102,7 +136,12 @@ export function ImageCropper({
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.current.size === 2 && pinch.current) {
       const [a, b] = [...pointers.current.values()];
-      update({ zoom: pinch.current.zoom * (Math.hypot(a.x - b.x, a.y - b.y) / pinch.current.dist) });
+      // Zwei Finger: zoomen und (bei Karten und Beiträgen) leicht drehen
+      const turn = ((Math.atan2(b.y - a.y, b.x - a.x) - pinch.current.angle) * 180) / Math.PI;
+      update({
+        zoom: pinch.current.zoom * (Math.hypot(a.x - b.x, a.y - b.y) / pinch.current.dist),
+        ...(canRotate ? { tilt: Math.round((pinch.current.tilt + turn) * 10) / 10 } : {}),
+      });
     } else if (pointers.current.size === 1) {
       setView((v) => clamp({ ...v, x: v.x + e.clientX - prev.x, y: v.y + e.clientY - prev.y }));
     }
@@ -110,7 +149,10 @@ export function ImageCropper({
 
   function onPointerUp(e: React.PointerEvent) {
     pointers.current.delete(e.pointerId);
-    if (pointers.current.size < 2) pinch.current = null;
+    if (pointers.current.size < 2) {
+      pinch.current = null;
+      setAdjusting(false);
+    }
   }
 
   function confirm() {
@@ -124,7 +166,7 @@ export function ImageCropper({
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.imageSmoothingQuality = "high";
     ctx.translate(output.width / 2 + view.x * k, output.height / 2 + view.y * k);
-    ctx.rotate((view.rotation * Math.PI) / 180);
+    ctx.rotate(((view.rotation + view.tilt) * Math.PI) / 180);
     ctx.scale(scale * k, scale * k);
     ctx.drawImage(img, -iw / 2, -ih / 2);
     onDone(canvas);
@@ -155,7 +197,7 @@ export function ImageCropper({
           style={{
             width: iw,
             height: ih,
-            transform: `translate(-50%, -50%) translate(${view.x}px, ${view.y}px) rotate(${view.rotation}deg) scale(${scale})`,
+            transform: `translate(-50%, -50%) translate(${view.x}px, ${view.y}px) rotate(${view.rotation + view.tilt}deg) scale(${scale})`,
           }}
         />
         {/* Abgedunkelter Bereich außerhalb des Rahmens */}
@@ -165,30 +207,75 @@ export function ImageCropper({
             shape === "circle" ? "rounded-full" : shape === "post" ? "rounded-none" : "rounded-[4%]"
           }`}
           style={{ width: fw, height: fh, boxShadow: "0 0 0 9999px rgba(10, 16, 28, 0.72)" }}
-        />
+        >
+          {/* Hilfslinien zum Geraderichten, sichtbar beim Drehen */}
+          {canRotate && (
+            <span
+              className={`absolute inset-0 transition-opacity ${adjusting || view.tilt !== 0 ? "opacity-100" : "opacity-0"}`}
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(255,255,255,0.45) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.45) 1px, transparent 1px)",
+                backgroundSize: `${fw / 3}px ${fh / 3}px`,
+                backgroundPosition: "-1px -1px",
+              }}
+            />
+          )}
+        </div>
         {shape === "card" && (
           <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-xs text-white/80">{t("cardHint")}</p>
         )}
       </div>
 
-      <div className="flex items-center gap-3 border-t border-line px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
-        <span aria-hidden className="text-sm">−</span>
-        <input
-          type="range"
-          min={1}
-          max={5}
-          step={0.01}
-          value={view.zoom}
-          onChange={(e) => update({ zoom: Number(e.target.value) })}
-          aria-label={t("zoom")}
-          className="flex-1 accent-brand"
-        />
-        <span aria-hidden className="text-sm">+</span>
-        {shape !== "circle" && (
-          <button type="button" className="btn-ghost px-3 py-1.5" onClick={() => update({ rotation: view.rotation + 90, x: 0, y: 0 })} aria-label={t("rotate")}>
-            ⟳
-          </button>
+      <div className="space-y-2 border-t border-line px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+        <div className="flex items-center gap-3">
+          <span aria-hidden className="w-12 text-sm text-cream/70">🔍</span>
+          <input
+            type="range"
+            min={1}
+            max={5}
+            step={0.01}
+            value={view.zoom}
+            onChange={(e) => update({ zoom: Number(e.target.value) })}
+            aria-label={t("zoom")}
+            className="flex-1 accent-brand"
+          />
+          {canRotate && (
+            <button type="button" className="btn-ghost px-3 py-1.5" onClick={() => update({ rotation: view.rotation + 90, x: 0, y: 0 })} aria-label={t("rotate")} title={t("rotate")}>
+              ⟳
+            </button>
+          )}
+        </div>
+        {canRotate && (
+          <div className="flex items-center gap-3">
+            <span className="w-12 text-right text-sm tabular-nums text-cream/80" aria-hidden>
+              {view.tilt > 0 ? "+" : ""}
+              {view.tilt.toFixed(1).replace(".", ",")}°
+            </span>
+            <input
+              type="range"
+              min={-MAX_TILT}
+              max={MAX_TILT}
+              step={0.1}
+              value={view.tilt}
+              onChange={(e) => update({ tilt: Number(e.target.value) })}
+              onPointerDown={() => setAdjusting(true)}
+              onPointerUp={() => setAdjusting(false)}
+              onBlur={() => setAdjusting(false)}
+              aria-label={t("straighten")}
+              aria-valuetext={`${view.tilt.toFixed(1)}°`}
+              className="flex-1 accent-brand"
+            />
+            <button
+              type="button"
+              className="btn-ghost px-3 py-1.5 text-xs disabled:opacity-40"
+              onClick={() => update({ tilt: 0 })}
+              disabled={view.tilt === 0}
+            >
+              {t("straightenReset")}
+            </button>
+          </div>
         )}
+        {canRotate && <p className="text-center text-xs text-cream/60">{t("straightenHint")}</p>}
       </div>
     </div>
   );

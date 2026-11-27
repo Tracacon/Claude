@@ -645,10 +645,13 @@
     "apply": "Übernehmen",
     "zoom": "Zoomen",
     "rotate": "Um 90 Grad drehen",
-    "cardHint": "Karte in den Rahmen schieben · mit zwei Fingern zoomen",
+    "cardHint": "Karte in den Rahmen schieben · mit zwei Fingern zoomen und drehen",
     "cropFront": "Vorderseite zuschneiden",
     "cropBack": "Rückseite zuschneiden",
-    "cropCard": "Foto zuschneiden"
+    "cropCard": "Foto zuschneiden",
+    "straighten": "Gerade ausrichten",
+    "straightenReset": "Gerade",
+    "straightenHint": "Unterer Regler: schiefes Foto gerade drehen. Am Handy geht das auch mit zwei Fingern."
   },
   "Events": {
     "title": "Termine",
