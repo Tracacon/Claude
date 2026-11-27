@@ -82,6 +82,7 @@ export async function updateProfile(_prev: FormState, formData: FormData): Promi
     city: str(formData, "city"),
     bio: str(formData, "bio"),
     website: str(formData, "website"),
+    website2: str(formData, "website2"),
     instagram: str(formData, "instagram"),
     locale: str(formData, "locale"),
   };

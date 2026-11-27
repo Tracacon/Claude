@@ -113,7 +113,8 @@
     "passwordSaved": "Passwort gespeichert. Du kannst dich jetzt auf jedem Gerät damit anmelden.",
     "instagram": "Instagram",
     "instagramPlaceholder": "deinname",
-    "instagramHint": "Nur deinen Instagram-Namen eintippen, ohne @. Ein kopierter Instagram-Link funktioniert auch."
+    "instagramHint": "Nur deinen Instagram-Namen eintippen, ohne @. Ein kopierter Instagram-Link funktioniert auch.",
+    "website2": "Zweiter Link"
   },
   "Roles": {
     "member": "Mitglied",
@@ -226,7 +227,8 @@
     "pocket_taken": "In diesem Fach liegt schon eine Karte.",
     "binder_name_required": "Bitte gib dem Binder einen Namen.",
     "front_required": "Bitte füge ein Foto der Vorderseite hinzu.",
-    "title_required": "Zum Tauschen oder Verkaufen braucht die Karte einen Titel."
+    "title_required": "Zum Tauschen oder Verkaufen braucht die Karte einen Titel.",
+    "too_many_highlights": "Du kannst höchstens 20 Highlights anlegen."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -496,7 +498,8 @@
     "previewTitle": "Foto senden",
     "cancel": "Abbrechen",
     "caption": "Text zum Foto",
-    "captionPlaceholder": "Text hinzufügen …"
+    "captionPlaceholder": "Text hinzufügen …",
+    "direct": "Direktnachricht"
   },
   "Register": {
     "title": "Registrieren",
@@ -575,7 +578,9 @@
     "posts": "Beiträge",
     "newPost": "Beitrag",
     "instagramLink": "Instagram-Profil von {name} öffnen",
-    "collection": "Sammlung"
+    "collection": "Sammlung",
+    "message": "Nachricht",
+    "followedBy": "Gefolgt von {names}{more, plural, =0 {} =1 { und 1 weiteren Person} other { und # weiteren Personen}}"
   },
   "Badges": {
     "team": {
@@ -1180,5 +1185,20 @@
     "coverRemove": "Titelbild entfernen",
     "coverUploading": "Wird hochgeladen …",
     "coverError": "Das Foto konnte nicht verarbeitet werden. Bitte versuche ein anderes."
+  },
+  "Highlights": {
+    "title": "Highlights",
+    "new": "Neu",
+    "edit": "Bearbeiten",
+    "back": "Zurück",
+    "manageTitle": "Highlights",
+    "manageIntro": "Wähle Binder aus, die oben in deinem Profil als runde Highlights erscheinen. Die Beschriftung darf bis zu 20 Zeichen lang sein. Als Bild dient das Titelbild des Binders, sonst die Vorderseite der ersten Karte.",
+    "noBinders": "Du hast noch keinen Binder. Leg zuerst einen an.",
+    "createBinder": "Binder anlegen",
+    "label": "Beschriftung",
+    "add": "Als Highlight",
+    "save": "Speichern",
+    "saved": "Gespeichert",
+    "remove": "Highlight entfernen"
   }
 }

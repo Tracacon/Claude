@@ -66,7 +66,7 @@ export default async function ConversationPage({ params }: PageProps<"/[locale]/
           </div>
         </Link>
       ) : (
-        <p className="card p-3 text-sm text-cream/70 sm:p-3">{t("listingGone", { title: c.listing_title })}</p>
+        c.listing_title ? <p className="card p-3 text-sm text-cream/70 sm:p-3">{t("listingGone", { title: c.listing_title })}</p> : null
       )}
 
       <p className="rounded-xl border border-brand/30 bg-brand/5 px-3 py-2 text-xs text-cream/80">{t("safety")}</p>

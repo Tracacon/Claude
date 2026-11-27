@@ -51,11 +51,10 @@ export async function BinderShelf({
   const shown = items.filter((i) => inBinder(i) && matchesMark(markOf(i), mark));
 
   const href = (m: CollectionMark, b: string | null) => {
-    const q = new URLSearchParams();
+    const q = new URLSearchParams({ tab: "sammlung" });
     if (m !== "alle") q.set("filter", m);
     if (b) q.set("binder", b);
-    const qs = q.toString();
-    return qs ? `${basePath}?${qs}` : basePath;
+    return `${basePath}?${q.toString()}`;
   };
   const countFor = (m: CollectionMark) => items.filter((i) => inBinder(i) && matchesMark(markOf(i), m)).length;
   const chip = (on: boolean) =>
@@ -119,7 +118,7 @@ export async function BinderShelf({
               </div>
             )}
             {active && (
-              <Link href={basePath} className="inline-block text-sm text-brand hover:underline">✕ {t("filterReset")}</Link>
+              <Link href={`${basePath}?tab=sammlung`} className="inline-block text-sm text-brand hover:underline">✕ {t("filterReset")}</Link>
             )}
           </div>
         </details>

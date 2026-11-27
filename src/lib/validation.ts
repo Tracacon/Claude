@@ -99,6 +99,12 @@ export const profileSchema = z.object({
     .max(200, { message: "too_long" })
     .refine((v) => v === "" || /^https:\/\/[^\s]+\.[^\s]+$/.test(v), { message: "invalid_website" })
     .transform((v) => (v === "" ? null : v)),
+  website2: z
+    .string()
+    .trim()
+    .max(200, { message: "too_long" })
+    .refine((v) => v === "" || /^https:\/\/[^\s]+\.[^\s]+$/.test(v), { message: "invalid_website" })
+    .transform((v) => (v === "" ? null : v)),
   instagram: z
     .string()
     .transform(normalizeInstagram)

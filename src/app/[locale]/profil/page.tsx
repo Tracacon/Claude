@@ -6,6 +6,7 @@ import { UserMenu } from "@/components/user-menu";
 import { getProfilePosts } from "@/lib/feed";
 import { requireProfile } from "@/lib/auth";
 import { getProfileBinders } from "@/lib/binders";
+import { getProfileHighlights } from "@/lib/highlights";
 import { parseCollectionMark } from "@/lib/binder-shared";
 import { getProfileCollection, getProfileEvents, getProfileListings, getPublicProfile } from "@/lib/profiles";
 import { getUserMenu } from "@/lib/user-menu-data";
@@ -25,6 +26,7 @@ export default async function MyProfilePage({ params, searchParams }: PageProps<
   const profile = await getPublicProfile(me.nickname!);
   if (!profile) notFound();
   const tab = parseProfileTab(sp.tab);
+  const highlights = true ? await getProfileHighlights(me.nickname!) : [];
   const [collection, binders] = tab === "sammlung"
     ? await Promise.all([getProfileCollection(me.nickname!), getProfileBinders(me.nickname!)])
     : [[], []];
@@ -40,7 +42,7 @@ export default async function MyProfilePage({ params, searchParams }: PageProps<
           <UserMenu data={menu} variant="sheet" />
         </div>
       )}
-      <ProfileView profile={profile} listings={listings} collection={collection} binders={binders} events={events} posts={posts} tab={tab} offerFilter={parseOfferFilter(sp.angebot)} collectionMark={parseCollectionMark(sp.filter)} collectionBinder={typeof sp.binder === "string" ? sp.binder : null} loggedIn basePath="/profil" />
+      <ProfileView profile={profile} listings={listings} collection={collection} binders={binders} highlights={highlights} events={events} posts={posts} tab={tab} offerFilter={parseOfferFilter(sp.angebot)} collectionMark={parseCollectionMark(sp.filter)} collectionBinder={typeof sp.binder === "string" ? sp.binder : null} loggedIn basePath="/profil" />
     </div>
   );
 }

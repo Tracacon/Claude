@@ -27,10 +27,51 @@ export function parseOfferFilter(v: unknown): OfferFilter {
 }
 
 export function parseProfileTab(v: unknown): ProfileTab {
-  // Ohne Angabe öffnet das Profil die Sammlung
-  return v === "beitraege" || v === "inserate" || v === "abzeichen" ? v : "sammlung";
+  // Ohne Angabe öffnet das Profil die Beiträge (wie bei Instagram)
+  return v === "sammlung" || v === "inserate" || v === "abzeichen" ? v : "beitraege";
 }
 import { BADGE_ICONS, type PublicProfile } from "@/lib/social";
+import { MessageButton } from "@/components/message-button";
+import { ProfileHighlights } from "@/components/profile-highlights";
+import type { Highlight } from "@/lib/highlights";
+
+/** Symbole der Reiterleiste */
+function TabIcon({ tab }: { tab: ProfileTab }) {
+  const common = { viewBox: "0 0 24 24", className: "size-6", fill: "none", stroke: "currentColor", strokeWidth: 1.9, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
+  switch (tab) {
+    case "beitraege":
+      return (
+        <svg {...common}>
+          <rect x="3.5" y="3.5" width="17" height="17" rx="2" />
+          <path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17" />
+        </svg>
+      );
+    case "sammlung":
+      // Binder mit Ringen
+      return (
+        <svg {...common}>
+          <rect x="5" y="3" width="15" height="18" rx="2" />
+          <path d="M3 7h4M3 12h4M3 17h4" />
+          <rect x="10" y="7" width="6" height="8" rx="1" />
+        </svg>
+      );
+    case "inserate":
+      // Preisschild
+      return (
+        <svg {...common}>
+          <path d="M3.5 12.5V4.5a1 1 0 0 1 1-1h8l8 8-9 9z" />
+          <circle cx="8" cy="8" r="1.4" />
+        </svg>
+      );
+    case "abzeichen":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="9" r="5.5" />
+          <path d="M8.5 13.5 7 21l5-2.5 5 2.5-1.5-7.5" />
+        </svg>
+      );
+  }
+}
 
 /**
  * Profilansicht wie in sozialen Netzwerken: Bild, Zahlen, Beschreibung,
@@ -49,6 +90,7 @@ export async function ProfileView({
   offerFilter = "alle",
   collectionMark = "alle",
   collectionBinder = null,
+  highlights = [],
 }: {
   profile: PublicProfile;
   listings: ListingSummary[];
@@ -67,6 +109,8 @@ export async function ProfileView({
   /** Filter im Reiter Sammlung */
   collectionMark?: CollectionMark;
   collectionBinder?: string | null;
+  /** Highlights (Binder als runde Kreise) */
+  highlights?: Highlight[];
 }) {
   const t = await getTranslations("Social");
   const tRoles = await getTranslations("Roles");
@@ -93,7 +137,7 @@ export async function ProfileView({
 
   return (
     <div className="space-y-5">
-      <header className="space-y-4">
+      <header className="space-y-3">
         <div className="flex items-center gap-4 sm:gap-6">
           <Avatar userId={p.id} avatarId={p.avatar_id} nickname={p.nickname} size="lg" />
           <div className="flex flex-1 justify-around">
@@ -104,35 +148,54 @@ export async function ProfileView({
         </div>
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-xl font-bold normal-case">{p.nickname}</h1>
+            <h1 className="text-base font-bold normal-case">{p.nickname}</h1>
             {p.role !== "member" && (
               <span className="rounded-full bg-brand/15 px-2 py-0.5 text-xs font-semibold text-brand">{tRoles(p.role)}</span>
             )}
             {p.visibility === "followers" && <span className="text-xs text-cream/60" title={t("privateLabel")}>🔒</span>}
+            {p.follows_me && !p.is_me && <span className="rounded bg-white/10 px-1.5 py-0.5 text-xs text-cream/70">{t("followsYou")}</span>}
           </div>
-          {p.can_view && p.city && <p className="text-sm text-cream/70">📍 {p.city}</p>}
           {p.can_view && p.bio && <p className="whitespace-pre-line text-[15px]">{p.bio}</p>}
-          {p.can_view && p.instagram && (
-            <a
-              href={`https://www.instagram.com/${p.instagram}/`}
-              target="_blank"
-              rel="noopener noreferrer nofollow ugc"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-cream hover:text-brand"
-              aria-label={t("instagramLink", { name: p.instagram })}
-            >
-              <InstagramIcon className="size-5" />
-              {p.instagram}
-            </a>
+          {p.can_view && p.city && <p className="text-sm text-cream/70">📍 {p.city}</p>}
+          {p.can_view && (p.website || p.website2 || p.instagram) && (
+            <div className="flex flex-col items-start gap-0.5">
+              {[p.website, p.website2].filter((x): x is string => Boolean(x)).map((w) => (
+                <a key={w} href={w} target="_blank" rel="noopener noreferrer nofollow ugc" className="inline-flex max-w-full items-center gap-1 text-sm font-semibold text-brand-light hover:underline">
+                  <span aria-hidden>🔗</span>
+                  <span className="truncate">{w.replace(/^https:\/\/(www\.)?/, "").replace(/\/$/, "")}</span>
+                </a>
+              ))}
+              {p.instagram && (
+                <a
+                  href={`https://www.instagram.com/${p.instagram}/`}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow ugc"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-cream hover:text-brand"
+                  aria-label={t("instagramLink", { name: p.instagram })}
+                >
+                  <InstagramIcon className="size-4" />
+                  {p.instagram}
+                </a>
+              )}
+            </div>
           )}
-          {p.can_view && p.website && (
-            <a href={p.website} target="_blank" rel="noopener noreferrer nofollow ugc" className="link break-all text-sm">
-              {p.website.replace(/^https:\/\//, "")}
-            </a>
+          {!p.is_me && (p.followed_by?.length ?? 0) > 0 && (
+            <Link href={`${userPath}/follower`} className="flex items-center gap-2 pt-1 text-xs text-cream/75 hover:text-cream">
+              <span className="flex -space-x-2">
+                {p.followed_by!.map((f) => (
+                  <span key={f.id} className="rounded-full ring-2 ring-night">
+                    <Avatar userId={f.id} avatarId={f.avatar_id} nickname={f.nickname} size="2xs" />
+                  </span>
+                ))}
+              </span>
+              <span>
+                {t("followedBy", {
+                  names: p.followed_by!.map((f) => f.nickname).join(", "),
+                  more: Math.max(0, (p.followed_by_count ?? 0) - p.followed_by!.length),
+                })}
+              </span>
+            </Link>
           )}
-          <p className="text-xs text-cream/50">
-            {t("memberSince", { date: format.dateTime(new Date(p.member_since), { month: "long", year: "numeric" }) })}
-            {p.follows_me && !p.is_me && <span className="ml-2 rounded bg-white/10 px-1.5 py-0.5">{t("followsYou")}</span>}
-          </p>
         </div>
         <div className="flex gap-2">
           {p.is_me ? (
@@ -141,28 +204,33 @@ export async function ProfileView({
               <Link href="/beitrag/neu" className="btn-ghost flex-1">+ {t("newPost")}</Link>
             </>
           ) : loggedIn && !p.blocked ? (
-            <FollowButton userId={p.id} initial={p.my_follow} />
+            <>
+              <div className="flex-1 [&_button]:w-full">
+                <FollowButton userId={p.id} initial={p.my_follow} />
+              </div>
+              <MessageButton userId={p.id} />
+            </>
           ) : !loggedIn ? (
-            <Link href="/anmelden" className="btn-primary">{t("follow")}</Link>
+            <>
+              <Link href="/anmelden" className="btn-primary flex-1">{t("follow")}</Link>
+              <Link href="/anmelden" className="btn-ghost flex-1">{t("message")}</Link>
+            </>
           ) : null}
         </div>
+        {p.can_view && <ProfileHighlights nickname={p.nickname} highlights={highlights} isMe={p.is_me} />}
       </header>
 
-      <nav className="flex border-b border-line text-sm" aria-label={t("sections")}>
-        {(["sammlung", "beitraege", "inserate", "abzeichen"] as const).map((x) => (
+      <nav className="flex border-b border-line" aria-label={t("sections")}>
+        {(["beitraege", "sammlung", "inserate", "abzeichen"] as const).map((x) => (
           <Link
             key={x}
-            href={x === "sammlung" ? basePath : `${basePath}?tab=${x}`}
+            href={x === "beitraege" ? basePath : `${basePath}?tab=${x}`}
             aria-current={tab === x ? "page" : undefined}
-            className={`flex-1 border-b-2 py-2.5 text-center font-semibold ${tab === x ? "border-cream text-cream" : "border-transparent text-cream/55"}`}
+            aria-label={x === "beitraege" ? t("posts") : x === "sammlung" ? t("collection") : x === "inserate" ? `${t("listings")} (${p.listing_count})` : t("badges")}
+            title={x === "beitraege" ? t("posts") : x === "sammlung" ? t("collection") : x === "inserate" ? t("listings") : t("badges")}
+            className={`flex flex-1 justify-center border-b-2 py-2.5 ${tab === x ? "border-cream text-cream" : "border-transparent text-cream/50 hover:text-cream/80"}`}
           >
-            {x === "sammlung"
-              ? `📁 ${t("collection")}`
-              : x === "beitraege"
-                ? `▦ ${t("posts")}`
-                : x === "inserate"
-                  ? `🃏 ${t("listings")} (${p.listing_count})`
-                  : `🏅 ${t("badges")}`}
+            <TabIcon tab={x} />
           </Link>
         ))}
       </nav>
