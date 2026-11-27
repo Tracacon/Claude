@@ -1,9 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { FormError } from "@/components/form-error";
-import { deleteBinder, saveBinder, type BinderFormState } from "@/lib/actions/binders";
+import { ImageCropper } from "@/components/image-cropper";
+import { PhotoSourceSheet } from "@/components/photo-source-sheet";
+import { Link } from "@/i18n/navigation";
+import { autosaveBinder, deleteBinder, type BinderFormState } from "@/lib/actions/binders";
 import {
   BINDER_COLORS,
   BINDER_COLOR_STYLES,
@@ -11,40 +14,130 @@ import {
   BINDER_VISIBILITIES,
   type BinderColor,
   type BinderEffect,
+  type BinderVisibility,
 } from "@/lib/binder-shared";
-import { BinderCover } from "./binder-cover";
-import { ImageCropper } from "@/components/image-cropper";
-import { PhotoSourceSheet } from "@/components/photo-source-sheet";
 import { canvasToJpeg, loadImage } from "@/lib/image";
 import { PHOTO_BUCKET, photoUrl } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/client";
+import { BinderCover } from "./binder-cover";
 
-/** Binder anlegen oder bearbeiten: Name, Farbe, wer ihn sieht */
+type Section = "color" | "effect" | "visibility" | null;
+type SaveState = "idle" | "saving" | "saved" | "error";
+
+const VIS_ICON: Record<BinderVisibility, string> = { public: "🌐", followers: "👥", private: "🔒" };
+
+function CameraIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M4 8h3l1.6-2.4A1.5 1.5 0 0 1 9.9 5h4.2a1.5 1.5 0 0 1 1.3.6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z" />
+      <circle cx="12" cy="13" r="3.6" />
+    </svg>
+  );
+}
+
+function Chevron({ open }: { open: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" className={`size-5 text-cream/50 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+/**
+ * Binder anlegen oder bearbeiten, wie bei Instagram:
+ * Vorschau oben (bleibt stehen), Kamera-Knopf auf dem Einband für das Titelbild,
+ * darunter Name und aufklappbare Zeilen für Farbe, Effekt und Sichtbarkeit.
+ * Jede Änderung wird automatisch gespeichert; ein neuer Binder entsteht, sobald er einen Namen hat.
+ */
 export function BinderForm({
   userId,
+  nickname,
   binder,
 }: {
-  /** Eigene Nutzer-ID (Ordner für das Titelbild) */
   userId: string;
+  nickname: string;
   binder?: { id: string; name: string; color: BinderColor; visibility: string; effect: BinderEffect; cover_image: string | null };
 }) {
   const t = useTranslations("Binder");
-  const [state, action, pending] = useActionState<BinderFormState, FormData>(saveBinder, {});
-  const [del, delAction, deleting] = useActionState<BinderFormState, FormData>(deleteBinder, {});
-  const [name, setName] = useState(state.values?.name ?? binder?.name ?? "");
-  const [color, setColor] = useState<BinderColor>((state.values?.color as BinderColor) ?? binder?.color ?? "night");
-  const [effect, setEffect] = useState<BinderEffect>((state.values?.effect as BinderEffect) ?? binder?.effect ?? "none");
-  const [confirm, setConfirm] = useState(false);
-  // Eigenes Titelbild: auswählen, zuschneiden, anpassen, hochladen
   const tP = useTranslations("Photos");
+  const [id, setId] = useState<string | null>(binder?.id ?? null);
+  const [name, setName] = useState(binder?.name ?? "");
+  const [color, setColor] = useState<BinderColor>(binder?.color ?? "night");
+  const [effect, setEffect] = useState<BinderEffect>(binder?.effect ?? "none");
+  const [visibility, setVisibility] = useState<BinderVisibility>((binder?.visibility as BinderVisibility) ?? "public");
   const [cover, setCover] = useState<{ id: string; preview: string } | null>(
     binder?.cover_image ? { id: binder.cover_image, preview: photoUrl(userId, binder.cover_image, "thumb") } : null,
   );
+  const [open, setOpen] = useState<Section>(null);
+  const [save, setSave] = useState<SaveState>("idle");
+  const [saveError, setSaveError] = useState<string | undefined>();
   const [sourceOpen, setSourceOpen] = useState(false);
   const [crop, setCrop] = useState<{ img: HTMLImageElement; url: string } | null>(null);
   const [uploading, setUploading] = useState(false);
   const [coverError, setCoverError] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState(false);
+  const [del, delAction, deleting] = useActionState<BinderFormState, FormData>(deleteBinder, {});
 
+  // Vorschau bleibt unter der oberen Leiste stehen: deren Höhe messen
+  const [headerH, setHeaderH] = useState(64);
+  useEffect(() => {
+    const h = document.querySelector<HTMLElement>("header.sticky");
+    if (!h) return;
+    const ro = new ResizeObserver(() => setHeaderH(h.offsetHeight));
+    ro.observe(h);
+    return () => ro.disconnect();
+  }, []);
+
+  // --- Automatisch speichern -------------------------------------------------------
+  const latest = useRef({ id, name, color, effect, visibility, cover: cover?.id ?? null });
+  latest.current = { id, name, color, effect, visibility, cover: cover?.id ?? null };
+  const busy = useRef(false);
+  const again = useRef(false);
+  const first = useRef(true);
+
+  async function persist() {
+    if (busy.current) {
+      again.current = true;
+      return;
+    }
+    const v = latest.current;
+    if (v.name.trim() === "") return; // ohne Namen wird (noch) nichts angelegt
+    busy.current = true;
+    setSave("saving");
+    const r = await autosaveBinder({ id: v.id, name: v.name, color: v.color, effect: v.effect, visibility: v.visibility, cover: v.cover });
+    busy.current = false;
+    if (r.error) {
+      setSave("error");
+      setSaveError(r.error);
+    } else {
+      setSave("saved");
+      setSaveError(undefined);
+      if (!v.id && r.id) {
+        setId(r.id);
+        latest.current.id = r.id;
+        // Adresse auf "bearbeiten" umstellen, damit Neuladen bzw. Zurück den Binder behält
+        window.history.replaceState(window.history.state, "", window.location.pathname.replace(/\/binder\/neu$/, `/binder/${r.id}/bearbeiten`));
+      }
+    }
+    if (again.current) {
+      again.current = false;
+      void persist();
+    }
+  }
+
+  // Name: kurz nach dem Tippen speichern; alles andere sofort
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    const timer = window.setTimeout(() => void persist(), 700);
+    return () => window.clearTimeout(timer);
+    // persist liest den Stand über latest
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name, color, effect, visibility, cover?.id]);
+
+  // --- Titelbild ---------------------------------------------------------------------
   async function pickCover(files: File[]) {
     setCoverError(null);
     if (!files[0]) return;
@@ -58,7 +151,7 @@ export function BinderForm({
   async function uploadCover(canvas: HTMLCanvasElement) {
     if (crop) URL.revokeObjectURL(crop.url);
     setCrop(null);
-    const id = crypto.randomUUID();
+    const newId = crypto.randomUUID();
     const preview = canvas.toDataURL("image/jpeg", 0.7);
     setUploading(true);
     try {
@@ -66,11 +159,11 @@ export function BinderForm({
       const supabase = createClient();
       const opts = { contentType: "image/jpeg", cacheControl: "31536000", upsert: false };
       const [a, b] = await Promise.all([
-        supabase.storage.from(PHOTO_BUCKET).upload(`${userId}/${id}.jpg`, full, opts),
-        supabase.storage.from(PHOTO_BUCKET).upload(`${userId}/${id}_t.jpg`, thumb, opts),
+        supabase.storage.from(PHOTO_BUCKET).upload(`${userId}/${newId}.jpg`, full, opts),
+        supabase.storage.from(PHOTO_BUCKET).upload(`${userId}/${newId}_t.jpg`, thumb, opts),
       ]);
       if (a.error || b.error) throw a.error ?? b.error;
-      setCover({ id, preview });
+      setCover({ id: newId, preview });
     } catch (e) {
       console.error("Titelbild", e);
       setCoverError(t("coverError"));
@@ -78,107 +171,156 @@ export function BinderForm({
       setUploading(false);
     }
   }
-  const visibility = state.values?.visibility ?? binder?.visibility ?? "public";
+
+  const toggle = (x: Section) => setOpen((o) => (o === x ? null : x));
+  const row = "flex w-full items-center gap-3 px-4 py-3.5 text-left hover:bg-white/[0.03]";
+  const swatch = (x: BinderColor) => ({ background: `radial-gradient(circle at 30% 30%, ${BINDER_COLOR_STYLES[x].base}, ${BINDER_COLOR_STYLES[x].edge})` });
 
   return (
-    <div className="space-y-5">
-      <div className="mx-auto w-40">
-        <BinderCover name={name || t("namePlaceholder")} color={color} effect={effect} imageUrl={cover?.preview ?? null} subtitle={t("preview")} />
-      </div>
-      <form action={action} className="card space-y-4" noValidate>
-        {binder && <input type="hidden" name="id" value={binder.id} />}
-        <input type="hidden" name="cover_field" value="1" />
-        <input type="hidden" name="cover_image" value={cover?.id ?? ""} />
-        <div>
-          <label htmlFor="name" className="label">{t("name")}</label>
-          <input
-            id="name"
-            name="name"
-            required
-            maxLength={40}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={t("namePlaceholder")}
-            className="input"
-          />
-        </div>
-        <fieldset>
-          <legend className="label">{t("color")}</legend>
-          <div className="flex flex-wrap gap-3">
-            {BINDER_COLORS.map((x) => (
-              <label key={x} className="cursor-pointer">
-                <input type="radio" name="color" value={x} checked={color === x} onChange={() => setColor(x)} className="peer sr-only" />
-                <span
-                  className="block size-10 rounded-full border-2 border-transparent ring-offset-2 ring-offset-night-2 peer-checked:ring-2 peer-checked:ring-brand peer-focus-visible:ring-2 peer-focus-visible:ring-brand"
-                  style={{ background: `radial-gradient(circle at 30% 30%, ${BINDER_COLOR_STYLES[x].base}, ${BINDER_COLOR_STYLES[x].edge})` }}
-                  title={t(`color_${x}`)}
-                />
-                <span className="sr-only">{t(`color_${x}`)}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <div>
-          <p className="label">{t("coverImage")}</p>
-          <p className="hint mt-0 mb-2">{t("coverImageHint")}</p>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" className="btn-ghost" disabled={uploading} onClick={() => setSourceOpen(true)}>
-              📷 {uploading ? t("coverUploading") : cover ? t("coverChange") : t("coverAdd")}
+    <div className="space-y-4">
+      {/* Vorschau mit Kamera-Knopf, bleibt beim Scrollen stehen */}
+      <div className="sticky z-10 -mx-4 bg-night/95 px-4 pb-3 pt-2 backdrop-blur" style={{ top: headerH }}>
+        <div className="relative mx-auto w-36 sm:w-44">
+          <BinderCover name={name || t("namePlaceholder")} color={color} effect={effect} imageUrl={cover?.preview ?? null} subtitle={t("preview")} />
+          <button
+            type="button"
+            onClick={() => setSourceOpen(true)}
+            disabled={uploading}
+            className="absolute -bottom-2 -right-3 grid size-12 place-items-center rounded-full border-2 border-night bg-brand text-on-brand shadow-lg transition-transform hover:scale-105 disabled:opacity-60"
+            aria-label={cover ? t("coverChange") : t("coverAdd")}
+            title={cover ? t("coverChange") : t("coverAdd")}
+          >
+            {uploading ? <span className="size-5 animate-spin rounded-full border-2 border-on-brand border-t-transparent" /> : <CameraIcon className="size-6" />}
+          </button>
+          {cover && !uploading && (
+            <button
+              type="button"
+              onClick={() => setCover(null)}
+              className="absolute -right-3 -top-2 grid size-8 place-items-center rounded-full border-2 border-night bg-night-3 text-sm text-cream/80 shadow hover:text-danger"
+              aria-label={t("coverRemove")}
+              title={t("coverRemove")}
+            >
+              ✕
             </button>
-            {cover && !uploading && (
-              <button type="button" className="btn-ghost text-danger" onClick={() => setCover(null)}>
-                ✕ {t("coverRemove")}
-              </button>
-            )}
-          </div>
-          {coverError && <p role="alert" className="error">{coverError}</p>}
+          )}
         </div>
-        <fieldset>
-          <legend className="label">{t("effect")}</legend>
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-            {BINDER_EFFECTS.map((x) => (
-              <label key={x} className="cursor-pointer text-center">
-                <input type="radio" name="effect" value={x} checked={effect === x} onChange={() => setEffect(x)} className="peer sr-only" />
-                <span
-                  className="relative block aspect-square overflow-hidden rounded-xl border-2 border-transparent peer-checked:border-brand peer-focus-visible:border-brand"
-                  style={{ background: `radial-gradient(120% 90% at 30% 10%, ${BINDER_COLOR_STYLES[color].base}, ${BINDER_COLOR_STYLES[color].edge})` }}
-                >
-                  {x !== "none" && <span aria-hidden className={`binder-fx binder-fx-${x}`} />}
-                </span>
-                <span className="mt-1 block text-xs text-cream/80">{t(`effect_${x}`)}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend className="label">{t("visibility")}</legend>
-          <div className="space-y-2">
-            {BINDER_VISIBILITIES.map((v) => (
-              <label key={v} className="flex items-start gap-3 rounded-xl border border-line px-3 py-2.5 has-[:checked]:border-brand has-[:checked]:bg-brand/10">
-                <input type="radio" name="visibility" value={v} defaultChecked={visibility === v} className="mt-1 size-4 accent-brand" />
-                <span>
-                  <span className="block font-medium">{t(`visibility_${v}`)}</span>
-                  <span className="block text-xs text-cream/60">{t(`visibility_${v}_hint`)}</span>
-                </span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <FormError code={state.error} />
-        <button type="submit" className="btn-primary" disabled={pending || uploading}>
-          {pending ? t("saving") : binder ? t("save") : t("create")}
-        </button>
-      </form>
+        <p className="mt-3 min-h-4 text-center text-xs text-cream/60" role="status">
+          {save === "saving" ? t("autosaving") : save === "saved" ? `✓ ${t("autosaved")}` : !id && name.trim() === "" ? t("nameFirst") : ""}
+        </p>
+        {coverError && <p role="alert" className="error text-center">{coverError}</p>}
+        {save === "error" && <div className="text-center"><FormError code={saveError} /></div>}
+      </div>
 
-      {binder && (
-        <section className="card space-y-2">
+      <div className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-night-2">
+        {/* Name */}
+        <label className="flex items-center gap-3 px-4 py-3">
+          <span className="w-7 text-center text-lg" aria-hidden>✏️</span>
+          <span className="sr-only">{t("name")}</span>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value.slice(0, 40))}
+            maxLength={40}
+            placeholder={t("namePlaceholder")}
+            className="min-w-0 flex-1 bg-transparent py-1 text-base font-semibold outline-none placeholder:font-normal placeholder:text-cream/40"
+            aria-label={t("name")}
+          />
+        </label>
+
+        {/* Farbe */}
+        <div>
+          <button type="button" className={row} onClick={() => toggle("color")} aria-expanded={open === "color"}>
+            <span className="w-7 text-center" aria-hidden>
+              <span className="mx-auto block size-6 rounded-full border border-white/20" style={swatch(color)} />
+            </span>
+            <span className="flex-1 font-medium">{t("color")}</span>
+            <span className="text-sm text-cream/60">{t(`color_${color}`)}</span>
+            <Chevron open={open === "color"} />
+          </button>
+          {open === "color" && (
+            <div className="flex flex-wrap gap-3 px-4 pb-4 pt-1">
+              {BINDER_COLORS.map((x) => (
+                <button
+                  key={x}
+                  type="button"
+                  onClick={() => setColor(x)}
+                  aria-pressed={color === x}
+                  title={t(`color_${x}`)}
+                  aria-label={t(`color_${x}`)}
+                  className={`size-11 rounded-full border-2 ring-offset-2 ring-offset-night-2 ${color === x ? "border-transparent ring-2 ring-brand" : "border-white/10"}`}
+                  style={swatch(x)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Effekt */}
+        <div>
+          <button type="button" className={row} onClick={() => toggle("effect")} aria-expanded={open === "effect"}>
+            <span className="w-7 text-center text-lg" aria-hidden>✨</span>
+            <span className="flex-1 font-medium">{t("effect")}</span>
+            <span className="text-sm text-cream/60">{t(`effect_${effect}`)}</span>
+            <Chevron open={open === "effect"} />
+          </button>
+          {open === "effect" && (
+            <div className="grid grid-cols-3 gap-2 px-4 pb-4 pt-1 sm:grid-cols-6">
+              {BINDER_EFFECTS.map((x) => (
+                <button key={x} type="button" onClick={() => setEffect(x)} aria-pressed={effect === x} className="text-center">
+                  <span
+                    className={`relative block aspect-square overflow-hidden rounded-xl border-2 ${effect === x ? "border-brand" : "border-transparent"}`}
+                    style={{ background: `radial-gradient(120% 90% at 30% 10%, ${BINDER_COLOR_STYLES[color].base}, ${BINDER_COLOR_STYLES[color].edge})` }}
+                  >
+                    {x !== "none" && <span aria-hidden className={`binder-fx binder-fx-${x}`} />}
+                  </span>
+                  <span className="mt-1 block text-xs text-cream/80">{t(`effect_${x}`)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Sichtbarkeit */}
+        <div>
+          <button type="button" className={row} onClick={() => toggle("visibility")} aria-expanded={open === "visibility"}>
+            <span className="w-7 text-center text-lg" aria-hidden>{VIS_ICON[visibility]}</span>
+            <span className="flex-1 font-medium">{t("visibilityShort")}</span>
+            <span className="text-sm text-cream/60">{t(`visibility_${visibility}`)}</span>
+            <Chevron open={open === "visibility"} />
+          </button>
+          {open === "visibility" && (
+            <div className="space-y-1 px-2 pb-3">
+              {BINDER_VISIBILITIES.map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setVisibility(v)}
+                  aria-pressed={visibility === v}
+                  className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left ${visibility === v ? "bg-brand/10" : "hover:bg-white/[0.03]"}`}
+                >
+                  <span className="w-6 text-center" aria-hidden>{VIS_ICON[v]}</span>
+                  <span className="flex-1">
+                    <span className="block font-medium">{t(`visibility_${v}`)}</span>
+                    <span className="block text-xs text-cream/60">{t(`visibility_${v}_hint`)}</span>
+                  </span>
+                  {visibility === v && <span className="text-brand" aria-hidden>✓</span>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {id && <Link href={`/u/${nickname}/binder/${id}`} className="btn-primary w-full">{t("done")}</Link>}
+
+      {id && (
+        <section className="rounded-2xl border border-line bg-night-2 px-4 py-3">
           {!confirm ? (
-            <button type="button" className="text-sm text-danger hover:underline" onClick={() => setConfirm(true)}>
-              {t("delete")}
+            <button type="button" className="flex items-center gap-3 text-sm text-danger hover:underline" onClick={() => setConfirm(true)}>
+              <span aria-hidden>🗑</span> {t("delete")}
             </button>
           ) : (
             <form action={delAction} className="space-y-2">
-              <input type="hidden" name="id" value={binder.id} />
+              <input type="hidden" name="id" value={id} />
               <p className="text-sm">{t("deleteConfirm")}</p>
               <div className="flex gap-2">
                 <button type="submit" className="btn-danger" disabled={deleting}>{t("deleteYes")}</button>
@@ -189,6 +331,7 @@ export function BinderForm({
           )}
         </section>
       )}
+
       <PhotoSourceSheet
         idPrefix="binder-cover"
         open={sourceOpen}

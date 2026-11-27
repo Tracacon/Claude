@@ -183,7 +183,13 @@ export function ImageCropper({
     if (pointers.current.size === 2 && pinch.current) {
       const [a, b] = [...pointers.current.values()];
       // Zwei Finger: zoomen und (bei Karten und Beiträgen) leicht drehen
-      const turn = ((Math.atan2(b.y - a.y, b.x - a.x) - pinch.current.angle) * 180) / Math.PI;
+      let raw = ((Math.atan2(b.y - a.y, b.x - a.x) - pinch.current.angle) * 180) / Math.PI;
+      if (raw > 180) raw -= 360;
+      if (raw < -180) raw += 360;
+      // Beim Zoomen dreht man die Finger meist leicht mit: erst ab 10° Drehung reagieren,
+      // dann nur halb so stark, damit reines Zoomen den Winkel nicht verstellt
+      const DEAD = 10;
+      const turn = Math.abs(raw) <= DEAD ? 0 : (raw - Math.sign(raw) * DEAD) * 0.5;
       update({
         zoom: pinch.current.zoom * (Math.hypot(a.x - b.x, a.y - b.y) / pinch.current.dist),
         ...(canRotate ? { tilt: Math.round((pinch.current.tilt + turn) * 10) / 10 } : {}),

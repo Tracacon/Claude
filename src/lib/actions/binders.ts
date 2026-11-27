@@ -59,6 +59,45 @@ export async function saveBinder(_prev: BinderFormState, formData: FormData): Pr
   return redirect({ href: `/u/${me.nickname}/binder/${data as string}`, locale });
 }
 
+export type BinderAutosave = {
+  id: string | null;
+  name: string;
+  color: string;
+  visibility: string;
+  effect: string;
+  /** Titelbild-ID oder null (entfernt) */
+  cover: string | null;
+};
+
+/**
+ * Automatisch speichern (ohne Weiterleitung): legt den Binder beim ersten Mal an und gibt die ID
+ * zurück. Wird bei jeder Änderung im Formular aufgerufen.
+ */
+export async function autosaveBinder(input: BinderAutosave): Promise<{ id?: string; error?: string }> {
+  const me = await requireProfile();
+  if (input.id && !UUID_PATTERN.test(input.id)) return { error: "generic" };
+  const parsed = binderSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "generic" };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("save_binder", {
+    p_id: input.id,
+    p_name: parsed.data.name,
+    p_color: parsed.data.color,
+    p_visibility: parsed.data.visibility,
+    p_effect: parsed.data.effect,
+  });
+  if (error || !data) return { error: error ? mapDbError(error) : "generic" };
+  const image = input.cover && UUID_PATTERN.test(input.cover) ? input.cover : null;
+  const { data: old, error: e2 } = await supabase.rpc("set_binder_cover", { p_binder: data as string, p_image: image });
+  if (e2) console.error("set_binder_cover", e2.message);
+  else if (old) {
+    const { error: e3 } = await supabase.storage.from(PHOTO_BUCKET).remove(photoPaths(me.id, old as string));
+    if (e3) console.error("altes Titelbild", e3.message);
+  }
+  revalidatePath("/", "layout");
+  return { id: data as string };
+}
+
 /** Binder löschen. Die Karten bleiben in der Sammlung (Ohne Binder). */
 export async function deleteBinder(_prev: BinderFormState, formData: FormData): Promise<BinderFormState> {
   const me = await requireProfile();

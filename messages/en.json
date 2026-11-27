@@ -1184,7 +1184,12 @@
     "coverChange": "Other photo",
     "coverRemove": "Remove cover image",
     "coverUploading": "Uploading …",
-    "coverError": "The photo could not be processed. Please try another one."
+    "coverError": "The photo could not be processed. Please try another one.",
+    "autosaving": "Saving …",
+    "autosaved": "Saved automatically",
+    "nameFirst": "Give the binder a name and it will be saved automatically.",
+    "done": "Done",
+    "visibilityShort": "Who can see it"
   },
   "Highlights": {
     "title": "Highlights",

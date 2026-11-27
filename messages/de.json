@@ -1184,7 +1184,12 @@
     "coverChange": "Anderes Foto",
     "coverRemove": "Titelbild entfernen",
     "coverUploading": "Wird hochgeladen …",
-    "coverError": "Das Foto konnte nicht verarbeitet werden. Bitte versuche ein anderes."
+    "coverError": "Das Foto konnte nicht verarbeitet werden. Bitte versuche ein anderes.",
+    "autosaving": "Wird gespeichert …",
+    "autosaved": "Automatisch gespeichert",
+    "nameFirst": "Gib dem Binder einen Namen, dann wird er automatisch gespeichert.",
+    "done": "Fertig",
+    "visibilityShort": "Wer sieht ihn"
   },
   "Highlights": {
     "title": "Highlights",
