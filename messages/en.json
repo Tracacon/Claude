@@ -113,7 +113,8 @@
     "passwordSaved": "Password saved. You can now use it to sign in on any device.",
     "instagram": "Instagram",
     "instagramPlaceholder": "yourname",
-    "instagramHint": "Just type your Instagram name, without @. A copied Instagram link works too."
+    "instagramHint": "Just type your Instagram name, without @. A copied Instagram link works too.",
+    "website2": "Second link"
   },
   "Roles": {
     "member": "Member",
@@ -226,7 +227,8 @@
     "pocket_taken": "There is already a card in this pocket.",
     "binder_name_required": "Please give the binder a name.",
     "front_required": "Please add a photo of the front.",
-    "title_required": "To trade or sell, the card needs a title."
+    "title_required": "To trade or sell, the card needs a title.",
+    "too_many_highlights": "You can create up to 20 highlights."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -496,7 +498,8 @@
     "previewTitle": "Send photo",
     "cancel": "Cancel",
     "caption": "Caption",
-    "captionPlaceholder": "Add a caption …"
+    "captionPlaceholder": "Add a caption …",
+    "direct": "Direct message"
   },
   "Register": {
     "title": "Sign up",
@@ -575,7 +578,9 @@
     "posts": "Posts",
     "newPost": "Post",
     "instagramLink": "Open {name}'s Instagram profile",
-    "collection": "Collection"
+    "collection": "Collection",
+    "message": "Message",
+    "followedBy": "Followed by {names}{more, plural, =0 {} =1 { and 1 other} other { and # others}}"
   },
   "Badges": {
     "team": {
@@ -1180,5 +1185,20 @@
     "coverRemove": "Remove cover image",
     "coverUploading": "Uploading …",
     "coverError": "The photo could not be processed. Please try another one."
+  },
+  "Highlights": {
+    "title": "Highlights",
+    "new": "New",
+    "edit": "Edit",
+    "back": "Back",
+    "manageTitle": "Highlights",
+    "manageIntro": "Choose binders that appear as round highlights at the top of your profile. The label can be up to 20 characters. The binder's cover image is used, otherwise the front of its first card.",
+    "noBinders": "You don't have a binder yet. Create one first.",
+    "createBinder": "Create binder",
+    "label": "Label",
+    "add": "Add highlight",
+    "save": "Save",
+    "saved": "Saved",
+    "remove": "Remove highlight"
   }
 }

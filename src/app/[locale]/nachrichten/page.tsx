@@ -58,7 +58,8 @@ export default async function InboxPage({ params }: PageProps<"/[locale]/nachric
                       <span className="ml-auto shrink-0 text-xs text-cream/50">{when}</span>
                     </div>
                     <p className="truncate text-xs text-cream/60">
-                      {c.i_am_seller ? t("yourListing") : t("listing")}: {c.listing_title}
+                      {/* Direktnachricht (ohne Inserat) */}
+                      {c.listing_title ? `${c.i_am_seller ? t("yourListing") : t("listing")}: ${c.listing_title}` : t("direct")}
                     </p>
                     <p className={`truncate text-sm ${c.unread > 0 ? "text-cream" : "text-cream/70"}`}>
                       {c.last_from_me ? `${t("you")}: ` : ""}

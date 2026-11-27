@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { FormError } from "@/components/form-error";
 import { updateProfile, type FormState } from "@/lib/actions/profile";
 
-type Values = { city: string; bio: string; website: string; instagram: string; locale: string };
+type Values = { city: string; bio: string; website: string; website2: string; instagram: string; locale: string };
 
 export function ProfileForm({ initial }: { initial: Values }) {
   const t = useTranslations("Profile");
@@ -60,6 +60,20 @@ export function ProfileForm({ initial }: { initial: Values }) {
         />
         <p id="website-hint" className="hint">{t("websiteHint")}</p>
         <FormError code={state.errors?.website} />
+      </div>
+      <div>
+        <label htmlFor="website2" className="label">{t("website2")}</label>
+        <input
+          id="website2"
+          name="website2"
+          type="url"
+          inputMode="url"
+          maxLength={200}
+          placeholder="https://"
+          defaultValue={v.website2}
+          className="input"
+        />
+        <FormError code={state.errors?.website2} />
       </div>
       <div>
         <label htmlFor="locale" className="label">{t("locale")}</label>

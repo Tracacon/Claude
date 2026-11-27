@@ -25,6 +25,20 @@ export async function startConversation(_prev: ChatActionState, formData: FormDa
   return redirect({ href: `/nachrichten/${data as string}`, locale });
 }
 
+/** Direktnachricht an eine Person (Knopf "Nachricht" im Profil) */
+export async function startDirectConversation(_prev: ChatActionState, formData: FormData): Promise<ChatActionState> {
+  await requireProfile();
+  const userId = String(formData.get("userId") ?? "");
+  if (!UUID_PATTERN.test(userId)) return { error: "generic" };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("start_direct_conversation", { p_user: userId });
+  if (error || !data) return { error: error ? mapDbError(error) : "generic" };
+
+  const locale = await getLocale();
+  return redirect({ href: `/nachrichten/${data as string}`, locale });
+}
+
 export async function blockUser(_prev: ChatActionState, formData: FormData): Promise<ChatActionState> {
   await requireProfile();
   const userId = String(formData.get("userId") ?? "");

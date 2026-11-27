@@ -14,6 +14,7 @@ export type Profile = {
   city: string | null;
   bio: string | null;
   website: string | null;
+  website2?: string | null;
   instagram: string | null;
   locale: "de" | "en";
   role: AppRole;

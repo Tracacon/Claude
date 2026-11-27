@@ -21,7 +21,11 @@ export type PublicProfile = {
   bio: string | null;
   city: string | null;
   website: string | null;
+  website2?: string | null;
   instagram?: string | null;
+  /** Leute, denen ich folge und die dieser Person folgen (höchstens 3) */
+  followed_by?: { id: string; nickname: string; avatar_id: string | null }[];
+  followed_by_count?: number;
   listing_count: number;
   post_count?: number;
   follower_count: number;
