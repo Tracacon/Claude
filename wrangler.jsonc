@@ -9,6 +9,14 @@
     "binding": "ASSETS"
   },
   "observability": { "enabled": true },
+  // Bremse gegen zu viele Anfragen pro Minute (siehe src/lib/rate-limit.ts)
+  "ratelimits": [
+    { "name": "RL_USER_READ", "namespace_id": "1101", "simple": { "limit": 1200, "period": 60 } },
+    { "name": "RL_USER_WRITE", "namespace_id": "1102", "simple": { "limit": 60, "period": 60 } },
+    { "name": "RL_ANON_READ", "namespace_id": "1103", "simple": { "limit": 1200, "period": 60 } },
+    { "name": "RL_ANON_WRITE", "namespace_id": "1104", "simple": { "limit": 120, "period": 60 } },
+    { "name": "RL_IP_FLOOD", "namespace_id": "1105", "simple": { "limit": 4000, "period": 60 } }
+  ],
   // Im Cloudflare-Dashboard eingetragene Werte (z. B. Impressumsangaben OPERATOR_…) beim Veröffentlichen behalten
   "keep_vars": true,
   // Odoo (Termine) und Instagram. Die Geheimnisse ODOO_API_KEY, SUPABASE_SECRET_KEY und

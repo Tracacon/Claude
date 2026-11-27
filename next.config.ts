@@ -24,6 +24,10 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" },
+          // Nur verschlüsselt (https) verbinden, ein Jahr lang merken
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+          // Nicht in fremde Seiten einbetten, keine Plugins, Formulare nur an die App selbst
+          { key: "Content-Security-Policy", value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'" },
         ],
       },
       {
