@@ -7,7 +7,7 @@ import { redirect } from "@/i18n/navigation";
 import { requireProfile } from "@/lib/auth";
 import { BINDER_COLORS, BINDER_EFFECTS, BINDER_VISIBILITIES } from "@/lib/binder-shared";
 import { mapDbError } from "@/lib/db-errors";
-import { UUID_PATTERN } from "@/lib/marketplace";
+import { PHOTO_BUCKET, photoPaths, UUID_PATTERN } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/server";
 
 export type BinderFormState = { error?: string; values?: Record<string, string> };
@@ -42,6 +42,18 @@ export async function saveBinder(_prev: BinderFormState, formData: FormData): Pr
     p_effect: parsed.data.effect,
   });
   if (error || !data) return { error: error ? mapDbError(error) : "generic", values };
+
+  // Titelbild setzen oder entfernen; das alte Bild löschen
+  if (formData.get("cover_field") === "1") {
+    const raw = String(formData.get("cover_image") ?? "");
+    const image = UUID_PATTERN.test(raw) ? raw : null;
+    const { data: old, error: e2 } = await supabase.rpc("set_binder_cover", { p_binder: data as string, p_image: image });
+    if (e2) console.error("set_binder_cover", e2.message);
+    else if (old) {
+      const { error: e3 } = await supabase.storage.from(PHOTO_BUCKET).remove(photoPaths(me.id, old as string));
+      if (e3) console.error("altes Titelbild", e3.message);
+    }
+  }
   revalidatePath("/", "layout");
   const locale = await getLocale();
   return redirect({ href: `/u/${me.nickname}/binder/${data as string}`, locale });

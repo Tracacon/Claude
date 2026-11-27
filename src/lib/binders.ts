@@ -12,7 +12,7 @@ export async function getProfileBinders(nickname: string): Promise<BinderSummary
   return ((data ?? []) as BinderSummary[]).map((b) => ({ ...b, card_count: Number(b.card_count) }));
 }
 
-export type MyBinder = { id: string; name: string; color: BinderColor; visibility: BinderVisibility; effect: BinderEffect };
+export type MyBinder = { id: string; name: string; color: BinderColor; visibility: BinderVisibility; effect: BinderEffect; cover_image: string | null };
 
 /** Eigene Binder für Auswahllisten */
 export async function getMyBinders(): Promise<MyBinder[]> {

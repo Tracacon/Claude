@@ -4,12 +4,52 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
-export type CropShape = "circle" | "card" | "post";
+export type CropShape = "circle" | "card" | "post" | "cover";
 
 // Kartenformat: 63 × 88 mm (Pokémon, Magic, One Piece …)
 const CARD_RATIO = 63 / 88;
 /** Beitragsfotos wie bei Instagram im Hochformat 4:5 */
 const POST_RATIO = 4 / 5;
+/** Binder-Einband (Titelbild) */
+const COVER_RATIO = 4 / 5;
+
+/** Bildanpassung in Prozent (100 = unverändert) */
+type Adjust = { brightness: number; contrast: number; saturation: number; warmth: number };
+const NO_ADJUST: Adjust = { brightness: 100, contrast: 100, saturation: 100, warmth: 0 };
+
+function cssFilter(a: Adjust) {
+  // Wärme: leichter Sepia-Anteil plus etwas Farbe
+  const warm = a.warmth > 0 ? ` sepia(${a.warmth * 0.5}%)` : a.warmth < 0 ? ` hue-rotate(${a.warmth * 0.3}deg)` : "";
+  return `brightness(${a.brightness}%) contrast(${a.contrast}%) saturate(${a.saturation}%)${warm}`;
+}
+
+/** Anpassung direkt auf die Pixel (für Browser ohne Zeichenflächen-Filter, z. B. ältere Safari) */
+function adjustPixels(ctx: CanvasRenderingContext2D, w: number, h: number, a: Adjust) {
+  const data = ctx.getImageData(0, 0, w, h);
+  const d = data.data;
+  const br = a.brightness / 100;
+  const ct = a.contrast / 100;
+  const sat = a.saturation / 100;
+  const warm = a.warmth / 100;
+  for (let i = 0; i < d.length; i += 4) {
+    let r = d[i] * br;
+    let g = d[i + 1] * br;
+    let b = d[i + 2] * br;
+    r = (r - 128) * ct + 128;
+    g = (g - 128) * ct + 128;
+    b = (b - 128) * ct + 128;
+    const l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    r = l + (r - l) * sat;
+    g = l + (g - l) * sat;
+    b = l + (b - l) * sat;
+    r += 30 * warm;
+    b -= 30 * warm;
+    d[i] = r < 0 ? 0 : r > 255 ? 255 : r;
+    d[i + 1] = g < 0 ? 0 : g > 255 ? 255 : g;
+    d[i + 2] = b < 0 ? 0 : b > 255 ? 255 : b;
+  }
+  ctx.putImageData(data, 0, 0);
+}
 
 /** rotation: Vierteldrehungen (0, 90, 180 …); tilt: feines Geraderichten in Grad */
 type View = { zoom: number; x: number; y: number; rotation: number; tilt: number };
@@ -31,6 +71,7 @@ export function ImageCropper({
   onCancel,
   onDone,
   confirmLabel,
+  adjustable = false,
 }: {
   src: string;
   img: HTMLImageElement;
@@ -40,6 +81,8 @@ export function ImageCropper({
   onCancel: () => void;
   onDone: (canvas: HTMLCanvasElement) => void;
   confirmLabel?: string;
+  /** Zusätzlich Helligkeit, Kontrast, Sättigung und Wärme anpassen */
+  adjustable?: boolean;
 }) {
   const t = useTranslations("Photos");
   const boxRef = useRef<HTMLDivElement>(null);
@@ -49,6 +92,9 @@ export function ImageCropper({
   const pinch = useRef<{ dist: number; zoom: number; angle: number; tilt: number } | null>(null);
   const [adjusting, setAdjusting] = useState(false);
   const canRotate = shape !== "circle";
+  const [adjust, setAdjust] = useState<Adjust>(NO_ADJUST);
+  const [panel, setPanel] = useState<"crop" | "adjust">("crop");
+  const adjusted = JSON.stringify(adjust) !== JSON.stringify(NO_ADJUST);
 
   // Größe der Arbeitsfläche messen
   useEffect(() => {
@@ -68,7 +114,7 @@ export function ImageCropper({
   if (shape === "circle") {
     fw = fh = Math.max(80, Math.min(maxW, maxH));
   } else {
-    const ratio = shape === "post" ? POST_RATIO : CARD_RATIO;
+    const ratio = shape === "post" ? POST_RATIO : shape === "cover" ? COVER_RATIO : CARD_RATIO;
     fh = Math.max(100, Math.min(maxH, maxW / ratio));
     fw = fh * ratio;
   }
@@ -168,7 +214,17 @@ export function ImageCropper({
     ctx.translate(output.width / 2 + view.x * k, output.height / 2 + view.y * k);
     ctx.rotate(((view.rotation + view.tilt) * Math.PI) / 180);
     ctx.scale(scale * k, scale * k);
+    // Anpassungen: Zeichenflächen-Filter, wenn der Browser ihn kann, sonst Pixel für Pixel
+    const useFilter = adjusted && "filter" in ctx && (() => {
+      ctx.filter = "brightness(100%)";
+      return ctx.filter === "brightness(100%)";
+    })();
+    if (useFilter) ctx.filter = cssFilter(adjust);
     ctx.drawImage(img, -iw / 2, -ih / 2);
+    if (adjusted && !useFilter) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      adjustPixels(ctx, canvas.width, canvas.height, adjust);
+    }
     onDone(canvas);
   }
 
@@ -198,13 +254,14 @@ export function ImageCropper({
             width: iw,
             height: ih,
             transform: `translate(-50%, -50%) translate(${view.x}px, ${view.y}px) rotate(${view.rotation + view.tilt}deg) scale(${scale})`,
+            filter: adjusted ? cssFilter(adjust) : undefined,
           }}
         />
         {/* Abgedunkelter Bereich außerhalb des Rahmens */}
         <div
           aria-hidden
           className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-white/90 ${
-            shape === "circle" ? "rounded-full" : shape === "post" ? "rounded-none" : "rounded-[4%]"
+            shape === "circle" ? "rounded-full" : shape === "post" ? "rounded-none" : shape === "cover" ? "rounded-l-md rounded-r-2xl" : "rounded-[4%]"
           }`}
           style={{ width: fw, height: fh, boxShadow: "0 0 0 9999px rgba(10, 16, 28, 0.72)" }}
         >
@@ -221,12 +278,61 @@ export function ImageCropper({
             />
           )}
         </div>
-        {shape === "card" && (
-          <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-xs text-white/80">{t("cardHint")}</p>
+        {(shape === "card" || shape === "cover") && (
+          <p className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-xs text-white/80">{t(shape === "cover" ? "coverHint" : "cardHint")}</p>
         )}
       </div>
 
       <div className="space-y-2 border-t border-line px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+        {adjustable && (
+          <div className="flex justify-center gap-2" role="tablist">
+            {(["crop", "adjust"] as const).map((x) => (
+              <button
+                key={x}
+                type="button"
+                role="tab"
+                aria-selected={panel === x}
+                onClick={() => setPanel(x)}
+                className={`rounded-full px-4 py-1.5 text-sm ${panel === x ? "bg-brand/15 font-semibold text-brand" : "text-cream/70"}`}
+              >
+                {t(x === "crop" ? "tabCrop" : "tabAdjust")}
+              </button>
+            ))}
+          </div>
+        )}
+        {adjustable && panel === "adjust" ? (
+          <div className="space-y-2">
+            {(["brightness", "contrast", "saturation", "warmth"] as const).map((k) => {
+              const [min, max] = k === "warmth" ? [-100, 100] : [50, 150];
+              const neutral = NO_ADJUST[k];
+              return (
+                <label key={k} className="flex items-center gap-3">
+                  <span className="w-24 text-sm text-cream/80">{t(`adjust_${k}`)}</span>
+                  <input
+                    type="range"
+                    min={min}
+                    max={max}
+                    step={1}
+                    value={adjust[k]}
+                    onChange={(e) => setAdjust((a) => ({ ...a, [k]: Number(e.target.value) }))}
+                    onDoubleClick={() => setAdjust((a) => ({ ...a, [k]: neutral }))}
+                    className="flex-1 accent-brand"
+                  />
+                  <span className="w-10 text-right text-xs tabular-nums text-cream/70">
+                    {adjust[k] - neutral > 0 ? "+" : ""}
+                    {adjust[k] - neutral}
+                  </span>
+                </label>
+              );
+            })}
+            <div className="flex justify-end">
+              <button type="button" className="btn-ghost px-3 py-1.5 text-xs disabled:opacity-40" disabled={!adjusted} onClick={() => setAdjust(NO_ADJUST)}>
+                {t("adjustReset")}
+              </button>
+            </div>
+          </div>
+        ) : (
+        <>
         <div className="flex items-center gap-3">
           <span aria-hidden className="w-12 text-sm text-cream/70">🔍</span>
           <input
@@ -276,6 +382,8 @@ export function ImageCropper({
           </div>
         )}
         {canRotate && <p className="text-center text-xs text-cream/60">{t("straightenHint")}</p>}
+        </>
+        )}
       </div>
     </div>
   );

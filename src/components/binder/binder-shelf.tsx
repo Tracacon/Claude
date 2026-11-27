@@ -42,7 +42,6 @@ export async function BinderShelf({
   const loose = items.filter((i) => !i.binder_id);
   const total = items.reduce((n, i) => n + (i.quantity ?? 1), 0);
   const marked = items.filter((i) => i.status !== "collection").length;
-  const looseCover = loose.find((i) => i.cover_photo_id);
   const binderName = new Map(binders.map((b) => [b.id, b.name]));
   const validBinder = binderFilter === NO_BINDER || (binderFilter !== null && binderName.has(binderFilter)) ? binderFilter : null;
   const active = mark !== "alle" || validBinder !== null;
@@ -177,7 +176,7 @@ export async function BinderShelf({
                   name={b.name}
                   color={b.color}
                   effect={b.effect}
-                  coverUrl={b.cover_photo_id ? photoUrl(b.owner_id, b.cover_photo_id, "thumb") : null}
+                  imageUrl={b.cover_image ? photoUrl(b.owner_id, b.cover_image, "thumb") : null}
                   subtitle={t("count", { count: b.card_count })}
                   locked={b.visibility === "public" ? null : b.visibility}
                 />
@@ -191,7 +190,6 @@ export async function BinderShelf({
                   name={t("noBinder")}
                   color="night"
                   dashed
-                  coverUrl={looseCover?.cover_photo_id ? photoUrl(looseCover.owner_id, looseCover.cover_photo_id, "thumb") : null}
                   subtitle={t("count", { count: loose.length })}
                 />
               </Link>

@@ -2,14 +2,14 @@
 import { BINDER_COLOR_STYLES, type BinderColor, type BinderEffect } from "@/lib/binder-shared";
 
 /**
- * Einband eines Sammelkartenbinders: Ledereffekt in der Binderfarbe, Rücken mit Nähten,
- * Sichtfenster mit der Vorderseite der ersten Karte und Namensschild.
+ * Einband eines Sammelkartenbinders: Ledereffekt in der Binderfarbe (oder eigenes Titelbild),
+ * Effekt (Glitzer, Holo …), Rücken mit Naht und Namensschild.
  */
 export function BinderCover({
   name,
   color,
   effect = "none",
-  coverUrl,
+  imageUrl = null,
   subtitle,
   locked,
   dashed = false,
@@ -18,7 +18,8 @@ export function BinderCover({
   color: BinderColor;
   /** Glitzer, Holo usw. über der Einbandfarbe */
   effect?: BinderEffect;
-  coverUrl: string | null;
+  /** Eigenes Titelbild, füllt den Einband */
+  imageUrl?: string | null;
   subtitle: string;
   /** Schloss für Binder, die nicht öffentlich sind */
   locked?: "followers" | "private" | null;
@@ -40,8 +41,10 @@ export function BinderCover({
             }
       }
     >
+      {/* Eigenes Titelbild */}
+      {imageUrl && <img src={imageUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />}
       {/* Lederstruktur */}
-      {!dashed && (
+      {!dashed && !imageUrl && (
         <span
           aria-hidden
           className="absolute inset-0 opacity-25 mix-blend-overlay"
@@ -58,16 +61,11 @@ export function BinderCover({
       {!dashed && <span aria-hidden className="absolute inset-y-2 left-[14%] border-l border-dashed border-white/30" />}
       <span aria-hidden className="absolute inset-y-2 right-2 rounded-r-xl border border-dashed border-white/20" style={{ left: "17%" }} />
 
-      {/* Sichtfenster mit Vorderseite der ersten Karte */}
-      <span className="absolute left-[30%] right-[16%] top-[12%] aspect-[63/88] overflow-hidden rounded-md border border-white/40 bg-black/30 shadow-inner">
-        {coverUrl ? (
-          <img src={coverUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
-        ) : (
-          <span className="flex h-full items-center justify-center text-2xl opacity-60" aria-hidden>🃏</span>
-        )}
-        <span aria-hidden className="pointer-events-none absolute inset-0 bg-[linear-gradient(130deg,rgba(255,255,255,0.35)_0%,transparent_35%,transparent_70%,rgba(255,255,255,0.12)_100%)]" />
-      </span>
-
+      {/* Geprägter Rahmen auf dem Einband */}
+      {!dashed && !imageUrl && (
+        <span aria-hidden className="absolute left-[26%] right-[12%] top-[14%] bottom-[30%] rounded-lg border border-white/15 shadow-[inset_0_1px_3px_rgba(0,0,0,0.45),0_1px_0_rgba(255,255,255,0.08)]" />
+      )}
+      {dashed && <span aria-hidden className="absolute inset-0 flex items-center justify-center pb-[20%] text-4xl opacity-40">🃏</span>}
       {/* Namensschild */}
       <span className="absolute bottom-[6%] left-[20%] right-[6%] rounded-md bg-black/35 px-2 py-1.5 backdrop-blur-sm">
         <span className="block truncate text-sm font-bold leading-tight text-white">{name}</span>
