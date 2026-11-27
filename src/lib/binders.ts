@@ -1,6 +1,6 @@
 import "server-only";
 import { isSupabaseConfigured } from "@/lib/env";
-import type { BinderColor, BinderSummary, BinderVisibility } from "@/lib/binder-shared";
+import type { BinderColor, BinderEffect, BinderSummary, BinderVisibility } from "@/lib/binder-shared";
 import { createClient } from "@/lib/supabase/server";
 
 /** Binder eines Profils, die die angemeldete Person sehen darf */
@@ -12,7 +12,7 @@ export async function getProfileBinders(nickname: string): Promise<BinderSummary
   return ((data ?? []) as BinderSummary[]).map((b) => ({ ...b, card_count: Number(b.card_count) }));
 }
 
-export type MyBinder = { id: string; name: string; color: BinderColor; visibility: BinderVisibility };
+export type MyBinder = { id: string; name: string; color: BinderColor; visibility: BinderVisibility; effect: BinderEffect };
 
 /** Eigene Binder für Auswahllisten */
 export async function getMyBinders(): Promise<MyBinder[]> {

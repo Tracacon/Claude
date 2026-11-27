@@ -4,27 +4,35 @@ import { useTranslations } from "next-intl";
 import { useActionState, useState } from "react";
 import { FormError } from "@/components/form-error";
 import { deleteBinder, saveBinder, type BinderFormState } from "@/lib/actions/binders";
-import { BINDER_COLORS, BINDER_COLOR_STYLES, BINDER_VISIBILITIES, type BinderColor } from "@/lib/binder-shared";
+import {
+  BINDER_COLORS,
+  BINDER_COLOR_STYLES,
+  BINDER_EFFECTS,
+  BINDER_VISIBILITIES,
+  type BinderColor,
+  type BinderEffect,
+} from "@/lib/binder-shared";
 import { BinderCover } from "./binder-cover";
 
 /** Binder anlegen oder bearbeiten: Name, Farbe, wer ihn sieht */
 export function BinderForm({
   binder,
 }: {
-  binder?: { id: string; name: string; color: BinderColor; visibility: string };
+  binder?: { id: string; name: string; color: BinderColor; visibility: string; effect: BinderEffect };
 }) {
   const t = useTranslations("Binder");
   const [state, action, pending] = useActionState<BinderFormState, FormData>(saveBinder, {});
   const [del, delAction, deleting] = useActionState<BinderFormState, FormData>(deleteBinder, {});
   const [name, setName] = useState(state.values?.name ?? binder?.name ?? "");
   const [color, setColor] = useState<BinderColor>((state.values?.color as BinderColor) ?? binder?.color ?? "night");
+  const [effect, setEffect] = useState<BinderEffect>((state.values?.effect as BinderEffect) ?? binder?.effect ?? "none");
   const [confirm, setConfirm] = useState(false);
   const visibility = state.values?.visibility ?? binder?.visibility ?? "public";
 
   return (
     <div className="space-y-5">
       <div className="mx-auto w-40">
-        <BinderCover name={name || t("namePlaceholder")} color={color} coverUrl={null} subtitle={t("preview")} />
+        <BinderCover name={name || t("namePlaceholder")} color={color} effect={effect} coverUrl={null} subtitle={t("preview")} />
       </div>
       <form action={action} className="card space-y-4" noValidate>
         {binder && <input type="hidden" name="id" value={binder.id} />}
@@ -53,6 +61,23 @@ export function BinderForm({
                   title={t(`color_${x}`)}
                 />
                 <span className="sr-only">{t(`color_${x}`)}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend className="label">{t("effect")}</legend>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+            {BINDER_EFFECTS.map((x) => (
+              <label key={x} className="cursor-pointer text-center">
+                <input type="radio" name="effect" value={x} checked={effect === x} onChange={() => setEffect(x)} className="peer sr-only" />
+                <span
+                  className="relative block aspect-square overflow-hidden rounded-xl border-2 border-transparent peer-checked:border-brand peer-focus-visible:border-brand"
+                  style={{ background: `radial-gradient(120% 90% at 30% 10%, ${BINDER_COLOR_STYLES[color].base}, ${BINDER_COLOR_STYLES[color].edge})` }}
+                >
+                  {x !== "none" && <span aria-hidden className={`binder-fx binder-fx-${x}`} />}
+                </span>
+                <span className="mt-1 block text-xs text-cream/80">{t(`effect_${x}`)}</span>
               </label>
             ))}
           </div>

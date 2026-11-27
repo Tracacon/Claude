@@ -65,10 +65,7 @@ describe("Inserat prüfen", () => {
     expect(r).toMatchObject({ status: "collection", offer: "trade", price_cents: null, quantity: 3, handover_event: true, binder: "10000000-0000-0000-0000-0000000000aa" });
   });
 
-  it("Auch in der Sammlung sind Vorder- und Rückseite Pflicht", () => {
-    const r = listingSchema.safeParse({ ...base, offer: "collection", photos: "[]" });
-    expect(r.error?.issues[0].message).toBe("front_back_required");
-  });
+
 
   it("Markierte Stücke sind aktiv und brauchen weiter Fotos", () => {
     expect(listingSchema.parse(base)).toMatchObject({ status: "active", quantity: 1 });
@@ -80,5 +77,26 @@ describe("Inserat prüfen", () => {
     expect(listingSchema.safeParse({ ...base, quantity: "0" }).error?.issues[0].message).toBe("invalid_quantity");
     expect(listingSchema.safeParse({ ...base, quantity: "1000" }).error?.issues[0].message).toBe("invalid_quantity");
     expect(listingSchema.safeParse({ ...base, quantity: "zwei" }).success).toBe(false);
+  });
+
+  it("Sammlung: eine Vorderseite reicht, Titel und Spiel sind freiwillig", () => {
+    const r = listingSchema.parse({ ...base, offer: "collection", title: "", tcg: "", card_code: "", card_no: "", photos: JSON.stringify(["10000000-0000-0000-0000-000000000001"]) });
+    expect(r).toMatchObject({ status: "collection", title_auto: true, title: "Sammlungskarte", tcg: "other" });
+  });
+
+  it("Sammlung ohne Foto geht nicht", () => {
+    const r = listingSchema.safeParse({ ...base, offer: "collection", photos: "[]" });
+    expect(r.error?.issues[0].message).toBe("front_required");
+  });
+
+  it("Verschenken reicht mit Vorderseite", () => {
+    const r = listingSchema.parse({ ...base, offer: "gift", price: "", photos: JSON.stringify(["10000000-0000-0000-0000-000000000001"]) });
+    expect(r).toMatchObject({ status: "active", offer: "gift" });
+  });
+
+  it("Tausch braucht Titel, Spiel und Rückseite", () => {
+    expect(listingSchema.safeParse({ ...base, offer: "trade", photos: JSON.stringify(["10000000-0000-0000-0000-000000000001"]) }).error?.issues[0].message).toBe("front_back_required");
+    expect(listingSchema.safeParse({ ...base, offer: "trade", title: "" }).error?.issues[0].message).toBe("title_required");
+    expect(listingSchema.safeParse({ ...base, offer: "trade", tcg: "" }).error?.issues[0].message).toBe("tcg_required");
   });
 });

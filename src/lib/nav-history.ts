@@ -33,3 +33,31 @@ export function parentPath(pathname: string) {
   if (["/p", "/u", "/beitrag", "/checkin"].includes(parent)) return "/";
   return parent;
 }
+
+const PREV = "tc-prev-path";
+
+/** Vorherige App-Seite merken (für gezielte Zurück-Ziele) */
+export function setPrevPath(path: string) {
+  try {
+    sessionStorage.setItem(PREV, path);
+  } catch {}
+}
+export function prevPath() {
+  try {
+    return sessionStorage.getItem(PREV);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Eine Seite kann festlegen, wohin der Zurück-Pfeil führt (z. B. Karte einpflegen → Binder).
+ * Gilt nur, solange man auf dieser Seite ist.
+ */
+let backTarget: { path: string; href: string } | null = null;
+export function setBackTarget(t: { path: string; href: string } | null) {
+  backTarget = t;
+}
+export function getBackTarget(path: string) {
+  return backTarget && backTarget.path === path ? backTarget.href : null;
+}

@@ -80,6 +80,7 @@ export type ListingDetail = {
     id: string;
     owner_id: string;
     title: string;
+    title_auto: boolean;
     description: string | null;
     tcg: Tcg;
     kind: Kind;
@@ -120,6 +121,7 @@ export type ListingDetail = {
 export type CollectionItem = {
   id: string;
   title: string;
+  title_auto: boolean;
   tcg: Tcg;
   kind: Kind;
   offer: Offer;
@@ -169,3 +171,6 @@ export type CardInfo = {
   card_rarity: string | null;
   card_image: string | null;
 };
+
+/** Erlaubte Rücksprungziele nach dem Speichern einer Karte (eigene Seiten, keine fremden Adressen) */
+export const RETURN_PATTERN = /^\/(profil|u\/[A-Za-z0-9_.-]{3,24}\/binder\/([0-9a-f-]{36}|ohne))$/;

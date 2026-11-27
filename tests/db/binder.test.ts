@@ -92,6 +92,15 @@ describe("Binder", () => {
     expect(await pockets(null, other)).toEqual([]);
   });
 
+  it("speichert einen Effekt für den Einband", async () => {
+    const r = await t.as<{ save_binder: string }>(ana, "select public.save_binder(null, 'Glitzer', 'purple', 'public', 'holo')");
+    const id = r.rows[0].save_binder;
+    const b = await t.as<{ effect: string }>(null, "select effect from public.profile_binders('Ana') where id = $1", [id]);
+    expect(b.rows[0].effect).toBe("holo");
+    await expect(t.as(ana, "select public.save_binder($1, 'Glitzer', 'purple', 'public', 'disco')", [id])).rejects.toThrow();
+    await t.as(ana, "delete from public.binders where id = $1", [id]);
+  });
+
   it("ändert und löscht Binder; Karten landen dann in „Ohne Binder“", async () => {
     await t.as(ana, "select public.save_binder($1, 'Kanto', 'blue', 'public')", [main]);
     await expect(t.as(ben, "select public.save_binder($1, 'Gekapert', 'blue', 'public')", [main])).rejects.toThrow(/not_found/);

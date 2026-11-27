@@ -2,6 +2,9 @@
 
 export const BINDER_COLORS = ["night", "amber", "red", "blue", "green", "purple", "black", "cream"] as const;
 export const BINDER_VISIBILITIES = ["public", "followers", "private"] as const;
+/** Effekte über der Einbandfarbe */
+export const BINDER_EFFECTS = ["none", "glitter", "gold", "holo", "rainbow", "cosmos"] as const;
+export type BinderEffect = (typeof BINDER_EFFECTS)[number];
 export type BinderColor = (typeof BINDER_COLORS)[number];
 export type BinderVisibility = (typeof BINDER_VISIBILITIES)[number];
 
@@ -24,6 +27,7 @@ export type BinderSummary = {
   id: string;
   name: string;
   color: BinderColor;
+  effect: BinderEffect;
   visibility: BinderVisibility;
   position: number;
   card_count: number;
@@ -33,3 +37,30 @@ export type BinderSummary = {
 
 /** Adresse für Karten ohne Binder */
 export const NO_BINDER = "ohne";
+
+/** Filter der Sammlung: alles, nur Sammlung oder nach Markierung */
+export const COLLECTION_MARKS = ["alle", "sammlung", "tausch", "verkauf", "verschenken"] as const;
+export type CollectionMark = (typeof COLLECTION_MARKS)[number];
+
+export function parseCollectionMark(v: unknown): CollectionMark {
+  return COLLECTION_MARKS.includes(v as CollectionMark) ? (v as CollectionMark) : "alle";
+}
+
+/**
+ * Passt ein Stück zum Filter? mark = Markierung im Marktplatz (trade, sell, sell_or_trade, gift)
+ * oder null für "nur Sammlung".
+ */
+export function matchesMark(mark: string | null, filter: CollectionMark) {
+  switch (filter) {
+    case "alle":
+      return true;
+    case "sammlung":
+      return mark === null;
+    case "tausch":
+      return mark === "trade" || mark === "sell_or_trade";
+    case "verkauf":
+      return mark === "sell" || mark === "sell_or_trade";
+    case "verschenken":
+      return mark === "gift";
+  }
+}

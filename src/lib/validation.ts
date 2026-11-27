@@ -132,9 +132,10 @@ const checkbox = z
 
 export const listingSchema = z
   .object({
-    title: z.string().trim().min(3, { message: "title_short" }).max(100, { message: "too_long" }),
+    // Titel und Spiel sind nur für Tausch und Verkauf Pflicht (Prüfung unten)
+    title: z.string().trim().max(100, { message: "too_long" }),
     description: optionalText(2000),
-    tcg: z.enum(TCGS, { message: "tcg_required" }),
+    tcg: z.union([z.enum(TCGS), z.literal("")], { message: "tcg_required" }),
     kind: z.enum(KINDS),
     // "collection" = nur in die Sammlung legen, sonst Markierung für den Marktplatz
     offer: z.enum([COLLECTION_CHOICE, ...OFFERS]),
@@ -195,9 +196,23 @@ export const listingSchema = z
       ctx.addIssue({ code: "custom", path: ["price"], message: "invalid_price" });
       return z.NEVER;
     }
-    // Vorder- und Rückseite sind bei Einzelkarten und Slabs immer Pflicht, auch in der Sammlung
-    if (KINDS_NEEDING_BOTH_SIDES.includes(v.kind) && v.photos.length < 2) {
-      ctx.addIssue({ code: "custom", path: ["photos"], message: "front_back_required" });
+    // Tausch und Verkauf (Marktplatz): Titel, Spiel, Vorder- und Rückseite Pflicht.
+    // Nur Sammlung und Verschenken: bei Einzelkarten und Slabs reicht die Vorderseite.
+    const forMarket = isMarketOffer(v.offer);
+    if (KINDS_NEEDING_BOTH_SIDES.includes(v.kind) && v.photos.length < (forMarket ? 2 : 1)) {
+      ctx.addIssue({ code: "custom", path: ["photos"], message: forMarket ? "front_back_required" : "front_required" });
+      return z.NEVER;
+    }
+    if (forMarket && v.title.length < 3) {
+      ctx.addIssue({ code: "custom", path: ["title"], message: v.title === "" ? "title_required" : "title_short" });
+      return z.NEVER;
+    }
+    if (!forMarket && v.title.length > 0 && v.title.length < 3) {
+      ctx.addIssue({ code: "custom", path: ["title"], message: "title_short" });
+      return z.NEVER;
+    }
+    if (forMarket && v.tcg === "") {
+      ctx.addIssue({ code: "custom", path: ["tcg"], message: "tcg_required" });
       return z.NEVER;
     }
     if (!inCollection && !v.handover_event && !v.handover_pickup && !v.handover_shipping) {
@@ -208,10 +223,19 @@ export const listingSchema = z
     const card = { code: withCard ? v.card_code : null, number: withCard ? v.card_no : null };
     const { price: _price, card_code: _code, card_no: _no, binder, ...rest } = v;
     void [_price, _code, _no];
+    // Ohne Titel: automatischer Titel aus Kürzel und Nummer bzw. allgemein (wird später durch den
+    // Kartennamen aus der Kartendatenbank ersetzt, falls gefunden)
+    const title_auto = v.title === "";
+    const title = title_auto
+      ? [card.code, card.number].filter(Boolean).join(" ") || (KINDS_WITH_CARD.includes(v.kind) ? "Sammlungskarte" : "Sammlungsstück")
+      : v.title;
     // Die Datenbank verlangt mindestens eine Übergabeart; in der Sammlung bleibt "beim Event" als Vorgabe
     const handover_event = rest.handover_event || (inCollection && !rest.handover_pickup && !rest.handover_shipping);
     return {
       ...rest,
+      title: title.length < 3 ? `Karte ${title}` : title,
+      title_auto,
+      tcg: v.tcg === "" ? ("other" as const) : v.tcg,
       offer,
       handover_event,
       status: inCollection ? ("collection" as const) : ("active" as const),
@@ -223,6 +247,11 @@ export const listingSchema = z
   });
 
 export type ListingInput = z.output<typeof listingSchema>;
+
+/** Tausch und Verkauf: Angebote mit vollen Pflichtangaben (Titel, Spiel, Vorder- und Rückseite) */
+export function isMarketOffer(offer: string) {
+  return offer === "sell" || offer === "trade" || offer === "sell_or_trade";
+}
 
 export const reportSchema = z.object({
   reason: z.enum(REPORT_REASONS, { message: "reason_required" }),

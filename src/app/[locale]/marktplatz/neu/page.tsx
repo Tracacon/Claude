@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ListingForm } from "@/components/listing-form";
+import { BackTarget } from "@/components/back-target";
 import { requireProfile } from "@/lib/auth";
 import { ensureEventsFresh, getEvents } from "@/lib/events";
 import { getMyBinders } from "@/lib/binders";
@@ -24,6 +25,14 @@ export default async function NewListingPage({ params, searchParams }: PageProps
   // Aus einem Binder heraus ("Karte hinzufügen") kommt ?binder=<id>
   const presetBinder = binders.find((b) => b.id === sp.binder)?.id ?? "";
   // Aus einem leeren Fach ("+") kommt ?fach=<nummer>
+  // Zurück (Pfeil, Abbrechen) und nach dem Speichern: Binder bzw. Sammlung
+  const returnTo = presetBinder
+    ? `/u/${profile.nickname}/binder/${presetBinder}`
+    : sp.zurueck === "ohne"
+      ? `/u/${profile.nickname}/binder/ohne`
+      : toCollection
+        ? "/profil"
+        : undefined;
   const fach = typeof sp.fach === "string" && /^\d{1,4}$/.test(sp.fach) && presetBinder ? sp.fach : "";
   const preset = events.filter((e) => e.id === wanted).map((e) => e.id);
   const t = await getTranslations("Listing");
@@ -31,8 +40,10 @@ export default async function NewListingPage({ params, searchParams }: PageProps
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">{toCollection ? t("newCollectionTitle") : t("newTitle")}</h1>
+      {returnTo && <BackTarget href={returnTo} />}
       <ListingForm
         userId={profile.id}
+        returnTo={returnTo}
         initial={{
           title: "",
           description: "",

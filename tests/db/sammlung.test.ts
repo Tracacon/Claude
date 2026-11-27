@@ -47,7 +47,7 @@ beforeAll(async () => {
 describe("Sammlung", () => {
   let id: string;
 
-  it("legt eine Einzelkarte nur für die Sammlung an (mit Vorder- und Rückseite)", async () => {
+  it("legt eine Einzelkarte nur für die Sammlung an", async () => {
     await expect(create(ana, glurak)).rejects.toThrow(/front_back_required/);
     id = await create(ana, { ...glurak, photos: [photo(1), photo(2)] });
     expect(await status(id)).toEqual({ status: "collection", quantity: 2 });
@@ -71,7 +71,7 @@ describe("Sammlung", () => {
     expect((await collection(ben, "Ana")).find((x) => x.id === id)?.status).toBe("active");
   });
 
-  it("legt ein Inserat zurück in die Sammlung, Fotos bleiben Pflicht", async () => {
+  it("legt ein Inserat zurück in die Sammlung, die Vorderseite bleibt Pflicht", async () => {
     await t.as(ana, "select public.set_listing_status($1, 'collection')", [id]);
     expect(await search()).not.toContain(id);
     await expect(
@@ -106,5 +106,26 @@ describe("Sammlung", () => {
     const log = await t.db.query<{ reason: string }>("select reason from public.collection_removals where owner_id = $1", [ana]);
     expect(log.rows).toEqual([{ reason: "traded" }]);
     await expect(t.as(ana, "select * from public.collection_removals")).resolves.toMatchObject({ rows: [] });
+  });
+
+  it("Sammlung: eine Vorderseite reicht, Tausch braucht Rückseite und echten Titel", async () => {
+    await expect(create(ana, { ...glurak, photos: [] })).rejects.toThrow(/front_back_required/);
+    const x = await create(ana, { ...glurak, title: "Sammlungskarte", photos: [photo(20)] });
+    await t.as(ana, "update public.listings set title_auto = true where id = $1", [x]);
+    // Verschenken geht mit einem Foto und automatischem Titel
+    await t.as(ana, "select public.update_listing($1, $2::jsonb)", [x, JSON.stringify({ ...glurak, title: "Sammlungskarte", offer: "gift", status: "active", photos: [photo(20)] })]);
+    expect((await status(x)).status).toBe("active");
+    await t.as(ana, "select public.set_listing_status($1, 'collection')", [x]);
+    // Tausch: nur Vorderseite reicht nicht
+    await expect(
+      t.as(ana, "select public.update_listing($1, $2::jsonb)", [x, JSON.stringify({ ...glurak, title: "Sammlungskarte", status: "active", photos: [photo(20)] })]),
+    ).rejects.toThrow(/front_back_required/);
+    // Tausch: mit Rückseite, aber automatischem Titel geht es nicht
+    await expect(
+      t.as(ana, "select public.update_listing($1, $2::jsonb)", [x, JSON.stringify({ ...glurak, title: "Sammlungskarte", status: "active", photos: [photo(20), photo(21)] })]),
+    ).rejects.toThrow(/title_required/);
+    await t.as(ana, "update public.listings set title_auto = false where id = $1", [x]);
+    await t.as(ana, "select public.update_listing($1, $2::jsonb)", [x, JSON.stringify({ ...glurak, title: "Glurak 4/102", status: "active", photos: [photo(20), photo(21)] })]);
+    expect((await status(x)).status).toBe("active");
   });
 });
