@@ -17,7 +17,7 @@ export type SimpleState = { ok?: boolean; error?: string };
 const FIELDS = [
   "title", "description", "tcg", "kind", "offer", "quantity", "price", "negotiable", "condition", "card_language",
   "grading", "city", "handover_event", "handover_pickup", "handover_shipping", "photos",
-  "card_code", "card_no",
+  "card_code", "card_no", "binder",
 ] as const;
 
 function readForm(formData: FormData) {
@@ -60,6 +60,14 @@ async function saveCardDetails(listingId: string, tcg: string, card: ListingInpu
   if (error) console.error("set_listing_details", error.message);
 }
 
+/** Binder der Karte setzen (Feld "binder" im Formular; leer = ohne Binder) */
+async function saveBinder(listingId: string, binder: string | null, formData: FormData) {
+  if (formData.get("binder_field") !== "1") return;
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_listing_binder", { p_listing: listingId, p_binder: binder, p_pocket: null });
+  if (error) console.error("set_listing_binder", error.message);
+}
+
 /** Termine, zu denen die Karte mitgebracht wird (Kästchen "events" im Formular) */
 async function saveListingEvents(listingId: string, formData: FormData) {
   if (formData.get("events_field") !== "1") return;
@@ -75,11 +83,12 @@ export async function createListing(_prev: ListingFormState, formData: FormData)
   const parsed = listingSchema.safeParse(values);
   if (!parsed.success) return { errors: toFieldErrors(parsed.error), values };
 
-  const { card, ...listing } = parsed.data;
+  const { card, binder, ...listing } = parsed.data;
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("create_listing", { p: listing });
   if (error || !data) return { errors: { _form: error ? mapDbError(error) : "generic" }, values };
   await saveCardDetails(data as string, listing.tcg, card);
+  await saveBinder(data as string, binder, formData);
   await saveListingEvents(data as string, formData);
 
   revalidatePath("/", "layout");
@@ -95,11 +104,12 @@ export async function updateListing(_prev: ListingFormState, formData: FormData)
   const parsed = listingSchema.safeParse(values);
   if (!parsed.success) return { errors: toFieldErrors(parsed.error), values };
 
-  const { card, ...listing } = parsed.data;
+  const { card, binder, ...listing } = parsed.data;
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("update_listing", { p_id: id, p: listing });
   if (error) return { errors: { _form: mapDbError(error) }, values };
   await saveCardDetails(id, listing.tcg, card);
+  await saveBinder(id, binder, formData);
 
   await removePhotoFiles(profile.id, (data as string[] | null) ?? []);
   await saveListingEvents(id, formData);

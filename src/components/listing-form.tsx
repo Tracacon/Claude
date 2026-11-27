@@ -43,7 +43,11 @@ export type ListingFormValues = {
   events: string[];
   card_code: string;
   card_no: string;
+  /** Binder-ID oder "" (ohne Binder) */
+  binder: string;
 };
+
+export type BinderOption = { id: string; name: string };
 
 export type EventOption = { id: string; name: string; starts_at: string; ends_at: string; timezone: string | null; city: string | null };
 
@@ -52,12 +56,15 @@ export function ListingForm({
   listingId,
   initial,
   events = [],
+  binders = [],
 }: {
   userId: string;
   listingId?: string;
   initial: ListingFormValues;
   /** Kommende Termine zum Ankreuzen */
   events?: EventOption[];
+  /** Eigene Binder zur Auswahl */
+  binders?: BinderOption[];
 }) {
   const locale = useLocale();
   const t = useTranslations("Listing");
@@ -79,8 +86,8 @@ export function ListingForm({
   const [kind, setKind] = useState(val("kind") || "single");
   const [tcg, setTcg] = useState(val("tcg"));
   const inCollection = offer === COLLECTION_CHOICE;
-  // Vorder- und Rückseite nur im Marktplatz Pflicht
-  const bothSides = !inCollection && KINDS_NEEDING_BOTH_SIDES.includes(kind);
+  // Vorder- und Rückseite bei Einzelkarten und Slabs immer Pflicht
+  const bothSides = KINDS_NEEDING_BOTH_SIDES.includes(kind);
   const photos = v?.photos ? (JSON.parse(v.photos || "[]") as string[]) : initial.photos;
   const e = state.errors ?? {};
   // React setzt Formulare nach jeder Aktion zurück. Ein neuer Schlüssel baut das Formular
@@ -94,7 +101,7 @@ export function ListingForm({
       <section className="card space-y-2">
         <h2 className="font-semibold">{t("photos")}</h2>
         <p className={`hint mt-0 ${bothSides ? "text-brand" : ""}`}>
-          {bothSides ? t("photosHintRequired") : inCollection ? t("photosHintCollection") : t("photosHint")}
+          {bothSides ? t("photosHintRequired") : t("photosHint")}
         </p>
         <PhotoUploader
           key={photos.join(",")}
@@ -147,10 +154,21 @@ export function ListingForm({
           <p className="hint">{inCollection ? t("offerCollectionHint") : t("offerMarketHint")}</p>
         </fieldset>
 
-        <div className="max-w-40">
-          <label htmlFor="quantity" className="label">{t("quantity")}</label>
-          <input id="quantity" name="quantity" type="number" inputMode="numeric" min={1} max={MAX_QUANTITY} defaultValue={val("quantity") || "1"} className="input" />
-          <FormError code={e.quantity} />
+        <div className="grid gap-4 sm:grid-cols-[10rem_1fr]">
+          <div>
+            <label htmlFor="quantity" className="label">{t("quantity")}</label>
+            <input id="quantity" name="quantity" type="number" inputMode="numeric" min={1} max={MAX_QUANTITY} defaultValue={val("quantity") || "1"} className="input" />
+            <FormError code={e.quantity} />
+          </div>
+          <div>
+            <input type="hidden" name="binder_field" value="1" />
+            <label htmlFor="binder" className="label">{t("binder")}</label>
+            <select id="binder" name="binder" defaultValue={val("binder")} className="input">
+              <option value="">{t("binderNone")}</option>
+              {binders.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+            </select>
+            {binders.length === 0 && <p className="hint">{t("binderHintNone")}</p>}
+          </div>
         </div>
 
         {offerHasPrice(offer) ? (

@@ -47,8 +47,9 @@ beforeAll(async () => {
 describe("Sammlung", () => {
   let id: string;
 
-  it("legt eine Einzelkarte nur für die Sammlung ohne Fotos an", async () => {
-    id = await create(ana, glurak);
+  it("legt eine Einzelkarte nur für die Sammlung an (mit Vorder- und Rückseite)", async () => {
+    await expect(create(ana, glurak)).rejects.toThrow(/front_back_required/);
+    id = await create(ana, { ...glurak, photos: [photo(1), photo(2)] });
     expect(await status(id)).toEqual({ status: "collection", quantity: 2 });
   });
 
@@ -60,15 +61,7 @@ describe("Sammlung", () => {
     expect(detail.rows[0].get_listing).not.toBeNull();
   });
 
-  it("verlangt beim Markieren zum Tauschen Vorder- und Rückseite", async () => {
-    await expect(t.as(ana, "select public.set_listing_status($1, 'active')", [id])).rejects.toThrow(/front_back_required/);
-    await expect(
-      t.as(ana, "select public.update_listing($1, $2::jsonb)", [id, JSON.stringify({ ...glurak, status: "active" })]),
-    ).rejects.toThrow(/front_back_required/);
-    expect((await status(id)).status).toBe("collection");
-  });
-
-  it("markiert mit Fotos und erscheint dann im Marktplatz", async () => {
+  it("markiert zum Tauschen und erscheint dann im Marktplatz", async () => {
     await t.as(ana, "select public.update_listing($1, $2::jsonb)", [
       id,
       JSON.stringify({ ...glurak, status: "active", photos: [photo(1), photo(2)] }),
@@ -78,16 +71,16 @@ describe("Sammlung", () => {
     expect((await collection(ben, "Ana")).find((x) => x.id === id)?.status).toBe("active");
   });
 
-  it("legt ein Inserat zurück in die Sammlung", async () => {
+  it("legt ein Inserat zurück in die Sammlung, Fotos bleiben Pflicht", async () => {
     await t.as(ana, "select public.set_listing_status($1, 'collection')", [id]);
     expect(await search()).not.toContain(id);
-    // Fotos darf man in der Sammlung wieder entfernen
-    await t.as(ana, "select public.update_listing($1, $2::jsonb)", [id, JSON.stringify({ ...glurak, photos: [] })]);
-    expect((await status(id)).status).toBe("collection");
+    await expect(
+      t.as(ana, "select public.update_listing($1, $2::jsonb)", [id, JSON.stringify({ ...glurak, photos: [] })]),
+    ).rejects.toThrow(/front_back_required/);
   });
 
   it("respektiert private Profile", async () => {
-    const hidden = await create(cem, { ...glurak, title: "Geheime Karte" });
+    const hidden = await create(cem, { ...glurak, title: "Geheime Karte", photos: [photo(3), photo(4)] });
     expect(await collection(ben, "Cem")).toEqual([]);
     const direct = await t.as(ben, "select id from public.listings where id = $1", [hidden]);
     expect(direct.rows).toEqual([]);
@@ -95,8 +88,8 @@ describe("Sammlung", () => {
   });
 
   it("erlaubt nur gültige Anzahlen", async () => {
-    await expect(create(ana, { ...glurak, quantity: 0 })).rejects.toThrow();
-    await expect(create(ana, { ...glurak, quantity: 1000 })).rejects.toThrow();
+    await expect(create(ana, { ...glurak, kind: "lot", quantity: 0 })).rejects.toThrow();
+    await expect(create(ana, { ...glurak, kind: "lot", quantity: 1000 })).rejects.toThrow();
   });
 
   it("macht aus einem frechen Status beim Anlegen ein normales Inserat", async () => {
@@ -105,7 +98,7 @@ describe("Sammlung", () => {
   });
 
   it("entfernt Stücke mit Grund und merkt sich nur den Grund", async () => {
-    const x = await create(ana, { ...glurak, title: "Tauschkarte" });
+    const x = await create(ana, { ...glurak, kind: "lot", title: "Tauschkarte" });
     await expect(t.as(ben, "select public.remove_listing($1, 'traded')", [x])).rejects.toThrow(/not_found/);
     await expect(t.as(ana, "select public.remove_listing($1, 'kaputt')", [x])).rejects.toThrow(/invalid_action/);
     await t.as(ana, "select public.remove_listing($1, 'traded')", [x]);

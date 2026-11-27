@@ -138,6 +138,11 @@ export const listingSchema = z
     kind: z.enum(KINDS),
     // "collection" = nur in die Sammlung legen, sonst Markierung für den Marktplatz
     offer: z.enum([COLLECTION_CHOICE, ...OFFERS]),
+    // Binder in der Sammlung ("" = ohne Binder)
+    binder: z
+      .string()
+      .optional()
+      .transform((v) => (v && UUID_PATTERN.test(v) ? v : null)),
     quantity: z
       .string()
       .optional()
@@ -190,8 +195,8 @@ export const listingSchema = z
       ctx.addIssue({ code: "custom", path: ["price"], message: "invalid_price" });
       return z.NEVER;
     }
-    // Vorder- und Rückseite sind nur im Marktplatz Pflicht, in der Sammlung reicht das Kartenbild
-    if (!inCollection && KINDS_NEEDING_BOTH_SIDES.includes(v.kind) && v.photos.length < 2) {
+    // Vorder- und Rückseite sind bei Einzelkarten und Slabs immer Pflicht, auch in der Sammlung
+    if (KINDS_NEEDING_BOTH_SIDES.includes(v.kind) && v.photos.length < 2) {
       ctx.addIssue({ code: "custom", path: ["photos"], message: "front_back_required" });
       return z.NEVER;
     }
@@ -201,7 +206,7 @@ export const listingSchema = z
     }
     const withCard = KINDS_WITH_CARD.includes(v.kind);
     const card = { code: withCard ? v.card_code : null, number: withCard ? v.card_no : null };
-    const { price: _price, card_code: _code, card_no: _no, ...rest } = v;
+    const { price: _price, card_code: _code, card_no: _no, binder, ...rest } = v;
     void [_price, _code, _no];
     // Die Datenbank verlangt mindestens eine Übergabeart; in der Sammlung bleibt "beim Event" als Vorgabe
     const handover_event = rest.handover_event || (inCollection && !rest.handover_pickup && !rest.handover_shipping);
@@ -213,6 +218,7 @@ export const listingSchema = z
       price_cents: cents,
       negotiable: offerHasPrice(offer) ? v.negotiable : false,
       card,
+      binder,
     };
   });
 
