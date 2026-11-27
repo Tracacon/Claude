@@ -152,6 +152,7 @@ export function PostComposer({ userId }: { userId: string }) {
       />
       {crop && (
         <ImageCropper
+          adjustable
           key={crop.url}
           src={crop.url}
           img={crop.img}

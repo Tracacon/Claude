@@ -23,7 +23,7 @@ export default async function EditBinderPage({ params }: PageProps<"/[locale]/bi
     <div className="mx-auto max-w-lg space-y-4">
       <BackLink fallback={`/u/${me.nickname}/binder/${id}`} label={t("back")} />
       <h1 className="text-2xl font-bold">{t("editTitle")}</h1>
-      <BinderForm binder={binder} />
+      <BinderForm userId={me.id} binder={binder} />
     </div>
   );
 }

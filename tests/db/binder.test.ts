@@ -101,6 +101,19 @@ describe("Binder", () => {
     await t.as(ana, "delete from public.binders where id = $1", [id]);
   });
 
+  it("setzt ein eigenes Titelbild und gibt das alte zurück", async () => {
+    const r = await t.as<{ save_binder: string }>(ana, "select public.save_binder(null, 'Mit Bild', 'black', 'public')");
+    const id = r.rows[0].save_binder;
+    const img1 = "60000000-0000-0000-0000-000000000001";
+    const img2 = "60000000-0000-0000-0000-000000000002";
+    expect((await t.as<{ old: string | null }>(ana, "select public.set_binder_cover($1, $2) as old", [id, img1])).rows[0].old).toBeNull();
+    expect((await t.as<{ old: string | null }>(ana, "select public.set_binder_cover($1, $2) as old", [id, img2])).rows[0].old).toBe(img1);
+    const b = await t.as<{ cover_image: string }>(null, "select cover_image from public.profile_binders('Ana') where id = $1", [id]);
+    expect(b.rows[0].cover_image).toBe(img2);
+    await expect(t.as(ben, "select public.set_binder_cover($1, null)", [id])).rejects.toThrow(/not_found/);
+    await t.as(ana, "delete from public.binders where id = $1", [id]);
+  });
+
   it("ändert und löscht Binder; Karten landen dann in „Ohne Binder“", async () => {
     await t.as(ana, "select public.save_binder($1, 'Kanto', 'blue', 'public')", [main]);
     await expect(t.as(ben, "select public.save_binder($1, 'Gekapert', 'blue', 'public')", [main])).rejects.toThrow(/not_found/);

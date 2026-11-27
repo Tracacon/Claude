@@ -13,12 +13,20 @@ import {
   type BinderEffect,
 } from "@/lib/binder-shared";
 import { BinderCover } from "./binder-cover";
+import { ImageCropper } from "@/components/image-cropper";
+import { PhotoSourceSheet } from "@/components/photo-source-sheet";
+import { canvasToJpeg, loadImage } from "@/lib/image";
+import { PHOTO_BUCKET, photoUrl } from "@/lib/marketplace";
+import { createClient } from "@/lib/supabase/client";
 
 /** Binder anlegen oder bearbeiten: Name, Farbe, wer ihn sieht */
 export function BinderForm({
+  userId,
   binder,
 }: {
-  binder?: { id: string; name: string; color: BinderColor; visibility: string; effect: BinderEffect };
+  /** Eigene Nutzer-ID (Ordner für das Titelbild) */
+  userId: string;
+  binder?: { id: string; name: string; color: BinderColor; visibility: string; effect: BinderEffect; cover_image: string | null };
 }) {
   const t = useTranslations("Binder");
   const [state, action, pending] = useActionState<BinderFormState, FormData>(saveBinder, {});
@@ -27,15 +35,60 @@ export function BinderForm({
   const [color, setColor] = useState<BinderColor>((state.values?.color as BinderColor) ?? binder?.color ?? "night");
   const [effect, setEffect] = useState<BinderEffect>((state.values?.effect as BinderEffect) ?? binder?.effect ?? "none");
   const [confirm, setConfirm] = useState(false);
+  // Eigenes Titelbild: auswählen, zuschneiden, anpassen, hochladen
+  const tP = useTranslations("Photos");
+  const [cover, setCover] = useState<{ id: string; preview: string } | null>(
+    binder?.cover_image ? { id: binder.cover_image, preview: photoUrl(userId, binder.cover_image, "thumb") } : null,
+  );
+  const [sourceOpen, setSourceOpen] = useState(false);
+  const [crop, setCrop] = useState<{ img: HTMLImageElement; url: string } | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [coverError, setCoverError] = useState<string | null>(null);
+
+  async function pickCover(files: File[]) {
+    setCoverError(null);
+    if (!files[0]) return;
+    try {
+      setCrop(await loadImage(files[0]));
+    } catch {
+      setCoverError(t("coverError"));
+    }
+  }
+
+  async function uploadCover(canvas: HTMLCanvasElement) {
+    if (crop) URL.revokeObjectURL(crop.url);
+    setCrop(null);
+    const id = crypto.randomUUID();
+    const preview = canvas.toDataURL("image/jpeg", 0.7);
+    setUploading(true);
+    try {
+      const [full, thumb] = await Promise.all([canvasToJpeg(canvas, 1500, 0.86), canvasToJpeg(canvas, 600, 0.82)]);
+      const supabase = createClient();
+      const opts = { contentType: "image/jpeg", cacheControl: "31536000", upsert: false };
+      const [a, b] = await Promise.all([
+        supabase.storage.from(PHOTO_BUCKET).upload(`${userId}/${id}.jpg`, full, opts),
+        supabase.storage.from(PHOTO_BUCKET).upload(`${userId}/${id}_t.jpg`, thumb, opts),
+      ]);
+      if (a.error || b.error) throw a.error ?? b.error;
+      setCover({ id, preview });
+    } catch (e) {
+      console.error("Titelbild", e);
+      setCoverError(t("coverError"));
+    } finally {
+      setUploading(false);
+    }
+  }
   const visibility = state.values?.visibility ?? binder?.visibility ?? "public";
 
   return (
     <div className="space-y-5">
       <div className="mx-auto w-40">
-        <BinderCover name={name || t("namePlaceholder")} color={color} effect={effect} coverUrl={null} subtitle={t("preview")} />
+        <BinderCover name={name || t("namePlaceholder")} color={color} effect={effect} imageUrl={cover?.preview ?? null} subtitle={t("preview")} />
       </div>
       <form action={action} className="card space-y-4" noValidate>
         {binder && <input type="hidden" name="id" value={binder.id} />}
+        <input type="hidden" name="cover_field" value="1" />
+        <input type="hidden" name="cover_image" value={cover?.id ?? ""} />
         <div>
           <label htmlFor="name" className="label">{t("name")}</label>
           <input
@@ -65,6 +118,21 @@ export function BinderForm({
             ))}
           </div>
         </fieldset>
+        <div>
+          <p className="label">{t("coverImage")}</p>
+          <p className="hint mt-0 mb-2">{t("coverImageHint")}</p>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className="btn-ghost" disabled={uploading} onClick={() => setSourceOpen(true)}>
+              📷 {uploading ? t("coverUploading") : cover ? t("coverChange") : t("coverAdd")}
+            </button>
+            {cover && !uploading && (
+              <button type="button" className="btn-ghost text-danger" onClick={() => setCover(null)}>
+                ✕ {t("coverRemove")}
+              </button>
+            )}
+          </div>
+          {coverError && <p role="alert" className="error">{coverError}</p>}
+        </div>
         <fieldset>
           <legend className="label">{t("effect")}</legend>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
@@ -97,7 +165,7 @@ export function BinderForm({
           </div>
         </fieldset>
         <FormError code={state.error} />
-        <button type="submit" className="btn-primary" disabled={pending}>
+        <button type="submit" className="btn-primary" disabled={pending || uploading}>
           {pending ? t("saving") : binder ? t("save") : t("create")}
         </button>
       </form>
@@ -120,6 +188,30 @@ export function BinderForm({
             </form>
           )}
         </section>
+      )}
+      <PhotoSourceSheet
+        idPrefix="binder-cover"
+        open={sourceOpen}
+        onClose={() => setSourceOpen(false)}
+        onFiles={(files) => void pickCover(files)}
+        facing="environment"
+        title={t("coverImage")}
+      />
+      {crop && (
+        <ImageCropper
+          key={crop.url}
+          src={crop.url}
+          img={crop.img}
+          shape="cover"
+          adjustable
+          output={{ width: 1200, height: 1500 }}
+          title={tP("cropCover")}
+          onCancel={() => {
+            URL.revokeObjectURL(crop.url);
+            setCrop(null);
+          }}
+          onDone={(canvas) => void uploadCover(canvas)}
+        />
       )}
     </div>
   );

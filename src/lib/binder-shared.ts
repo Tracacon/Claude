@@ -31,7 +31,8 @@ export type BinderSummary = {
   visibility: BinderVisibility;
   position: number;
   card_count: number;
-  cover_photo_id: string | null;
+  /** Eigenes Titelbild (Speicher listing-photos), sonst nur Farbe und Effekt */
+  cover_image: string | null;
   owner_id: string;
 };
 

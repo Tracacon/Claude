@@ -13,13 +13,13 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/binder/n
 export default async function NewBinderPage({ params }: PageProps<"/[locale]/binder/neu">) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await requireProfile();
+  const me = await requireProfile();
   const t = await getTranslations("Binder");
   return (
     <div className="mx-auto max-w-lg space-y-4">
       <BackLink fallback="/profil" label={t("back")} />
       <h1 className="text-2xl font-bold">{t("newTitle")}</h1>
-      <BinderForm />
+      <BinderForm userId={me.id} />
     </div>
   );
 }

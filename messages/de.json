@@ -656,7 +656,16 @@
     "cropCard": "Foto zuschneiden",
     "straighten": "Gerade ausrichten",
     "straightenReset": "Gerade",
-    "straightenHint": "Unterer Regler: schiefes Foto gerade drehen. Am Handy geht das auch mit zwei Fingern."
+    "straightenHint": "Unterer Regler: schiefes Foto gerade drehen. Am Handy geht das auch mit zwei Fingern.",
+    "tabCrop": "Zuschnitt",
+    "tabAdjust": "Anpassen",
+    "adjust_brightness": "Helligkeit",
+    "adjust_contrast": "Kontrast",
+    "adjust_saturation": "Sättigung",
+    "adjust_warmth": "Wärme",
+    "adjustReset": "Zurücksetzen",
+    "cropCover": "Titelbild zuschneiden",
+    "coverHint": "Bild in den Rahmen schieben · mit zwei Fingern zoomen und drehen"
   },
   "Events": {
     "title": "Termine",
@@ -1163,6 +1172,13 @@
     "effect_holo": "Holo",
     "effect_rainbow": "Regenbogen",
     "effect_cosmos": "Kosmos",
-    "highlight": "Karten hervorheben"
+    "highlight": "Karten hervorheben",
+    "coverImage": "Eigenes Titelbild",
+    "coverImageHint": "Freiwillig. Ein Foto für den Einband, zum Zuschneiden und Anpassen. Ohne Foto zeigt der Binder seine Farbe.",
+    "coverAdd": "Foto wählen",
+    "coverChange": "Anderes Foto",
+    "coverRemove": "Titelbild entfernen",
+    "coverUploading": "Wird hochgeladen …",
+    "coverError": "Das Foto konnte nicht verarbeitet werden. Bitte versuche ein anderes."
   }
 }
