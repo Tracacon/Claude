@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { isSupabaseConfigured } from "@/lib/env";
-import type { ListingSummary } from "@/lib/marketplace";
+import type { CollectionItem, ListingSummary } from "@/lib/marketplace";
 import type { FollowListItem, PublicProfile } from "@/lib/social";
 import { createClient } from "@/lib/supabase/server";
 import { NICKNAME_PATTERN } from "@/lib/validation";
@@ -19,6 +19,14 @@ export async function getProfileListings(nickname: string): Promise<ListingSumma
   const supabase = await createClient();
   const { data } = await supabase.rpc("profile_listings", { p_nickname: nickname, p_limit: 120, p_offset: 0 });
   return (data ?? []) as ListingSummary[];
+}
+
+/** Sammlung eines Profils: nur Sammlung plus alles, was im Marktplatz steht */
+export async function getProfileCollection(nickname: string): Promise<CollectionItem[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("profile_collection", { p_nickname: nickname, p_limit: 300, p_offset: 0 });
+  if (error) console.error("profile_collection", error.message);
+  return (data ?? []) as CollectionItem[];
 }
 
 export async function getFollowList(nickname: string, kind: "followers" | "following"): Promise<FollowListItem[]> {

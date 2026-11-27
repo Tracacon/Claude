@@ -5,7 +5,7 @@ import { parseOfferFilter, parseProfileTab, ProfileView } from "@/components/pro
 import { getProfilePosts } from "@/lib/feed";
 import { redirect } from "@/i18n/navigation";
 import { getMyProfile } from "@/lib/auth";
-import { getProfileEvents, getProfileListings, getPublicProfile } from "@/lib/profiles";
+import { getProfileCollection, getProfileEvents, getProfileListings, getPublicProfile } from "@/lib/profiles";
 import { ReportForm } from "../../marktplatz/[id]/listing-actions";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/u/[nickname]">): Promise<Metadata> {
@@ -23,13 +23,14 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
   if (profile.is_me) redirect({ href: typeof sp.tab === "string" ? `/profil?tab=${parseProfileTab(sp.tab)}` : "/profil", locale });
 
   const tab = parseProfileTab(sp.tab);
+  const collection = tab === "sammlung" && profile.can_view ? await getProfileCollection(profile.nickname) : [];
   const listings = tab === "inserate" && profile.can_view ? await getProfileListings(profile.nickname) : [];
   const events = tab === "abzeichen" && profile.can_view ? await getProfileEvents(profile.nickname) : [];
   const posts = tab === "beitraege" && profile.can_view ? await getProfilePosts(profile.nickname) : [];
   const t = await getTranslations("Listing");
   return (
     <div className="space-y-6">
-      <ProfileView profile={profile} listings={listings} events={events} posts={posts} tab={tab} offerFilter={parseOfferFilter(sp.angebot)} loggedIn={Boolean(me?.nickname)} basePath={`/u/${profile.nickname}`} />
+      <ProfileView profile={profile} listings={listings} collection={collection} events={events} posts={posts} tab={tab} offerFilter={parseOfferFilter(sp.angebot)} loggedIn={Boolean(me?.nickname)} basePath={`/u/${profile.nickname}`} />
       {me?.nickname && <ReportForm profileId={profile.id} label={t("reportProfile")} />}
     </div>
   );

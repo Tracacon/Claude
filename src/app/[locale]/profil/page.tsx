@@ -5,7 +5,7 @@ import { parseOfferFilter, parseProfileTab, ProfileView } from "@/components/pro
 import { UserMenu } from "@/components/user-menu";
 import { getProfilePosts } from "@/lib/feed";
 import { requireProfile } from "@/lib/auth";
-import { getProfileEvents, getProfileListings, getPublicProfile } from "@/lib/profiles";
+import { getProfileCollection, getProfileEvents, getProfileListings, getPublicProfile } from "@/lib/profiles";
 import { getUserMenu } from "@/lib/user-menu-data";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/profil">): Promise<Metadata> {
@@ -23,6 +23,7 @@ export default async function MyProfilePage({ params, searchParams }: PageProps<
   const profile = await getPublicProfile(me.nickname!);
   if (!profile) notFound();
   const tab = parseProfileTab(sp.tab);
+  const collection = tab === "sammlung" ? await getProfileCollection(me.nickname!) : [];
   const listings = tab === "inserate" ? await getProfileListings(me.nickname!) : [];
   const events = tab === "abzeichen" ? await getProfileEvents(me.nickname!) : [];
   const posts = tab === "beitraege" ? await getProfilePosts(me.nickname!) : [];
@@ -35,7 +36,7 @@ export default async function MyProfilePage({ params, searchParams }: PageProps<
           <UserMenu data={menu} variant="sheet" />
         </div>
       )}
-      <ProfileView profile={profile} listings={listings} events={events} posts={posts} tab={tab} offerFilter={parseOfferFilter(sp.angebot)} loggedIn basePath="/profil" />
+      <ProfileView profile={profile} listings={listings} collection={collection} events={events} posts={posts} tab={tab} offerFilter={parseOfferFilter(sp.angebot)} loggedIn basePath="/profil" />
     </div>
   );
 }

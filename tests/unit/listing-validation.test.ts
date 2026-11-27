@@ -52,4 +52,28 @@ describe("Inserat prüfen", () => {
     expect(r.price_cents).toBeNull();
     expect(r.negotiable).toBe(false);
   });
+
+  it("Nur Sammlung: ohne Fotos, Preis und Übergabe, gespeichert als Tausch-Vorgabe", () => {
+    const r = listingSchema.parse({
+      ...base,
+      offer: "collection",
+      price: "",
+      photos: "[]",
+      handover_event: "",
+      quantity: "3",
+    });
+    expect(r).toMatchObject({ status: "collection", offer: "trade", price_cents: null, quantity: 3, handover_event: true });
+  });
+
+  it("Markierte Stücke sind aktiv und brauchen weiter Fotos", () => {
+    expect(listingSchema.parse(base)).toMatchObject({ status: "active", quantity: 1 });
+    const r = listingSchema.safeParse({ ...base, offer: "trade", photos: "[]" });
+    expect(r.error?.issues[0].message).toBe("front_back_required");
+  });
+
+  it("prüft die Anzahl", () => {
+    expect(listingSchema.safeParse({ ...base, quantity: "0" }).error?.issues[0].message).toBe("invalid_quantity");
+    expect(listingSchema.safeParse({ ...base, quantity: "1000" }).error?.issues[0].message).toBe("invalid_quantity");
+    expect(listingSchema.safeParse({ ...base, quantity: "zwei" }).success).toBe(false);
+  });
 });

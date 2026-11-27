@@ -45,6 +45,8 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
   const format = await getFormatter();
   const date = (d: string) => format.dateTime(new Date(d), { dateStyle: "medium" });
   const publicVisible = l.status === "active" || l.status === "reserved";
+  // Nur in der Sammlung: nicht im Marktplatz, kein Preis, kein Kontakt
+  const inCollection = l.status === "collection";
   let existingConversation: string | null = null;
   if (user && !isOwner) {
     const supabase = await createClient();
@@ -59,7 +61,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
   ]);
   const tInt = await getTranslations("Interest");
   // Tauschinteresse gibt es nur bei Inseraten, die man tauschen kann
-  const tradable = l.offer === "trade" || l.offer === "sell_or_trade";
+  const tradable = !inCollection && (l.offer === "trade" || l.offer === "sell_or_trade");
   const showInterest = tradable && publicVisible && !isOwner;
   const interestControl = showInterest ? (
     user ? (
@@ -80,7 +82,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
 
   return (
     <article className="space-y-5">
-      <BackLink fallback="/marktplatz" label={t("backToList")} />
+      <BackLink fallback={inCollection ? `/u/${owner.nickname}` : "/marktplatz"} label={inCollection ? t("backToCollection") : t("backToList")} />
       {l.status === "removed" && (
         <div role="alert" className="card border-danger/50">
           <p className="font-semibold text-danger">{t("removedTitle")}</p>
@@ -89,7 +91,13 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
           <p className="mt-2 text-xs text-cream/60">{t("removedContact")}</p>
         </div>
       )}
-      {!publicVisible && l.status !== "removed" && <p className="card text-sm text-cream/70">{t("notVisible")}</p>}
+      {inCollection && isOwner && (
+        <div className="card space-y-2 text-sm">
+          <p>📁 {t("collectionOwnerHint")}</p>
+          <Link href={`/marktplatz/${l.id}/bearbeiten`} className="btn-primary">{t("markForMarket")}</Link>
+        </div>
+      )}
+      {!publicVisible && !inCollection && l.status !== "removed" && <p className="card text-sm text-cream/70">{t("notVisible")}</p>}
 
       {photos.length > 0 && (
         <div className="relative">
@@ -120,13 +128,16 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
         <div className="flex flex-wrap gap-2 text-xs">
           <span className="rounded-full bg-brand/15 px-2.5 py-1 font-semibold text-brand">{tTcg(l.tcg)}</span>
           <span className="rounded-full bg-white/10 px-2.5 py-1">{tKind(l.kind)}</span>
-          <span className="rounded-full bg-white/10 px-2.5 py-1">{tOffer(l.offer)}</span>
+          {!inCollection && <span className="rounded-full bg-white/10 px-2.5 py-1">{tOffer(l.offer)}</span>}
           {l.status !== "active" && <span className="rounded-full bg-white/10 px-2.5 py-1">{tStatus(l.status)}</span>}
+          {l.quantity > 1 && <span className="rounded-full bg-white/10 px-2.5 py-1">{t("quantityShort", { count: l.quantity })}</span>}
         </div>
         <h1 className="text-2xl font-bold leading-tight"><BrandText text={l.title} /></h1>
-        <p className="text-3xl font-black text-brand">
-          <PriceTag offer={l.offer} cents={l.price_cents} negotiable={l.negotiable} />
-        </p>
+        {!inCollection && (
+          <p className="text-3xl font-black text-brand">
+            <PriceTag offer={l.offer} cents={l.price_cents} negotiable={l.negotiable} />
+          </p>
+        )}
       </header>
 
       {l.description && <p className="whitespace-pre-line text-cream/90">{l.description}</p>}
@@ -161,7 +172,9 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
         {l.city && (
           <div><dt className="text-cream/60">{t("city")}</dt><dd>{l.city}</dd></div>
         )}
-        <div className="col-span-2"><dt className="text-cream/60">{t("handover")}</dt><dd>{handover.join(" · ")}</dd></div>
+        {!inCollection && (
+          <div className="col-span-2"><dt className="text-cream/60">{t("handover")}</dt><dd>{handover.join(" · ")}</dd></div>
+        )}
         {bringTo.length > 0 && (
           <div className="col-span-2 sm:col-span-3">
             <dt className="text-cream/60">{tEv("bringsTo")}</dt>
@@ -180,7 +193,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
       <section className="card flex flex-wrap items-center gap-3">
         <Avatar userId={l.owner_id} avatarId={owner.avatar_id} nickname={owner.nickname} size="md" />
         <div className="min-w-0 flex-1">
-          <p className="text-xs text-cream/60">{t("seller")}</p>
+          <p className="text-xs text-cream/60">{inCollection ? t("collector") : t("seller")}</p>
           <Link href={`/u/${owner.nickname}`} className="font-semibold hover:underline">@{owner.nickname}</Link>
           <p className="text-xs text-cream/50">{t("memberSince", { date: date(owner.member_since) })}</p>
         </div>

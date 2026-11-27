@@ -26,6 +26,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/meine-in
 }
 
 const statusColor: Record<ListingStatus, string> = {
+  collection: "bg-white/10 text-cream/80",
   active: "bg-ok/15 text-ok",
   reserved: "bg-brand/15 text-brand",
   done: "bg-white/10 text-cream/70",

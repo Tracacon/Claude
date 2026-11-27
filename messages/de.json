@@ -39,7 +39,9 @@
     "createListingHint": "Karten verkaufen oder tauschen",
     "activity": "Aktivität",
     "activityCount": "Aktivität, {count} neu",
-    "back": "Zurück"
+    "back": "Zurück",
+    "createCollection": "Zur Sammlung",
+    "createCollectionHint": "Karten einpflegen und zeigen"
   },
   "Home": {
     "claim": "Trading · Dealing · Connecting",
@@ -217,7 +219,9 @@
     "instagram_failed": "Bei Instagram hat etwas nicht geklappt. Details stehen oben.",
     "invalid_instagram": "Instagram-Namen bestehen nur aus Buchstaben, Zahlen, Punkt und Unterstrich (höchstens 30 Zeichen).",
     "invalid_card_code": "Das Set-Kürzel darf nur Buchstaben, Ziffern und : enthalten.",
-    "invalid_card_number": "Die Kartennummer darf nur Buchstaben, Ziffern und / enthalten."
+    "invalid_card_number": "Die Kartennummer darf nur Buchstaben, Ziffern und / enthalten.",
+    "removal_reason_required": "Bitte wähle aus, warum du das Stück herausnimmst.",
+    "invalid_quantity": "Bitte gib eine Anzahl zwischen 1 und 999 an."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -269,7 +273,8 @@
     "active": "Aktiv",
     "reserved": "Reserviert",
     "done": "Erledigt",
-    "removed": "Entfernt"
+    "removed": "Entfernt",
+    "collection": "Nur Sammlung"
   },
   "ReportReason": {
     "scam": "Betrugsverdacht",
@@ -396,7 +401,24 @@
     "cardLooking": "Karte wird gesucht …",
     "cardFound": "Gefunden: {name}",
     "cardNotFound": "Keine passende Karte gefunden. Kürzel und Nummer werden trotzdem gespeichert.",
-    "cardName": "Karte"
+    "cardName": "Karte",
+    "offerCollection": "Nur Sammlung",
+    "offerCollectionHint": "Liegt nur in deiner Sammlung und ist auf deinem Profil zu sehen, nicht im Marktplatz. Zum Tauschen, Verkaufen oder Verschenken kannst du es jederzeit markieren.",
+    "offerMarketHint": "Markiert: Erscheint im Marktplatz und bleibt Teil deiner Sammlung.",
+    "photosHintCollection": "Fotos sind freiwillig. Ohne Foto zeigen wir das Kartenbild aus der Kartendatenbank. Zum Tauschen oder Verkaufen brauchst du später Vorder- und Rückseite.",
+    "quantity": "Anzahl",
+    "quantityShort": "{count}×",
+    "saveCollection": "In die Sammlung",
+    "newCollectionTitle": "Zur Sammlung hinzufügen",
+    "backToCollection": "Zurück zur Sammlung",
+    "collectionOwnerHint": "Dieses Stück liegt nur in deiner Sammlung und ist nicht im Marktplatz.",
+    "markForMarket": "Zum Tauschen, Verkaufen oder Verschenken markieren",
+    "collector": "Sammler",
+    "removalReason": "Warum nimmst du es raus?",
+    "removal_traded": "Getauscht",
+    "removal_sold": "Verkauft",
+    "removal_gifted": "Verschenkt",
+    "removal_other": "Sonstiges"
   },
   "Moderation": {
     "title": "Moderation",
@@ -541,7 +563,8 @@
     "requestsOff": "Hinweis: Bei dir kann jeder direkt folgen. Anfragen gibt es nur, wenn du in den Einstellungen „Follower bestätigen“ einschaltest.",
     "posts": "Beiträge",
     "newPost": "Beitrag",
-    "instagramLink": "Instagram-Profil von {name} öffnen"
+    "instagramLink": "Instagram-Profil von {name} öffnen",
+    "collection": "Sammlung"
   },
   "Badges": {
     "team": {
@@ -1038,5 +1061,13 @@
     "tradeCount": "{count, plural, =0 {keine Tauschkarten} one {# Karte zum Tausch} other {# Karten zum Tausch}}",
     "noCards": "Bietet gerade nichts zum Tausch an – schreib einfach eine Nachricht.",
     "allCards": "Alle Tauschkarten ansehen →"
+  },
+  "Collection": {
+    "count": "{count, plural, =1 {1 Karte} other {# Karten}}",
+    "markedCount": "{count} markiert",
+    "add": "Hinzufügen",
+    "empty": "Noch keine Karten in der Sammlung.",
+    "emptyMe": "Deine Sammlung ist noch leer.",
+    "emptyMeHint": "Pflege deine Karten ein und zeig sie der Community. Was du tauschen willst, markierst du einfach."
   }
 }
