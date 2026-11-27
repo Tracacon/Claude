@@ -45,6 +45,8 @@ export type ListingFormValues = {
   card_no: string;
   /** Binder-ID oder "" (ohne Binder) */
   binder: string;
+  /** Gewünschtes Fach im Binder ("" = nächstes freies) */
+  pocket?: string;
 };
 
 export type BinderOption = { id: string; name: string };
@@ -162,6 +164,7 @@ export function ListingForm({
           </div>
           <div>
             <input type="hidden" name="binder_field" value="1" />
+            <input type="hidden" name="pocket" value={initial.pocket ?? ""} />
             <label htmlFor="binder" className="label">{t("binder")}</label>
             <select id="binder" name="binder" defaultValue={val("binder")} className="input">
               <option value="">{t("binderNone")}</option>

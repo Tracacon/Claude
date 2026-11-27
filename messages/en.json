@@ -1119,10 +1119,25 @@
     "sort": "Rearrange",
     "sortDone": "Done",
     "sortIntro": "Flip through your binder or rearrange the cards.",
-    "sortPickCard": "Tap the card you want to move.",
+    "sortPickCard": "Tap the card you want to move, or drag it with the mouse to another pocket.",
     "sortPickTarget": "Now tap the target pocket. If a card is there, they swap places.",
     "pocketCard": "Card {title}",
     "pocketEmpty": "Empty pocket {pocket}",
-    "looseHint": "These cards are not in a binder yet. Use “Edit” on a card to put it into a binder."
+    "looseHint": "These cards are not in a binder yet. Use “Edit” on a card to put it into a binder.",
+    "add": "Add",
+    "addTitle": "Cards for this binder",
+    "pocketTitle": "Pocket {pocket} (page {page})",
+    "close": "Close",
+    "addNew": "Add a new card",
+    "addNewHint": "With photos of front and back, goes into the next free pocket.",
+    "addNewHintPocket": "With photos of front and back, goes into exactly this pocket.",
+    "addExisting": "Or take a card you already have",
+    "addExistingEmpty": "You have no other cards. They are all in this binder already.",
+    "searchCards": "Search cards",
+    "searchEmpty": "No card found.",
+    "fromLoose": "No binder",
+    "fromBinder": "From “{name}”",
+    "addChosen": "{count, plural, =0 {Choose cards} =1 {Add 1 card} other {Add # cards}}",
+    "pocketAdd": "Empty pocket {pocket}: put a card here"
   }
 }

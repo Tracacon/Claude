@@ -83,6 +83,15 @@ describe("Binder", () => {
     void fol;
   });
 
+  it("legt eine Karte aus einem anderen Binder in ein bestimmtes leeres Fach", async () => {
+    const other = await binder(ana, "Zweiter Binder");
+    const e = await card(ana, "Pikachu");
+    await put(ana, e, other);
+    expect((await put(ana, e, main, 7)).rows[0].set_listing_binder).toBe(7);
+    expect((await pockets(null, main)).find((x) => x[0] === "Pikachu")).toEqual(["Pikachu", 7]);
+    expect(await pockets(null, other)).toEqual([]);
+  });
+
   it("ändert und löscht Binder; Karten landen dann in „Ohne Binder“", async () => {
     await t.as(ana, "select public.save_binder($1, 'Kanto', 'blue', 'public')", [main]);
     await expect(t.as(ben, "select public.save_binder($1, 'Gekapert', 'blue', 'public')", [main])).rejects.toThrow(/not_found/);

@@ -7,6 +7,7 @@ import { FormError } from "@/components/form-error";
 import { Link, useRouter } from "@/i18n/navigation";
 import { moveToPocket } from "@/lib/actions/binders";
 import { BINDER_COLOR_STYLES, POCKETS_PER_PAGE, type BinderColor } from "@/lib/binder-shared";
+import { AddToBinderSheet, type PickCard } from "./add-to-binder-sheet";
 
 export type PocketCard = {
   id: string;
@@ -24,17 +25,23 @@ const MARK_ICON: Record<string, string> = { trade: "🔁", sell_or_trade: "🔁�
 /**
  * Aufgeschlagener Sammelkartenbinder: Seiten mit 3 × 3 Fächern zum Durchblättern.
  * Handy: eine Seite, wischen. Breiter Bildschirm: Doppelseite wie ein echter Binder.
- * Eigentümer können Karten umsortieren (Karte antippen, dann Ziel-Fach antippen).
+ * Eigentümer können Karten umsortieren (antippen oder mit der Maus ziehen) und über das
+ * Plus in leeren Fächern neue oder vorhandene Karten genau dort einsortieren.
  */
 export function BinderView({
   cards: initial,
   color,
   sortable,
+  binderId,
+  pickable = [],
 }: {
   cards: PocketCard[];
   color: BinderColor;
-  /** Umsortieren erlaubt (eigener Binder) */
+  /** Eigener Binder: Umsortieren und Hinzufügen erlaubt */
   sortable: boolean;
+  binderId?: string;
+  /** Eigene Karten aus anderen Bindern oder ohne Binder */
+  pickable?: PickCard[];
 }) {
   const t = useTranslations("Binder");
   const tOffer = useTranslations("Offer");
@@ -47,6 +54,9 @@ export function BinderView({
   const scroller = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
   const [perView, setPerView] = useState(1);
+  /** Offenes Auswahlfenster: Fach (ab 0) oder null = nächste freie Fächer */
+  const [sheet, setSheet] = useState<{ pocket: number | null } | null>(null);
+  const canAdd = sortable && Boolean(binderId);
 
   // Neue Daten vom Server (nach dem Umsortieren) übernehmen
   const [prevInitial, setPrevInitial] = useState(initial);
@@ -121,17 +131,24 @@ export function BinderView({
           <p className="text-sm text-cream/70" role="status">
             {sorting ? (selected ? t("sortPickTarget") : t("sortPickCard")) : t("sortIntro")}
           </p>
-          <button
-            type="button"
-            onClick={() => {
-              setSorting((s) => !s);
-              setSelected(null);
-            }}
-            className={sorting ? "btn-primary" : "btn-ghost"}
-            aria-pressed={sorting}
-          >
-            {sorting ? t("sortDone") : `↔ ${t("sort")}`}
-          </button>
+          <div className="flex gap-2">
+            {canAdd && !sorting && (
+              <button type="button" onClick={() => setSheet({ pocket: null })} className="btn-primary">
+                + {t("add")}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setSorting((s) => !s);
+                setSelected(null);
+              }}
+              className={sorting ? "btn-primary" : "btn-ghost"}
+              aria-pressed={sorting}
+            >
+              {sorting ? t("sortDone") : `↔ ${t("sort")}`}
+            </button>
+          </div>
         </div>
       )}
       <FormError code={error} />
@@ -195,7 +212,23 @@ export function BinderView({
                           type="button"
                           disabled={pending}
                           onClick={() => (selected ? drop(pocket) : card && setSelected(card.id))}
-                          className={`${pocketClass} w-full ${selected && !isSel ? "hover:border-brand/70" : ""}`}
+                          // Am Computer: Karte mit der Maus in ein anderes Fach ziehen
+                          draggable={Boolean(card)}
+                          onDragStart={(ev) => {
+                            if (!card) return;
+                            ev.dataTransfer.effectAllowed = "move";
+                            ev.dataTransfer.setData("text/plain", card.id);
+                            setSelected(card.id);
+                          }}
+                          onDragOver={(ev) => {
+                            ev.preventDefault();
+                            ev.dataTransfer.dropEffect = "move";
+                          }}
+                          onDrop={(ev) => {
+                            ev.preventDefault();
+                            drop(pocket);
+                          }}
+                          className={`${pocketClass} w-full ${selected && !isSel ? "hover:border-brand/70" : ""} ${card ? "cursor-grab active:cursor-grabbing" : ""}`}
                           aria-label={card ? t("pocketCard", { title: card.title }) : t("pocketEmpty", { pocket: pocket + 1 })}
                           aria-pressed={Boolean(isSel)}
                         >
@@ -205,6 +238,16 @@ export function BinderView({
                         <Link href={`/marktplatz/${card.id}`} className={`${pocketClass} transition-transform hover:-translate-y-0.5`} title={card.title}>
                           {inner}
                         </Link>
+                      ) : canAdd ? (
+                        // Leeres Fach im eigenen Binder: Plus zum Einsortieren genau hier
+                        <button
+                          type="button"
+                          onClick={() => setSheet({ pocket })}
+                          className={`${pocketClass} group w-full hover:border-brand/70 hover:bg-brand/5`}
+                          aria-label={t("pocketAdd", { pocket: pocket + 1 })}
+                        >
+                          <span className="absolute inset-0 flex items-center justify-center text-2xl font-light text-cream/25 group-hover:text-brand">+</span>
+                        </button>
                       ) : (
                         <span className={pocketClass} aria-label={t("pocketEmpty", { pocket: pocket + 1 })} />
                       )}
@@ -216,6 +259,10 @@ export function BinderView({
           ))}
         </div>
       </div>
+
+      {sheet && binderId && (
+        <AddToBinderSheet binderId={binderId} pocket={sheet.pocket} cards={pickable} onClose={() => setSheet(null)} />
+      )}
 
       <div className="flex items-center justify-between gap-3">
         <button type="button" onClick={() => go(-1)} disabled={page === 0} className="btn-ghost disabled:opacity-40" aria-label={t("prev")}>
