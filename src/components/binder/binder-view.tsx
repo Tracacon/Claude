@@ -59,8 +59,6 @@ export function BinderView({
   const tOffer = useTranslations("Offer");
   const router = useRouter();
   const [cards, setCards] = useState(initial);
-  const [sorting, setSorting] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
   const [error, setError] = useState<string | undefined>();
   const [pending, startTransition] = useTransition();
   const scroller = useRef<HTMLDivElement>(null);
@@ -80,6 +78,9 @@ export function BinderView({
   const press = useRef<{ id: string; x: number; y: number; mouse: boolean; timer: number | null } | null>(null);
   const suppressClick = useRef(false);
   const edgeTimer = useRef<number | null>(null);
+  /** Finger am Rand: gleich wird umgeblättert (für den leuchtenden Pfeil) */
+  const [edge, setEdge] = useState<-1 | 0 | 1>(0);
+  const dropRef = useRef<(id: string, pocket: number) => void>(() => {});
 
   // Neue Daten vom Server (nach dem Umsortieren) übernehmen
   const [prevInitial, setPrevInitial] = useState(initial);
@@ -91,7 +92,7 @@ export function BinderView({
   const c = BINDER_COLOR_STYLES[color] ?? BINDER_COLOR_STYLES.night;
   const last = cards.reduce((m, x) => Math.max(m, x.pocket), -1);
   // Seiten bis zur letzten Karte; beim Sortieren eine leere Seite mehr; immer gerade Anzahl (Doppelseiten)
-  let pageCount = Math.max(1, Math.floor(last / POCKETS_PER_PAGE) + 1 + (sorting || drag ? 1 : 0));
+  let pageCount = Math.max(1, Math.floor(last / POCKETS_PER_PAGE) + 1 + (drag ? 1 : 0));
   if (pageCount % 2 === 1) pageCount += 1;
 
   const byPocket = useMemo(() => new Map(cards.map((x) => [x.pocket, x])), [cards]);
@@ -124,7 +125,6 @@ export function BinderView({
   /** Karte in ein Fach legen; liegt dort eine Karte, tauschen beide den Platz */
   function dropCard(cardId: string, pocket: number) {
     const card = cards.find((x) => x.id === cardId);
-    setSelected(null);
     if (!card || card.pocket === pocket) return;
     const before = cards;
     const other = byPocket.get(pocket);
@@ -137,10 +137,6 @@ export function BinderView({
         setError(r.error);
       } else router.refresh();
     });
-  }
-
-  function drop(pocket: number) {
-    if (selected) dropCard(selected, pocket);
   }
 
   /** Fach unter dem Finger, mit Toleranz: auch knapp daneben zählt, das nächste Fach gewinnt */
@@ -182,12 +178,27 @@ export function BinderView({
     press.current = p;
   }
 
+  // Neueste Fassung von dropCard für die Listener (die nur einmal angemeldet werden)
+  useEffect(() => {
+    dropRef.current = dropCard;
+  });
+
   // Bewegen, Loslassen und Umblättern am Rand während des Ziehens
   useEffect(() => {
     if (!sortable) return;
+    let edgeDir = 0;
     const stopEdge = () => {
-      if (edgeTimer.current) window.clearInterval(edgeTimer.current);
+      if (edgeTimer.current) window.clearTimeout(edgeTimer.current);
       edgeTimer.current = null;
+      edgeDir = 0;
+      setEdge(0);
+    };
+    // Am Rand festhalten: nach kurzer Zeit eine Seite weiter bzw. zurück, dann immer wieder
+    const flip = (dir: -1 | 1) => {
+      const el = scroller.current;
+      if (!el) return;
+      el.scrollBy({ left: dir * el.clientWidth, behavior: "smooth" });
+      edgeTimer.current = window.setTimeout(() => flip(dir), 1100);
     };
     const onMove = (e: PointerEvent) => {
       const p = press.current;
@@ -205,14 +216,17 @@ export function BinderView({
         return;
       }
       setDragState({ ...d, x: e.clientX, y: e.clientY, target: findTarget(e.clientX, e.clientY) });
-      // Am Rand des Binders festhalten: Seite umblättern
       const el = scroller.current;
       if (!el) return;
       const r = el.getBoundingClientRect();
-      const dir = e.clientX < r.left + 28 ? -1 : e.clientX > r.right - 28 ? 1 : 0;
-      if (dir === 0) stopEdge();
-      else if (!edgeTimer.current) {
-        edgeTimer.current = window.setInterval(() => el.scrollBy({ left: dir * el.clientWidth, behavior: "smooth" }), 700);
+      const zone = Math.max(36, r.width * 0.1);
+      const dir = e.clientX < r.left + zone ? -1 : e.clientX > r.right - zone ? 1 : 0;
+      if (dir === edgeDir) return;
+      stopEdge();
+      if (dir !== 0) {
+        edgeDir = dir;
+        setEdge(dir);
+        edgeTimer.current = window.setTimeout(() => flip(dir), 550);
       }
     };
     const onUp = () => {
@@ -225,7 +239,7 @@ export function BinderView({
       suppressClick.current = true;
       window.setTimeout(() => (suppressClick.current = false), 50);
       setDragState(null);
-      if (d.target !== null) dropCard(d.id, d.target);
+      if (d.target !== null) dropRef.current(d.id, d.target);
     };
     // Während des Ziehens darf die Seite nicht scrollen
     const onTouchMove = (e: TouchEvent) => {
@@ -240,10 +254,17 @@ export function BinderView({
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
       document.removeEventListener("touchmove", onTouchMove);
-      stopEdge();
+      if (edgeTimer.current) window.clearTimeout(edgeTimer.current);
     };
-    // dropCard ändert sich mit jeder Karte; die Listener lesen den Stand über Refs bzw. neu
-  });
+  }, [sortable, findTarget, setDragState]);
+
+  // Ziel-Fach neu bestimmen, wenn umgeblättert wurde (Finger steht still, Seite bewegt sich)
+  useEffect(() => {
+    const d = dragRef.current;
+    if (!d) return;
+    const tgt = findTarget(d.x, d.y);
+    if (tgt !== d.target) setDragState({ ...d, target: tgt });
+  }, [page, findTarget, setDragState]);
 
   const dragged = drag ? cards.find((x) => x.id === drag.id) : null;
 
@@ -257,26 +278,13 @@ export function BinderView({
       {sortable && (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm text-cream/70" role="status">
-            {drag ? t("dragging") : sorting ? (selected ? t("sortPickTarget") : t("sortPickCard")) : t("sortIntro")}
+            {drag ? t("dragging") : t("sortIntro")}
           </p>
-          <div className="flex gap-2">
-            {canAdd && !sorting && (
-              <button type="button" onClick={() => setSheet({ pocket: null })} className="btn-primary">
-                + {t("add")}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                setSorting((s) => !s);
-                setSelected(null);
-              }}
-              className={sorting ? "btn-primary" : "btn-ghost"}
-              aria-pressed={sorting}
-            >
-              {sorting ? t("sortDone") : `↔ ${t("sort")}`}
+          {canAdd && (
+            <button type="button" onClick={() => setSheet({ pocket: null })} className="btn-primary">
+              + {t("add")}
             </button>
-          </div>
+          )}
         </div>
       )}
       <FormError code={error} />
@@ -309,6 +317,17 @@ export function BinderView({
         style={{ background: `radial-gradient(140% 100% at 20% 0%, ${c.base} 0%, ${c.edge} 100%)` }}
       >
         {effect !== "none" && <span aria-hidden className={`binder-fx binder-fx-${effect}`} />}
+        {/* Leuchtender Pfeil am Rand: gleich wird umgeblättert */}
+        {drag && edge !== 0 && (
+          <span
+            aria-hidden
+            className={`pointer-events-none absolute inset-y-0 z-10 flex w-12 items-center justify-center text-3xl font-bold text-brand ${
+              edge < 0 ? "left-0 rounded-l-xl bg-gradient-to-r" : "right-0 rounded-r-xl bg-gradient-to-l"
+            } from-brand/45 to-transparent animate-pulse`}
+          >
+            {edge < 0 ? "‹" : "›"}
+          </span>
+        )}
         <div
           ref={scroller}
           className="relative flex snap-x snap-mandatory overflow-x-auto rounded-lg [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -332,7 +351,6 @@ export function BinderView({
                 {Array.from({ length: POCKETS_PER_PAGE }, (_, i) => {
                   const pocket = p * POCKETS_PER_PAGE + i;
                   const card = byPocket.get(pocket);
-                  const isSel = card && selected === card.id;
                   const inner = (
                     <>
                       {card?.front ? (
@@ -358,9 +376,7 @@ export function BinderView({
                   const pocketClass = `relative block aspect-[63/88] rounded-[6px] border transition-shadow select-none [-webkit-touch-callout:none] ${
                     isTarget
                       ? "border-brand ring-2 ring-brand shadow-[0_0_18px_4px_rgba(34,205,215,0.75)]"
-                      : isSel
-                        ? "border-brand ring-2 ring-brand"
-                        : card
+                      : card
                           ? "border-white/20"
                           : "border-dashed border-white/12 bg-white/[0.025]"
                   } ${isOrigin ? "opacity-30" : ""} ${card && !matchesMark(card.mark, highlight) ? "opacity-25 grayscale" : ""}`;
@@ -383,20 +399,7 @@ export function BinderView({
                     : {};
                   return (
                     <li key={pocket}>
-                      {sorting ? (
-                        <button
-                          type="button"
-                          disabled={pending}
-                          onClick={() => (selected ? drop(pocket) : card && setSelected(card.id))}
-                          ref={refFn}
-                          {...pressProps}
-                          className={`${pocketClass} w-full ${selected && !isSel ? "hover:border-brand/70" : ""} ${card ? "cursor-grab" : ""}`}
-                          aria-label={card ? t("pocketCard", { title: card.title }) : t("pocketEmpty", { pocket: pocket + 1 })}
-                          aria-pressed={Boolean(isSel)}
-                        >
-                          {inner}
-                        </button>
-                      ) : card ? (
+                      {card ? (
                         <Link
                           href={`/marktplatz/${card.id}`}
                           ref={refFn}
