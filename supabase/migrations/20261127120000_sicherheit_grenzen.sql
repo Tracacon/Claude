@@ -23,8 +23,6 @@ $$;
 revoke execute on function public.storage_upload_allowed() from public, anon;
 grant execute on function public.storage_upload_allowed() to authenticated;
 
-create index if not exists objects_owner_created_idx on storage.objects (owner_id, created_at);
-
 -- Zusätzliche, einschränkende Regel: gilt neben den bestehenden Upload-Regeln aller Foto-Ordner
 drop policy if exists "upload_limit" on storage.objects;
 create policy "upload_limit"
