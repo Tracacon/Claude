@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import createIntlMiddleware from "next-intl/middleware";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { NextRequest } from "next/server";
+import { checkRateLimit, tooManyRequests, type Limiters } from "@/lib/rate-limit";
 import { isSupabaseConfigured, supabaseEnv } from "@/lib/env";
 import { routing } from "@/i18n/routing";
 
@@ -11,7 +13,9 @@ const intl = createIntlMiddleware(routing);
  * 1. Sprache erkennen und Pfad umschreiben (next-intl)
  * 2. Supabase-Sitzung auffrischen, damit Server-Komponenten eine gültige Anmeldung sehen
  *
- * Hier wird nichts erlaubt oder verboten. Die echte Prüfung passiert auf den Seiten
+ * 3. Bremse gegen zu viele Anfragen (siehe rate-limit.ts)
+ *
+ * Wer was darf, wird hier nicht entschieden. Die echte Prüfung passiert auf den Seiten
  * und in der Datenbank (Row Level Security).
  */
 export async function proxy(request: NextRequest) {
@@ -33,9 +37,24 @@ export async function proxy(request: NextRequest) {
   });
 
   // getClaims prüft das Token und erneuert es bei Bedarf.
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+
+  const allowed = await checkRateLimit(cloudflareEnv(), {
+    method: request.method,
+    ip: request.headers.get("cf-connecting-ip"),
+    userId: typeof data?.claims?.sub === "string" ? data.claims.sub : null,
+  });
+  if (!allowed) return tooManyRequests(request.nextUrl.pathname.startsWith("/en") ? "en" : "de");
 
   return response;
+}
+
+function cloudflareEnv(): Limiters {
+  try {
+    return getCloudflareContext().env as unknown as Limiters;
+  } catch {
+    return {};
+  }
 }
 
 export const config = {

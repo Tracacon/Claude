@@ -30,7 +30,8 @@ create table storage.objects (
   bucket_id text references storage.buckets (id),
   name text not null,
   owner uuid,
-  owner_id text
+  owner_id text,
+  created_at timestamptz default now()
 );
 alter table storage.objects enable row level security;
 grant select, insert, delete on storage.objects to authenticated;
