@@ -10,10 +10,12 @@ import { createListing, updateListing, type ListingFormState } from "@/lib/actio
 import { eventDay } from "@/lib/event-format";
 import {
   CARD_LANGUAGES,
+  COLLECTION_CHOICE,
   CONDITIONS,
   KINDS,
   KINDS_NEEDING_BOTH_SIDES,
   KINDS_WITH_CARD,
+  MAX_QUANTITY,
   OFFERS,
   TCGS,
   TCGS_WITH_CARD_LOOKUP,
@@ -25,7 +27,9 @@ export type ListingFormValues = {
   description: string;
   tcg: string;
   kind: string;
+  /** Angebot oder "collection" (nur Sammlung) */
   offer: string;
+  quantity: string;
   price: string;
   negotiable: boolean;
   condition: string;
@@ -74,7 +78,9 @@ export function ListingForm({
   const [offer, setOffer] = useState(val("offer") || "sell");
   const [kind, setKind] = useState(val("kind") || "single");
   const [tcg, setTcg] = useState(val("tcg"));
-  const bothSides = KINDS_NEEDING_BOTH_SIDES.includes(kind);
+  const inCollection = offer === COLLECTION_CHOICE;
+  // Vorder- und Rückseite nur im Marktplatz Pflicht
+  const bothSides = !inCollection && KINDS_NEEDING_BOTH_SIDES.includes(kind);
   const photos = v?.photos ? (JSON.parse(v.photos || "[]") as string[]) : initial.photos;
   const e = state.errors ?? {};
   // React setzt Formulare nach jeder Aktion zurück. Ein neuer Schlüssel baut das Formular
@@ -87,7 +93,9 @@ export function ListingForm({
 
       <section className="card space-y-2">
         <h2 className="font-semibold">{t("photos")}</h2>
-        <p className={`hint mt-0 ${bothSides ? "text-brand" : ""}`}>{bothSides ? t("photosHintRequired") : t("photosHint")}</p>
+        <p className={`hint mt-0 ${bothSides ? "text-brand" : ""}`}>
+          {bothSides ? t("photosHintRequired") : inCollection ? t("photosHintCollection") : t("photosHint")}
+        </p>
         <PhotoUploader
           key={photos.join(",")}
           userId={userId}
@@ -129,14 +137,21 @@ export function ListingForm({
         <fieldset>
           <legend className="label">{t("offer")}</legend>
           <div className="flex flex-wrap gap-2">
-            {OFFERS.map((x) => (
+            {[COLLECTION_CHOICE, ...OFFERS].map((x) => (
               <label key={x} className={`btn cursor-pointer border ${offer === x ? "border-brand bg-brand/15 text-brand" : "border-line"}`}>
                 <input type="radio" name="offer" value={x} checked={offer === x} onChange={() => setOffer(x)} className="sr-only" />
-                {tOffer(x)}
+                {x === COLLECTION_CHOICE ? t("offerCollection") : tOffer(x)}
               </label>
             ))}
           </div>
+          <p className="hint">{inCollection ? t("offerCollectionHint") : t("offerMarketHint")}</p>
         </fieldset>
+
+        <div className="max-w-40">
+          <label htmlFor="quantity" className="label">{t("quantity")}</label>
+          <input id="quantity" name="quantity" type="number" inputMode="numeric" min={1} max={MAX_QUANTITY} defaultValue={val("quantity") || "1"} className="input" />
+          <FormError code={e.quantity} />
+        </div>
 
         {offerHasPrice(offer) ? (
           <div className="grid gap-4 sm:grid-cols-2">
@@ -185,7 +200,7 @@ export function ListingForm({
           <label htmlFor="city" className="label">{t("city")}</label>
           <input id="city" name="city" maxLength={80} autoComplete="address-level2" defaultValue={val("city")} className="input" />
         </div>
-        <fieldset className="sm:col-span-2">
+        <fieldset className={`sm:col-span-2 ${inCollection ? "hidden" : ""}`}>
           <legend className="label">{t("handover")}</legend>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
             {(["handover_event", "handover_pickup", "handover_shipping"] as const).map((k) => (
@@ -199,7 +214,7 @@ export function ListingForm({
         </fieldset>
       </section>
 
-      {events.length > 0 && (
+      {events.length > 0 && !inCollection && (
         <section className="card space-y-2">
           <input type="hidden" name="events_field" value="1" />
           <fieldset>
@@ -226,9 +241,9 @@ export function ListingForm({
       {uploading && <p className="text-sm text-cream/70">{tErr("photos_pending")}</p>}
       <div className="flex flex-wrap gap-3">
         <button type="submit" className="btn-primary" disabled={pending || uploading}>
-          {pending ? t("saving") : listingId ? t("saveEdit") : t("save")}
+          {pending ? t("saving") : listingId ? t("saveEdit") : inCollection ? t("saveCollection") : t("save")}
         </button>
-        <Link href={listingId ? `/marktplatz/${listingId}` : "/marktplatz"} className="btn-ghost">
+        <Link href={listingId ? `/marktplatz/${listingId}` : inCollection ? "/profil" : "/marktplatz"} className="btn-ghost">
           {t("cancel")}
         </Link>
       </div>

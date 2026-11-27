@@ -56,6 +56,8 @@ export async function SiteHeader() {
                   postHint: t("createPostHint"),
                   listing: t("createListing"),
                   listingHint: t("createListingHint"),
+                  collection: t("createCollection"),
+                  collectionHint: t("createCollectionHint"),
                   close: t("close"),
                 }}
               />

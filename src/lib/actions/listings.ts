@@ -9,13 +9,13 @@ import { mapDbError } from "@/lib/db-errors";
 import { PHOTO_BUCKET, STATUSES, TCGS_WITH_CARD_LOOKUP, UUID_PATTERN, photoPaths } from "@/lib/marketplace";
 import { setsForCode } from "@/lib/set-codes";
 import { createClient } from "@/lib/supabase/server";
-import { listingSchema, reportSchema, toFieldErrors, type FieldErrors, type ListingInput } from "@/lib/validation";
+import { listingSchema, removalReasonSchema, reportSchema, toFieldErrors, type FieldErrors, type ListingInput } from "@/lib/validation";
 
 export type ListingFormState = { errors?: FieldErrors; values?: Record<string, string> };
 export type SimpleState = { ok?: boolean; error?: string };
 
 const FIELDS = [
-  "title", "description", "tcg", "kind", "offer", "price", "negotiable", "condition", "card_language",
+  "title", "description", "tcg", "kind", "offer", "quantity", "price", "negotiable", "condition", "card_language",
   "grading", "city", "handover_event", "handover_pickup", "handover_shipping", "photos",
   "card_code", "card_no",
 ] as const;
@@ -121,19 +121,22 @@ export async function setListingStatus(_prev: SimpleState, formData: FormData): 
   return { ok: true };
 }
 
+/** Entfernen aus Sammlung bzw. Marktplatz, mit Grund (getauscht, verkauft, verschenkt, sonstiges) */
 export async function deleteListing(_prev: SimpleState, formData: FormData): Promise<SimpleState> {
   const profile = await requireProfile();
   const id = String(formData.get("id") ?? "");
   if (!UUID_PATTERN.test(id)) return { error: "generic" };
+  const reason = removalReasonSchema.safeParse(formData.get("reason") ?? "");
+  if (!reason.success) return { error: "removal_reason_required" };
 
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("delete_listing", { p_id: id });
+  const { data, error } = await supabase.rpc("remove_listing", { p_id: id, p_reason: reason.data });
   if (error) return { error: mapDbError(error) };
 
   await removePhotoFiles(profile.id, (data as string[] | null) ?? []);
   revalidatePath("/", "layout");
   const locale = await getLocale();
-  return redirect({ href: "/meine-inserate", locale });
+  return redirect({ href: "/profil", locale });
 }
 
 export async function reportContent(_prev: SimpleState, formData: FormData): Promise<SimpleState> {

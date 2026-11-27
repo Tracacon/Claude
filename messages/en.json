@@ -39,7 +39,9 @@
     "createListingHint": "Sell or trade cards",
     "activity": "Activity",
     "activityCount": "Activity, {count} new",
-    "back": "Back"
+    "back": "Back",
+    "createCollection": "Add to collection",
+    "createCollectionHint": "Add and show off your cards"
   },
   "Home": {
     "claim": "Trading · Dealing · Connecting",
@@ -217,7 +219,9 @@
     "instagram_failed": "Something went wrong with Instagram. Details are shown above.",
     "invalid_instagram": "Instagram names only contain letters, numbers, dots and underscores (max. 30 characters).",
     "invalid_card_code": "The set code may only contain letters, digits and :.",
-    "invalid_card_number": "The card number may only contain letters, digits and /."
+    "invalid_card_number": "The card number may only contain letters, digits and /.",
+    "removal_reason_required": "Please choose why you are removing the item.",
+    "invalid_quantity": "Please enter a quantity between 1 and 999."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -269,7 +273,8 @@
     "active": "Active",
     "reserved": "Reserved",
     "done": "Closed",
-    "removed": "Removed"
+    "removed": "Removed",
+    "collection": "Collection only"
   },
   "ReportReason": {
     "scam": "Suspected scam",
@@ -396,7 +401,24 @@
     "cardLooking": "Looking up the card …",
     "cardFound": "Found: {name}",
     "cardNotFound": "No matching card found. Code and number are saved anyway.",
-    "cardName": "Card"
+    "cardName": "Card",
+    "offerCollection": "Collection only",
+    "offerCollectionHint": "Stays in your collection and shows on your profile, not in the marketplace. You can mark it for trade, sale or giveaway at any time.",
+    "offerMarketHint": "Marked: shows in the marketplace and stays part of your collection.",
+    "photosHintCollection": "Photos are optional. Without one we show the card image from the card database. To trade or sell you will need front and back later.",
+    "quantity": "Quantity",
+    "quantityShort": "{count}×",
+    "saveCollection": "Add to collection",
+    "newCollectionTitle": "Add to collection",
+    "backToCollection": "Back to collection",
+    "collectionOwnerHint": "This item is only in your collection and not in the marketplace.",
+    "markForMarket": "Mark for trade, sale or giveaway",
+    "collector": "Collector",
+    "removalReason": "Why are you removing it?",
+    "removal_traded": "Traded",
+    "removal_sold": "Sold",
+    "removal_gifted": "Given away",
+    "removal_other": "Other"
   },
   "Moderation": {
     "title": "Moderation",
@@ -541,7 +563,8 @@
     "requestsOff": "Note: anyone can follow you directly. Requests only appear if you turn on “Approve followers” in settings.",
     "posts": "Posts",
     "newPost": "Post",
-    "instagramLink": "Open {name}'s Instagram profile"
+    "instagramLink": "Open {name}'s Instagram profile",
+    "collection": "Collection"
   },
   "Badges": {
     "team": {
@@ -1038,5 +1061,13 @@
     "tradeCount": "{count, plural, =0 {no trade cards} one {# card for trade} other {# cards for trade}}",
     "noCards": "Not offering anything for trade right now – just send a message.",
     "allCards": "See all trade cards →"
+  },
+  "Collection": {
+    "count": "{count, plural, =1 {1 card} other {# cards}}",
+    "markedCount": "{count} marked",
+    "add": "Add",
+    "empty": "No cards in the collection yet.",
+    "emptyMe": "Your collection is still empty.",
+    "emptyMeHint": "Add your cards and show them to the community. Just mark what you want to trade."
   }
 }

@@ -1,12 +1,15 @@
 import { z } from "zod";
 import {
   CARD_LANGUAGES,
+  COLLECTION_CHOICE,
   CONDITIONS,
   KINDS,
   KINDS_NEEDING_BOTH_SIDES,
   KINDS_WITH_CARD,
   MAX_PHOTOS,
+  MAX_QUANTITY,
   OFFERS,
+  REMOVAL_REASONS,
   REPORT_REASONS,
   TCGS,
   UUID_PATTERN,
@@ -133,7 +136,13 @@ export const listingSchema = z
     description: optionalText(2000),
     tcg: z.enum(TCGS, { message: "tcg_required" }),
     kind: z.enum(KINDS),
-    offer: z.enum(OFFERS),
+    // "collection" = nur in die Sammlung legen, sonst Markierung für den Marktplatz
+    offer: z.enum([COLLECTION_CHOICE, ...OFFERS]),
+    quantity: z
+      .string()
+      .optional()
+      .transform((v) => (v === undefined || v.trim() === "" ? 1 : Number(v.trim())))
+      .pipe(z.number({ message: "invalid_quantity" }).int({ message: "invalid_quantity" }).min(1, { message: "invalid_quantity" }).max(MAX_QUANTITY, { message: "invalid_quantity" })),
     price: z.string().trim().max(20, { message: "invalid_price" }),
     negotiable: checkbox,
     condition: z.union([z.enum(CONDITIONS), z.literal("")]).transform((v) => (v === "" ? null : v)),
@@ -169,8 +178,11 @@ export const listingSchema = z
       .pipe(z.array(z.string()).max(MAX_PHOTOS, { message: "too_many_photos" })),
   })
   .transform((v, ctx) => {
-    const cents = offerHasPrice(v.offer) ? parseEuroToCents(v.price) : null;
-    if (offerHasPrice(v.offer) && (cents === null || Number.isNaN(cents))) {
+    const inCollection = v.offer === COLLECTION_CHOICE;
+    // Sammlungsstücke haben keinen Preis; gespeichert wird "Tausch" als Vorgabe für später
+    const offer = inCollection ? "trade" : v.offer;
+    const cents = offerHasPrice(offer) ? parseEuroToCents(v.price) : null;
+    if (offerHasPrice(offer) && (cents === null || Number.isNaN(cents))) {
       ctx.addIssue({ code: "custom", path: ["price"], message: cents === null ? "price_required" : "invalid_price" });
       return z.NEVER;
     }
@@ -178,11 +190,12 @@ export const listingSchema = z
       ctx.addIssue({ code: "custom", path: ["price"], message: "invalid_price" });
       return z.NEVER;
     }
-    if (KINDS_NEEDING_BOTH_SIDES.includes(v.kind) && v.photos.length < 2) {
+    // Vorder- und Rückseite sind nur im Marktplatz Pflicht, in der Sammlung reicht das Kartenbild
+    if (!inCollection && KINDS_NEEDING_BOTH_SIDES.includes(v.kind) && v.photos.length < 2) {
       ctx.addIssue({ code: "custom", path: ["photos"], message: "front_back_required" });
       return z.NEVER;
     }
-    if (!v.handover_event && !v.handover_pickup && !v.handover_shipping) {
+    if (!inCollection && !v.handover_event && !v.handover_pickup && !v.handover_shipping) {
       ctx.addIssue({ code: "custom", path: ["handover"], message: "handover_required" });
       return z.NEVER;
     }
@@ -190,7 +203,17 @@ export const listingSchema = z
     const card = { code: withCard ? v.card_code : null, number: withCard ? v.card_no : null };
     const { price: _price, card_code: _code, card_no: _no, ...rest } = v;
     void [_price, _code, _no];
-    return { ...rest, price_cents: cents, negotiable: offerHasPrice(v.offer) ? v.negotiable : false, card };
+    // Die Datenbank verlangt mindestens eine Übergabeart; in der Sammlung bleibt "beim Event" als Vorgabe
+    const handover_event = rest.handover_event || (inCollection && !rest.handover_pickup && !rest.handover_shipping);
+    return {
+      ...rest,
+      offer,
+      handover_event,
+      status: inCollection ? ("collection" as const) : ("active" as const),
+      price_cents: cents,
+      negotiable: offerHasPrice(offer) ? v.negotiable : false,
+      card,
+    };
   });
 
 export type ListingInput = z.output<typeof listingSchema>;
@@ -199,6 +222,8 @@ export const reportSchema = z.object({
   reason: z.enum(REPORT_REASONS, { message: "reason_required" }),
   details: optionalText(1000),
 });
+
+export const removalReasonSchema = z.enum(REMOVAL_REASONS, { message: "reason_required" });
 
 export const moderationReasonSchema = z
   .string()

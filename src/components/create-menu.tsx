@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { MarketIcon, PlusIcon } from "./icons";
 
 /** "+" oben rechts wie bei Instagram: Beitrag oder Inserat erstellen */
-export function CreateMenu({ labels }: { labels: { create: string; post: string; postHint: string; listing: string; listingHint: string; close: string } }) {
+export function CreateMenu({ labels }: { labels: { create: string; post: string; postHint: string; listing: string; listingHint: string; collection: string; collectionHint: string; close: string } }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -39,6 +39,13 @@ export function CreateMenu({ labels }: { labels: { create: string; post: string;
               <span>
                 <span className="block font-semibold">{labels.listing}</span>
                 <span className="block text-sm text-cream/60">{labels.listingHint}</span>
+              </span>
+            </Link>
+            <Link href="/marktplatz/neu?sammlung=1" onClick={() => setOpen(false)} className="flex items-center gap-4 rounded-xl px-3 py-3 hover:bg-white/5">
+              <span className="flex size-11 items-center justify-center rounded-xl bg-brand/15 text-xl text-brand" aria-hidden>📁</span>
+              <span>
+                <span className="block font-semibold">{labels.collection}</span>
+                <span className="block text-sm text-cream/60">{labels.collectionHint}</span>
               </span>
             </Link>
           </div>

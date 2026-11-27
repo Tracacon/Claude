@@ -16,13 +16,16 @@ export default async function NewListingPage({ params, searchParams }: PageProps
   const profile = await requireProfile();
   await ensureEventsFresh();
   const events = await getEvents(false, 8);
-  const wanted = (await searchParams).termin;
+  const sp = await searchParams;
+  const wanted = sp.termin;
+  // Aus dem Profil ("Zur Sammlung hinzufügen") kommt ?sammlung=1
+  const toCollection = sp.sammlung === "1";
   const preset = events.filter((e) => e.id === wanted).map((e) => e.id);
   const t = await getTranslations("Listing");
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">{t("newTitle")}</h1>
+      <h1 className="text-2xl font-bold">{toCollection ? t("newCollectionTitle") : t("newTitle")}</h1>
       <ListingForm
         userId={profile.id}
         initial={{
@@ -30,7 +33,8 @@ export default async function NewListingPage({ params, searchParams }: PageProps
           description: "",
           tcg: "",
           kind: "single",
-          offer: "sell",
+          offer: toCollection ? "collection" : "sell",
+          quantity: "1",
           price: "",
           negotiable: false,
           condition: "",

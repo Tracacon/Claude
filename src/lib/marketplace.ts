@@ -11,7 +11,12 @@ export function offerHasPrice(offer: string) {
 }
 export const CONDITIONS = ["mint", "near_mint", "excellent", "good", "light_played", "played", "poor"] as const;
 export const CARD_LANGUAGES = ["de", "en", "ja", "fr", "it", "es", "pt", "ko", "zh", "other"] as const;
-export const STATUSES = ["active", "reserved", "done", "removed"] as const;
+export const STATUSES = ["collection", "active", "reserved", "done", "removed"] as const;
+/** Auswahl im Formular: nur in die Sammlung legen (nicht im Marktplatz) */
+export const COLLECTION_CHOICE = "collection";
+export const MAX_QUANTITY = 999;
+/** Gründe beim Entfernen aus der Sammlung */
+export const REMOVAL_REASONS = ["traded", "sold", "gifted", "other"] as const;
 export const REPORT_REASONS = ["scam", "counterfeit", "offensive", "spam", "wrong_info", "other"] as const;
 export const SORTS = ["newest", "price_asc", "price_desc"] as const;
 
@@ -96,6 +101,7 @@ export type ListingDetail = {
     handover_pickup: boolean;
     handover_shipping: boolean;
     status: ListingStatus;
+    quantity: number;
     removed_reason: string | null;
     created_at: string;
     updated_at: string;
@@ -104,6 +110,25 @@ export type ListingDetail = {
   photos: string[];
   is_owner: boolean;
   can_moderate: boolean;
+};
+
+/** Stück in der Sammlung eines Profils (profile_collection) */
+export type CollectionItem = {
+  id: string;
+  title: string;
+  tcg: Tcg;
+  kind: Kind;
+  offer: Offer;
+  price_cents: number | null;
+  negotiable: boolean;
+  status: ListingStatus;
+  quantity: number;
+  card_name: string | null;
+  card_image: string | null;
+  cover_photo_id: string | null;
+  owner_id: string;
+  created_at: string;
+  total_count: number;
 };
 
 export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;

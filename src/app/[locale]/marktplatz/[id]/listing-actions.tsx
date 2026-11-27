@@ -6,7 +6,7 @@ import { FormError } from "@/components/form-error";
 import { deleteListing, reportContent, setListingStatus, type SimpleState } from "@/lib/actions/listings";
 import { startConversation, type ChatActionState } from "@/lib/actions/chat";
 import { moderateListing, type ModerationState } from "@/lib/actions/moderation";
-import { REPORT_REASONS, type ListingStatus } from "@/lib/marketplace";
+import { REMOVAL_REASONS, REPORT_REASONS, type ListingStatus } from "@/lib/marketplace";
 
 export function StatusSwitch({ id, status }: { id: string; status: ListingStatus }) {
   const t = useTranslations("Listing");
@@ -18,7 +18,7 @@ export function StatusSwitch({ id, status }: { id: string; status: ListingStatus
       <input type="hidden" name="id" value={id} />
       <p className="label">{t("changeStatus")}</p>
       <div className="flex flex-wrap gap-2">
-        {(["active", "reserved", "done"] as const).map((s) => (
+        {(["collection", "active", "reserved", "done"] as const).map((s) => (
           <button
             key={s}
             type="submit"
@@ -51,9 +51,20 @@ export function DeleteListing({ id }: { id: string }) {
     );
   }
   return (
-    <form action={action} className="space-y-2 rounded-xl border border-danger/40 p-3">
+    <form action={action} className="space-y-3 rounded-xl border border-danger/40 p-3">
       <input type="hidden" name="id" value={id} />
       <p className="text-sm">{t("deleteConfirm")}</p>
+      <fieldset>
+        <legend className="label">{t("removalReason")}</legend>
+        <div className="flex flex-wrap gap-2">
+          {REMOVAL_REASONS.map((r) => (
+            <label key={r} className="btn cursor-pointer border border-line has-[:checked]:border-brand has-[:checked]:bg-brand/15 has-[:checked]:text-brand">
+              <input type="radio" name="reason" value={r} required className="sr-only" />
+              {t(`removal_${r}`)}
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <div className="flex gap-2">
         <button type="submit" className="btn-danger" disabled={pending}>{t("deleteYes")}</button>
         <button type="button" className="btn-ghost" onClick={() => setConfirming(false)}>{t("cancel")}</button>
