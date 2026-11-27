@@ -6,6 +6,8 @@ import { PriceTag } from "@/components/listing-card";
 import { Link } from "@/i18n/navigation";
 import { eventDay } from "@/lib/event-format";
 import { photoUrl, type CollectionItem, type ListingSummary } from "@/lib/marketplace";
+import { BinderShelf } from "@/components/binder/binder-shelf";
+import type { BinderSummary } from "@/lib/binder-shared";
 import type { VisitedEvent } from "@/lib/profiles";
 import { PostGrid } from "@/components/feed/post-grid";
 import { InstagramIcon } from "@/components/icons";
@@ -38,6 +40,7 @@ export async function ProfileView({
   profile: p,
   listings,
   collection = [],
+  binders = [],
   events = [],
   posts = [],
   tab,
@@ -49,6 +52,8 @@ export async function ProfileView({
   listings: ListingSummary[];
   /** Sammlung (nur im Reiter Sammlung) */
   collection?: CollectionItem[];
+  /** Binder (nur im Reiter Sammlung) */
+  binders?: BinderSummary[];
   /** Besuchte Events (nur im Reiter Abzeichen) */
   events?: VisitedEvent[];
   /** Beiträge (nur im Reiter Beiträge) */
@@ -164,7 +169,7 @@ export async function ProfileView({
           <p className="text-sm text-cream/70">{t("privateText", { nickname: p.nickname })}</p>
         </div>
       ) : tab === "sammlung" ? (
-        <CollectionGrid items={collection} isMe={p.is_me} />
+        <BinderShelf nickname={p.nickname} binders={binders} items={collection} isMe={p.is_me} />
       ) : tab === "beitraege" ? (
         posts.length === 0 ? (
           <div className="card space-y-2 py-10 text-center">
@@ -260,60 +265,3 @@ export async function ProfileView({
   );
 }
 
-/** Kleiner Aufkleber für markierte Stücke */
-const MARK_ICON: Record<string, string> = { trade: "🔁", sell_or_trade: "🔁€", sell: "€", gift: "🎁" };
-
-/** Sammlung als Kartenraster. Markierte Stücke (im Marktplatz) tragen einen Aufkleber. */
-async function CollectionGrid({ items, isMe }: { items: CollectionItem[]; isMe: boolean }) {
-  const t = await getTranslations("Collection");
-  const tOffer = await getTranslations("Offer");
-  const marked = items.filter((i) => i.status !== "collection").length;
-  return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-cream/70">
-          {t("count", { count: items.reduce((n, i) => n + (i.quantity ?? 1), 0) })}
-          {marked > 0 && ` · ${t("markedCount", { count: marked })}`}
-        </p>
-        {isMe && <Link href="/marktplatz/neu?sammlung=1" className="btn-primary">+ {t("add")}</Link>}
-      </div>
-      {items.length === 0 ? (
-        <div className="card space-y-2 py-10 text-center">
-          <p className="text-3xl" aria-hidden>📁</p>
-          <p className="font-semibold">{isMe ? t("emptyMe") : t("empty")}</p>
-          {isMe && <p className="text-sm text-cream/70">{t("emptyMeHint")}</p>}
-        </div>
-      ) : (
-        <ul className="grid grid-cols-3 gap-1.5 sm:gap-2">
-          {items.map((c) => {
-            const img = c.cover_photo_id ? photoUrl(c.owner_id, c.cover_photo_id, "thumb") : c.card_image;
-            const isMarked = c.status !== "collection";
-            return (
-              <li key={c.id}>
-                <Link
-                  href={`/marktplatz/${c.id}`}
-                  className="relative block aspect-[3/4] overflow-hidden rounded-md border border-line bg-night-3 sm:rounded-xl"
-                  title={isMarked ? `${c.title} · ${tOffer(c.offer)}` : c.title}
-                >
-                  {img ? (
-                    <img src={img} alt={c.title} loading="lazy" className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="flex h-full items-center justify-center p-2 text-center text-xs text-cream/60">{c.card_name ?? c.title}</span>
-                  )}
-                  {isMarked && (
-                    <span className="absolute right-1 top-1 rounded-md bg-brand px-1.5 py-0.5 text-[10px] font-bold text-night shadow" aria-label={tOffer(c.offer)}>
-                      {MARK_ICON[c.offer] ?? "★"}
-                    </span>
-                  )}
-                  {c.quantity > 1 && (
-                    <span className="absolute bottom-1 left-1 rounded-md bg-night/85 px-1.5 py-0.5 text-[10px] font-semibold text-cream">×{c.quantity}</span>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
-  );
-}

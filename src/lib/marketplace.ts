@@ -102,12 +102,16 @@ export type ListingDetail = {
     handover_shipping: boolean;
     status: ListingStatus;
     quantity: number;
+    binder_id: string | null;
+    pocket: number | null;
     removed_reason: string | null;
     created_at: string;
     updated_at: string;
   };
   owner: { nickname: string; role: "member" | "team" | "admin"; member_since: string; avatar_id: string | null };
   photos: string[];
+  /** Binder, in dem die Karte liegt (falls sichtbar) */
+  binder: { id: string; name: string } | null;
   is_owner: boolean;
   can_moderate: boolean;
 };
@@ -124,9 +128,10 @@ export type CollectionItem = {
   status: ListingStatus;
   quantity: number;
   card_name: string | null;
-  card_image: string | null;
   cover_photo_id: string | null;
   owner_id: string;
+  binder_id: string | null;
+  pocket: number | null;
   created_at: string;
   total_count: number;
 };

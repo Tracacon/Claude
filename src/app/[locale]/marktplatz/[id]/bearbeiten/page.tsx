@@ -6,6 +6,7 @@ import { redirect } from "@/i18n/navigation";
 import { requireProfile } from "@/lib/auth";
 import { ensureEventsFresh, getEvents, getListingEvents } from "@/lib/events";
 import { getListing } from "@/lib/listings";
+import { getMyBinders } from "@/lib/binders";
 import { centsToInput } from "@/lib/marketplace";
 import { SET_CODES } from "@/lib/set-codes";
 
@@ -25,7 +26,7 @@ export default async function EditListingPage({ params }: PageProps<"/[locale]/m
 
   const l = data.listing;
   await ensureEventsFresh();
-  const [upcoming, chosen] = await Promise.all([getEvents(false, 8), getListingEvents(l.id)]);
+  const [upcoming, chosen, binders] = await Promise.all([getEvents(false, 8), getListingEvents(l.id), getMyBinders()]);
   // Bereits gewählte Termine immer anzeigen, auch wenn sie nicht unter den nächsten acht sind
   const events = [...upcoming, ...chosen.filter((c) => !upcoming.some((u) => u.id === c.id)).map((c) => ({ ...c, timezone: null }))];
   const t = await getTranslations("Listing");
@@ -55,8 +56,10 @@ export default async function EditListingPage({ params }: PageProps<"/[locale]/m
           events: chosen.map((e) => e.id),
           card_code: cardCodeOf(l.card_ref, l.card_set),
           card_no: l.card_number ?? "",
+          binder: l.binder_id ?? "",
         }}
         events={events}
+        binders={binders}
       />
     </div>
   );

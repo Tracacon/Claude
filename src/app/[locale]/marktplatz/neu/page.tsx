@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ListingForm } from "@/components/listing-form";
 import { requireProfile } from "@/lib/auth";
 import { ensureEventsFresh, getEvents } from "@/lib/events";
+import { getMyBinders } from "@/lib/binders";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/marktplatz/neu">): Promise<Metadata> {
   const { locale } = await params;
@@ -15,11 +16,13 @@ export default async function NewListingPage({ params, searchParams }: PageProps
   setRequestLocale(locale);
   const profile = await requireProfile();
   await ensureEventsFresh();
-  const events = await getEvents(false, 8);
+  const [events, binders] = await Promise.all([getEvents(false, 8), getMyBinders()]);
   const sp = await searchParams;
   const wanted = sp.termin;
   // Aus dem Profil ("Zur Sammlung hinzufügen") kommt ?sammlung=1
   const toCollection = sp.sammlung === "1";
+  // Aus einem Binder heraus ("Karte hinzufügen") kommt ?binder=<id>
+  const presetBinder = binders.find((b) => b.id === sp.binder)?.id ?? "";
   const preset = events.filter((e) => e.id === wanted).map((e) => e.id);
   const t = await getTranslations("Listing");
 
@@ -48,8 +51,10 @@ export default async function NewListingPage({ params, searchParams }: PageProps
           events: preset,
           card_code: "",
           card_no: "",
+          binder: presetBinder,
         }}
         events={events}
+        binders={binders}
       />
     </div>
   );

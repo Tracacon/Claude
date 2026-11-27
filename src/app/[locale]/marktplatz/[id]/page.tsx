@@ -133,6 +133,11 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
           {l.quantity > 1 && <span className="rounded-full bg-white/10 px-2.5 py-1">{t("quantityShort", { count: l.quantity })}</span>}
         </div>
         <h1 className="text-2xl font-bold leading-tight"><BrandText text={l.title} /></h1>
+        {data.binder && (
+          <Link href={`/u/${owner.nickname}/binder/${data.binder.id}`} className="inline-flex items-center gap-1.5 text-sm text-brand hover:underline">
+            📁 {t("inBinder", { name: data.binder.name })}
+          </Link>
+        )}
         {!inCollection && (
           <p className="text-3xl font-black text-brand">
             <PriceTag offer={l.offer} cents={l.price_cents} negotiable={l.negotiable} />

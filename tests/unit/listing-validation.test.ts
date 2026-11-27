@@ -53,16 +53,21 @@ describe("Inserat prüfen", () => {
     expect(r.negotiable).toBe(false);
   });
 
-  it("Nur Sammlung: ohne Fotos, Preis und Übergabe, gespeichert als Tausch-Vorgabe", () => {
+  it("Nur Sammlung: ohne Preis und Übergabe, gespeichert als Tausch-Vorgabe", () => {
     const r = listingSchema.parse({
       ...base,
       offer: "collection",
       price: "",
-      photos: "[]",
       handover_event: "",
       quantity: "3",
+      binder: "10000000-0000-0000-0000-0000000000aa",
     });
-    expect(r).toMatchObject({ status: "collection", offer: "trade", price_cents: null, quantity: 3, handover_event: true });
+    expect(r).toMatchObject({ status: "collection", offer: "trade", price_cents: null, quantity: 3, handover_event: true, binder: "10000000-0000-0000-0000-0000000000aa" });
+  });
+
+  it("Auch in der Sammlung sind Vorder- und Rückseite Pflicht", () => {
+    const r = listingSchema.safeParse({ ...base, offer: "collection", photos: "[]" });
+    expect(r.error?.issues[0].message).toBe("front_back_required");
   });
 
   it("Markierte Stücke sind aktiv und brauchen weiter Fotos", () => {
