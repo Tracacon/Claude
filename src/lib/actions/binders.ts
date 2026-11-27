@@ -5,7 +5,7 @@ import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { redirect } from "@/i18n/navigation";
 import { requireProfile } from "@/lib/auth";
-import { BINDER_COLORS, BINDER_VISIBILITIES } from "@/lib/binder-shared";
+import { BINDER_COLORS, BINDER_EFFECTS, BINDER_VISIBILITIES } from "@/lib/binder-shared";
 import { mapDbError } from "@/lib/db-errors";
 import { UUID_PATTERN } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/server";
@@ -16,6 +16,7 @@ const binderSchema = z.object({
   name: z.string().trim().min(1, { message: "binder_name_required" }).max(40, { message: "too_long" }),
   color: z.enum(BINDER_COLORS),
   visibility: z.enum(BINDER_VISIBILITIES),
+  effect: z.enum(BINDER_EFFECTS),
 });
 
 /** Binder anlegen oder ändern */
@@ -26,6 +27,7 @@ export async function saveBinder(_prev: BinderFormState, formData: FormData): Pr
     name: String(formData.get("name") ?? ""),
     color: String(formData.get("color") ?? "night"),
     visibility: String(formData.get("visibility") ?? "public"),
+    effect: String(formData.get("effect") ?? "none"),
   };
   if (id && !UUID_PATTERN.test(id)) return { error: "generic", values };
   const parsed = binderSchema.safeParse(values);
@@ -37,6 +39,7 @@ export async function saveBinder(_prev: BinderFormState, formData: FormData): Pr
     p_name: parsed.data.name,
     p_color: parsed.data.color,
     p_visibility: parsed.data.visibility,
+    p_effect: parsed.data.effect,
   });
   if (error || !data) return { error: error ? mapDbError(error) : "generic", values };
   revalidatePath("/", "layout");

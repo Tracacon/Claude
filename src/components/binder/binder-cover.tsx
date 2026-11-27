@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element -- Bilder kommen direkt aus Supabase Storage */
-import { BINDER_COLOR_STYLES, type BinderColor } from "@/lib/binder-shared";
+import { BINDER_COLOR_STYLES, type BinderColor, type BinderEffect } from "@/lib/binder-shared";
 
 /**
  * Einband eines Sammelkartenbinders: Ledereffekt in der Binderfarbe, Rücken mit Nähten,
@@ -8,6 +8,7 @@ import { BINDER_COLOR_STYLES, type BinderColor } from "@/lib/binder-shared";
 export function BinderCover({
   name,
   color,
+  effect = "none",
   coverUrl,
   subtitle,
   locked,
@@ -15,6 +16,8 @@ export function BinderCover({
 }: {
   name: string;
   color: BinderColor;
+  /** Glitzer, Holo usw. über der Einbandfarbe */
+  effect?: BinderEffect;
   coverUrl: string | null;
   subtitle: string;
   /** Schloss für Binder, die nicht öffentlich sind */
@@ -45,6 +48,7 @@ export function BinderCover({
           style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 4px)" }}
         />
       )}
+      {!dashed && effect !== "none" && <span aria-hidden className={`binder-fx binder-fx-${effect}`} />}
       {/* Rücken mit Naht */}
       <span
         aria-hidden

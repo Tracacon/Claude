@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "@/i18n/navigation";
-import { navDepth, parentPath, TOP_LEVEL } from "@/lib/nav-history";
+import { getBackTarget, navDepth, parentPath, prevPath, TOP_LEVEL } from "@/lib/nav-history";
 
 /** Zurück-Pfeil oben links. Auf den Seiten der unteren Leiste wird er nicht gezeigt. */
 export function BackButton({ label }: { label: string }) {
@@ -12,7 +12,17 @@ export function BackButton({ label }: { label: string }) {
     <button
       type="button"
       aria-label={label}
-      onClick={() => (navDepth() > 0 ? router.back() : router.push(parentPath(pathname)))}
+      onClick={() => {
+        // Fest vorgegebenes Ziel (z. B. Karte einpflegen → zurück zum Binder)
+        const target = getBackTarget(pathname);
+        if (target) {
+          if (navDepth() > 0 && prevPath() === target) router.back();
+          else router.replace(target);
+          return;
+        }
+        if (navDepth() > 0) router.back();
+        else router.push(parentPath(pathname));
+      }}
       className="-ml-2 grid size-10 shrink-0 place-items-center rounded-full text-cream hover:bg-white/10 hover:text-brand"
     >
       <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>

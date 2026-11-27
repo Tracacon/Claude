@@ -1118,8 +1118,8 @@
     "next": "Weiter",
     "sort": "Umsortieren",
     "sortDone": "Fertig",
-    "sortIntro": "Blättere durch deinen Binder oder sortiere die Karten um.",
-    "sortPickCard": "Tippe auf die Karte, die du verschieben willst, oder zieh sie mit der Maus in ein anderes Fach.",
+    "sortIntro": "Halte eine Karte kurz gedrückt und zieh sie in ein anderes Fach.",
+    "sortPickCard": "Tippe auf die Karte, die du verschieben willst, oder halte sie gedrückt und zieh sie.",
     "sortPickTarget": "Tippe jetzt auf das Ziel-Fach. Liegt dort eine Karte, tauschen beide den Platz.",
     "pocketCard": "Karte {title}",
     "pocketEmpty": "Leeres Fach {pocket}",
@@ -1138,6 +1138,14 @@
     "fromLoose": "Ohne Binder",
     "fromBinder": "Aus „{name}“",
     "addChosen": "{count, plural, =0 {Karten auswählen} =1 {1 Karte hinzufügen} other {# Karten hinzufügen}}",
-    "pocketAdd": "Leeres Fach {pocket}: Karte hier einsortieren"
+    "pocketAdd": "Leeres Fach {pocket}: Karte hier einsortieren",
+    "dragging": "Zieh die Karte auf ein Fach und lass los. Am Rand blätterst du um.",
+    "effect": "Effekt",
+    "effect_none": "Ohne",
+    "effect_glitter": "Glitzer",
+    "effect_gold": "Goldglitzer",
+    "effect_holo": "Holo",
+    "effect_rainbow": "Regenbogen",
+    "effect_cosmos": "Kosmos"
   }
 }

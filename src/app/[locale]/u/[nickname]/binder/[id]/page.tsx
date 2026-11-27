@@ -83,7 +83,7 @@ export default async function BinderPage({ params }: PageProps<"/[locale]/u/[nic
             {binder ? (
               <Link href={`/binder/${binder.id}/bearbeiten`} className="btn-ghost">{t("edit")}</Link>
             ) : (
-              <Link href="/marktplatz/neu?sammlung=1" className="btn-primary">+ {tC("add")}</Link>
+              <Link href="/marktplatz/neu?sammlung=1&zurueck=ohne" className="btn-primary">+ {tC("add")}</Link>
             )}
           </div>
         )}
@@ -91,6 +91,7 @@ export default async function BinderPage({ params }: PageProps<"/[locale]/u/[nic
       <BinderView
         cards={cards}
         color={binder?.color ?? "black"}
+        effect={binder?.effect ?? "none"}
         sortable={profile.is_me && !loose}
         binderId={binder?.id}
         pickable={pickable}

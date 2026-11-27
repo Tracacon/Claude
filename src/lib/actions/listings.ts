@@ -6,7 +6,8 @@ import { redirect } from "@/i18n/navigation";
 import { requireProfile } from "@/lib/auth";
 import { getCardInfo, searchByCode } from "@/lib/cards";
 import { mapDbError } from "@/lib/db-errors";
-import { PHOTO_BUCKET, STATUSES, TCGS_WITH_CARD_LOOKUP, UUID_PATTERN, photoPaths } from "@/lib/marketplace";
+import { RedirectType } from "next/navigation";
+import { PHOTO_BUCKET, RETURN_PATTERN, STATUSES, TCGS_WITH_CARD_LOOKUP, UUID_PATTERN, photoPaths } from "@/lib/marketplace";
 import { setsForCode } from "@/lib/set-codes";
 import { createClient } from "@/lib/supabase/server";
 import { listingSchema, removalReasonSchema, reportSchema, toFieldErrors, type FieldErrors, type ListingInput } from "@/lib/validation";
@@ -73,6 +74,12 @@ async function saveBinder(listingId: string, binder: string | null, formData: Fo
   if (error) console.error("set_listing_binder", error.message);
 }
 
+/** Rücksprungziel aus dem Formular, nur eigene erlaubte Seiten */
+function returnTarget(formData: FormData) {
+  const r = String(formData.get("return_to") ?? "");
+  return RETURN_PATTERN.test(r) ? r : null;
+}
+
 /** Termine, zu denen die Karte mitgebracht wird (Kästchen "events" im Formular) */
 async function saveListingEvents(listingId: string, formData: FormData) {
   if (formData.get("events_field") !== "1") return;
@@ -98,6 +105,11 @@ export async function createListing(_prev: ListingFormState, formData: FormData)
 
   revalidatePath("/", "layout");
   const locale = await getLocale();
+  // Liegt die neue Karte in einem Binder, geht es zurück zum Binder (das Formular ersetzt dabei
+  // den Verlaufseintrag, damit "Zurück" nicht wieder im Formular landet)
+  const me = await requireProfile();
+  const target = binder ? `/u/${me.nickname}/binder/${binder}` : returnTarget(formData);
+  if (target) return redirect({ href: target, locale }, RedirectType.replace);
   return redirect({ href: `/marktplatz/${data as string}`, locale });
 }
 
@@ -120,6 +132,8 @@ export async function updateListing(_prev: ListingFormState, formData: FormData)
   await saveListingEvents(id, formData);
   revalidatePath("/", "layout");
   const locale = await getLocale();
+  const target = returnTarget(formData);
+  if (target) return redirect({ href: target, locale }, RedirectType.replace);
   return redirect({ href: `/marktplatz/${id}`, locale });
 }
 

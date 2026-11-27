@@ -52,6 +52,7 @@ export async function BinderShelf({
                 <BinderCover
                   name={b.name}
                   color={b.color}
+                  effect={b.effect}
                   coverUrl={b.cover_photo_id ? photoUrl(b.owner_id, b.cover_photo_id, "thumb") : null}
                   subtitle={t("count", { count: b.card_count })}
                   locked={b.visibility === "public" ? null : b.visibility}

@@ -59,6 +59,7 @@ export function ListingForm({
   initial,
   events = [],
   binders = [],
+  returnTo,
 }: {
   userId: string;
   listingId?: string;
@@ -67,6 +68,8 @@ export function ListingForm({
   events?: EventOption[];
   /** Eigene Binder zur Auswahl */
   binders?: BinderOption[];
+  /** Nach dem Speichern bzw. Abbrechen hierhin (z. B. zurück zum Binder) */
+  returnTo?: string;
 }) {
   const locale = useLocale();
   const t = useTranslations("Listing");
@@ -99,6 +102,7 @@ export function ListingForm({
   return (
     <form key={formKey} action={action} className="space-y-5" noValidate>
       {listingId && <input type="hidden" name="id" value={listingId} />}
+      {returnTo && <input type="hidden" name="return_to" value={returnTo} />}
 
       <section className="card space-y-2">
         <h2 className="font-semibold">{t("photos")}</h2>
@@ -264,7 +268,7 @@ export function ListingForm({
         <button type="submit" className="btn-primary" disabled={pending || uploading}>
           {pending ? t("saving") : listingId ? t("saveEdit") : inCollection ? t("saveCollection") : t("save")}
         </button>
-        <Link href={listingId ? `/marktplatz/${listingId}` : inCollection ? "/profil" : "/marktplatz"} className="btn-ghost">
+        <Link href={returnTo ?? (listingId ? `/marktplatz/${listingId}` : inCollection ? "/profil" : "/marktplatz")} className="btn-ghost">
           {t("cancel")}
         </Link>
       </div>

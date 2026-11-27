@@ -2,6 +2,9 @@
 
 export const BINDER_COLORS = ["night", "amber", "red", "blue", "green", "purple", "black", "cream"] as const;
 export const BINDER_VISIBILITIES = ["public", "followers", "private"] as const;
+/** Effekte über der Einbandfarbe */
+export const BINDER_EFFECTS = ["none", "glitter", "gold", "holo", "rainbow", "cosmos"] as const;
+export type BinderEffect = (typeof BINDER_EFFECTS)[number];
 export type BinderColor = (typeof BINDER_COLORS)[number];
 export type BinderVisibility = (typeof BINDER_VISIBILITIES)[number];
 
@@ -24,6 +27,7 @@ export type BinderSummary = {
   id: string;
   name: string;
   color: BinderColor;
+  effect: BinderEffect;
   visibility: BinderVisibility;
   position: number;
   card_count: number;
