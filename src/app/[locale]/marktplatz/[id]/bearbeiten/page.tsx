@@ -37,7 +37,8 @@ export default async function EditListingPage({ params }: PageProps<"/[locale]/m
         userId={profile.id}
         listingId={l.id}
         initial={{
-          title: l.title,
+          // Automatischer Titel wird nicht vorausgefüllt (zum Tauschen/Verkaufen braucht es einen echten)
+          title: l.title_auto ? "" : l.title,
           description: l.description ?? "",
           tcg: l.tcg,
           kind: l.kind,

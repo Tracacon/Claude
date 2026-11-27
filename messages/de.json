@@ -224,7 +224,9 @@
     "invalid_quantity": "Bitte gib eine Anzahl zwischen 1 und 999 an.",
     "too_many_binders": "Du kannst höchstens 50 Binder anlegen.",
     "pocket_taken": "In diesem Fach liegt schon eine Karte.",
-    "binder_name_required": "Bitte gib dem Binder einen Namen."
+    "binder_name_required": "Bitte gib dem Binder einen Namen.",
+    "front_required": "Bitte füge ein Foto der Vorderseite hinzu.",
+    "title_required": "Zum Tauschen oder Verkaufen braucht die Karte einen Titel."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -407,7 +409,7 @@
     "cardName": "Karte",
     "offerCollection": "Nur Sammlung",
     "offerCollectionHint": "Liegt nur in deiner Sammlung und ist auf deinem Profil zu sehen, nicht im Marktplatz. Zum Tauschen, Verkaufen oder Verschenken kannst du es jederzeit markieren.",
-    "offerMarketHint": "Markiert: Erscheint im Marktplatz und bleibt Teil deiner Sammlung.",
+    "offerMarketHint": "Tausch und Verkauf erscheinen im Marktplatz und brauchen Titel, Spiel, Vorder- und Rückseite. Verschenken reicht mit Vorderseite.",
     "quantity": "Anzahl",
     "quantityShort": "{count}×",
     "saveCollection": "In die Sammlung",
@@ -424,7 +426,10 @@
     "binder": "Binder",
     "binderNone": "Ohne Binder",
     "binderHintNone": "Lege in deinem Profil unter Sammlung einen Binder an, dann kannst du ihn hier auswählen.",
-    "inBinder": "Im Binder „{name}“"
+    "inBinder": "Im Binder „{name}“",
+    "optional": "freiwillig",
+    "titleHintOptional": "Für die Sammlung freiwillig. Zum Tauschen oder Verkaufen brauchst du einen Titel.",
+    "photosHintFront": "Pflicht: ein Foto der Vorderseite. Zum Tauschen oder Verkaufen brauchst du zusätzlich die Rückseite."
   },
   "Moderation": {
     "title": "Moderation",
@@ -1078,7 +1083,19 @@
     "newBinder": "Neuer Binder",
     "firstBinder": "Ersten Binder anlegen",
     "openBinder": "Binder {name} öffnen",
-    "noBinder": "Ohne Binder"
+    "noBinder": "Ohne Binder",
+    "filter": "Filter",
+    "filterAll": "Alle Karten in Bindern",
+    "filterShow": "Anzeigen",
+    "filterBinder": "Binder",
+    "allBinders": "Alle Binder",
+    "filterReset": "Filter zurücksetzen",
+    "filterEmpty": "Keine Karten für diesen Filter.",
+    "mark_alle": "Alle",
+    "mark_sammlung": "Nur Sammlung",
+    "mark_tausch": "Tauschen",
+    "mark_verkauf": "Verkaufen",
+    "mark_verschenken": "Verschenken"
   },
   "Binder": {
     "back": "Zurück",
@@ -1146,6 +1163,7 @@
     "effect_gold": "Goldglitzer",
     "effect_holo": "Holo",
     "effect_rainbow": "Regenbogen",
-    "effect_cosmos": "Kosmos"
+    "effect_cosmos": "Kosmos",
+    "highlight": "Karten hervorheben"
   }
 }

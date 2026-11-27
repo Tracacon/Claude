@@ -80,6 +80,7 @@ export type ListingDetail = {
     id: string;
     owner_id: string;
     title: string;
+    title_auto: boolean;
     description: string | null;
     tcg: Tcg;
     kind: Kind;
@@ -120,6 +121,7 @@ export type ListingDetail = {
 export type CollectionItem = {
   id: string;
   title: string;
+  title_auto: boolean;
   tcg: Tcg;
   kind: Kind;
   offer: Offer;

@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { eventDay } from "@/lib/event-format";
 import { photoUrl, type CollectionItem, type ListingSummary } from "@/lib/marketplace";
 import { BinderShelf } from "@/components/binder/binder-shelf";
-import type { BinderSummary } from "@/lib/binder-shared";
+import type { BinderSummary, CollectionMark } from "@/lib/binder-shared";
 import type { VisitedEvent } from "@/lib/profiles";
 import { PostGrid } from "@/components/feed/post-grid";
 import { InstagramIcon } from "@/components/icons";
@@ -47,6 +47,8 @@ export async function ProfileView({
   loggedIn,
   basePath,
   offerFilter = "alle",
+  collectionMark = "alle",
+  collectionBinder = null,
 }: {
   profile: PublicProfile;
   listings: ListingSummary[];
@@ -62,6 +64,9 @@ export async function ProfileView({
   loggedIn: boolean;
   basePath: string;
   offerFilter?: OfferFilter;
+  /** Filter im Reiter Sammlung */
+  collectionMark?: CollectionMark;
+  collectionBinder?: string | null;
 }) {
   const t = await getTranslations("Social");
   const tRoles = await getTranslations("Roles");
@@ -169,7 +174,15 @@ export async function ProfileView({
           <p className="text-sm text-cream/70">{t("privateText", { nickname: p.nickname })}</p>
         </div>
       ) : tab === "sammlung" ? (
-        <BinderShelf nickname={p.nickname} binders={binders} items={collection} isMe={p.is_me} />
+        <BinderShelf
+          nickname={p.nickname}
+          binders={binders}
+          items={collection}
+          isMe={p.is_me}
+          basePath={basePath}
+          mark={collectionMark}
+          binderFilter={collectionBinder}
+        />
       ) : tab === "beitraege" ? (
         posts.length === 0 ? (
           <div className="card space-y-2 py-10 text-center">

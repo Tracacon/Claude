@@ -37,3 +37,30 @@ export type BinderSummary = {
 
 /** Adresse für Karten ohne Binder */
 export const NO_BINDER = "ohne";
+
+/** Filter der Sammlung: alles, nur Sammlung oder nach Markierung */
+export const COLLECTION_MARKS = ["alle", "sammlung", "tausch", "verkauf", "verschenken"] as const;
+export type CollectionMark = (typeof COLLECTION_MARKS)[number];
+
+export function parseCollectionMark(v: unknown): CollectionMark {
+  return COLLECTION_MARKS.includes(v as CollectionMark) ? (v as CollectionMark) : "alle";
+}
+
+/**
+ * Passt ein Stück zum Filter? mark = Markierung im Marktplatz (trade, sell, sell_or_trade, gift)
+ * oder null für "nur Sammlung".
+ */
+export function matchesMark(mark: string | null, filter: CollectionMark) {
+  switch (filter) {
+    case "alle":
+      return true;
+    case "sammlung":
+      return mark === null;
+    case "tausch":
+      return mark === "trade" || mark === "sell_or_trade";
+    case "verkauf":
+      return mark === "sell" || mark === "sell_or_trade";
+    case "verschenken":
+      return mark === "gift";
+  }
+}

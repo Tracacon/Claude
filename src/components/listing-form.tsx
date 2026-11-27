@@ -7,6 +7,7 @@ import { FormError } from "@/components/form-error";
 import { PhotoUploader } from "@/components/photo-uploader";
 import { Link } from "@/i18n/navigation";
 import { createListing, updateListing, type ListingFormState } from "@/lib/actions/listings";
+import { isMarketOffer } from "@/lib/validation";
 import { eventDay } from "@/lib/event-format";
 import {
   CARD_LANGUAGES,
@@ -91,8 +92,10 @@ export function ListingForm({
   const [kind, setKind] = useState(val("kind") || "single");
   const [tcg, setTcg] = useState(val("tcg"));
   const inCollection = offer === COLLECTION_CHOICE;
-  // Vorder- und Rückseite bei Einzelkarten und Slabs immer Pflicht
-  const bothSides = KINDS_NEEDING_BOTH_SIDES.includes(kind);
+  // Tausch und Verkauf: Titel, Spiel, Vorder- und Rückseite Pflicht. Sammlung und Verschenken: Vorderseite reicht.
+  const forMarket = isMarketOffer(offer);
+  const needsPhoto = KINDS_NEEDING_BOTH_SIDES.includes(kind);
+  const bothSides = forMarket && needsPhoto;
   const photos = v?.photos ? (JSON.parse(v.photos || "[]") as string[]) : initial.photos;
   const e = state.errors ?? {};
   // React setzt Formulare nach jeder Aktion zurück. Ein neuer Schlüssel baut das Formular
@@ -107,7 +110,7 @@ export function ListingForm({
       <section className="card space-y-2">
         <h2 className="font-semibold">{t("photos")}</h2>
         <p className={`hint mt-0 ${bothSides ? "text-brand" : ""}`}>
-          {bothSides ? t("photosHintRequired") : t("photosHint")}
+          {bothSides ? t("photosHintRequired") : needsPhoto ? t("photosHintFront") : t("photosHint")}
         </p>
         <PhotoUploader
           key={photos.join(",")}
@@ -121,16 +124,22 @@ export function ListingForm({
 
       <section className="card space-y-4">
         <div>
-          <label htmlFor="title" className="label">{t("title")}</label>
-          <input id="title" name="title" required maxLength={100} defaultValue={val("title")} className="input" aria-describedby="title-hint" />
-          <p id="title-hint" className="hint">{t("titleHint")}</p>
+          <label htmlFor="title" className="label">
+            {t("title")}
+            {!forMarket && <span className="ml-1 font-normal text-cream/60">({t("optional")})</span>}
+          </label>
+          <input id="title" name="title" required={forMarket} maxLength={100} defaultValue={val("title")} className="input" aria-describedby="title-hint" />
+          <p id="title-hint" className="hint">{forMarket ? t("titleHint") : t("titleHintOptional")}</p>
           <FormError code={e.title} />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="tcg" className="label">{t("game")}</label>
-            <select id="tcg" name="tcg" required value={tcg} onChange={(ev) => setTcg(ev.target.value)} className="input">
+            <label htmlFor="tcg" className="label">
+              {t("game")}
+              {!forMarket && <span className="ml-1 font-normal text-cream/60">({t("optional")})</span>}
+            </label>
+            <select id="tcg" name="tcg" required={forMarket} value={tcg} onChange={(ev) => setTcg(ev.target.value)} className="input">
               <option value="">{t("choose")}</option>
               {TCGS.map((x) => <option key={x} value={x}>{tTcg(x)}</option>)}
             </select>

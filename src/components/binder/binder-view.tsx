@@ -7,7 +7,15 @@ import { createPortal } from "react-dom";
 import { FormError } from "@/components/form-error";
 import { Link, useRouter } from "@/i18n/navigation";
 import { moveToPocket } from "@/lib/actions/binders";
-import { BINDER_COLOR_STYLES, POCKETS_PER_PAGE, type BinderColor, type BinderEffect } from "@/lib/binder-shared";
+import {
+  BINDER_COLOR_STYLES,
+  COLLECTION_MARKS,
+  matchesMark,
+  POCKETS_PER_PAGE,
+  type BinderColor,
+  type BinderEffect,
+  type CollectionMark,
+} from "@/lib/binder-shared";
 import { AddToBinderSheet, type PickCard } from "./add-to-binder-sheet";
 
 export type PocketCard = {
@@ -61,6 +69,9 @@ export function BinderView({
   /** Offenes Auswahlfenster: Fach (ab 0) oder null = nächste freie Fächer */
   const [sheet, setSheet] = useState<{ pocket: number | null } | null>(null);
   const canAdd = sortable && Boolean(binderId);
+  const tC = useTranslations("Collection");
+  /** Hervorheben: passende Karten bleiben hell, die anderen werden abgedunkelt */
+  const [highlight, setHighlight] = useState<CollectionMark>("alle");
 
   // --- Ziehen mit dem Finger (gedrückt halten) bzw. der Maus -------------------
   const pocketEls = useRef(new Map<number, HTMLElement>());
@@ -270,6 +281,28 @@ export function BinderView({
       )}
       <FormError code={error} />
 
+      {cards.length > 0 && (
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" role="group" aria-label={t("highlight")}>
+          {COLLECTION_MARKS.map((m) => {
+            const n = cards.filter((x) => matchesMark(x.mark, m)).length;
+            if (m !== "alle" && n === 0) return null;
+            return (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setHighlight(m)}
+                aria-pressed={highlight === m}
+                className={`shrink-0 rounded-full border px-3 py-1.5 text-sm ${
+                  highlight === m ? "border-brand bg-brand/15 font-semibold text-brand" : "border-line text-cream/75 hover:bg-white/5"
+                }`}
+              >
+                {tC(`mark_${m}`)} ({n})
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Einband */}
       <div
         className="relative rounded-xl p-2 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.9)] sm:p-3"
@@ -330,7 +363,7 @@ export function BinderView({
                         : card
                           ? "border-white/20"
                           : "border-dashed border-white/12 bg-white/[0.025]"
-                  } ${isOrigin ? "opacity-30" : ""}`;
+                  } ${isOrigin ? "opacity-30" : ""} ${card && !matchesMark(card.mark, highlight) ? "opacity-25 grayscale" : ""}`;
                   const refFn = (el: HTMLElement | null) => {
                     if (el) pocketEls.current.set(pocket, el);
                     else pocketEls.current.delete(pocket);

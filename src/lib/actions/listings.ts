@@ -40,7 +40,13 @@ async function removePhotoFiles(ownerId: string, photoIds: string[]) {
  * Kartendatenbank nach (Name deutsch und englisch, Set, Nummer, Bild), damit die Suche sie findet.
  * Wird nichts gefunden, bleiben Kürzel bzw. Set-Name und Nummer als Text erhalten.
  */
-async function saveCardDetails(listingId: string, tcg: string, card: ListingInput["card"]) {
+async function setTitleAuto(listingId: string, auto: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("listings").update({ title_auto: auto }).eq("id", listingId);
+  if (error) console.error("title_auto", error.message);
+}
+
+async function saveCardDetails(listingId: string, tcg: string, card: ListingInput["card"], titleAuto = false) {
   let p: Record<string, unknown> = {};
   if (card.code || card.number) {
     const known = card.code ? setsForCode(card.code) : [];
@@ -59,6 +65,13 @@ async function saveCardDetails(listingId: string, tcg: string, card: ListingInpu
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_listing_details", { p_id: listingId, p });
   if (error) console.error("set_listing_details", error.message);
+  // Automatischer Titel: Kartenname aus der Kartendatenbank übernehmen, falls gefunden
+  const name = typeof p.card_name === "string" ? p.card_name : null;
+  if (titleAuto && name) {
+    const title = [name, p.card_number].filter(Boolean).join(" ").slice(0, 100);
+    const { error: e2 } = await supabase.from("listings").update({ title }).eq("id", listingId);
+    if (e2) console.error("Titel aus Kartendatenbank", e2.message);
+  }
 }
 
 /** Binder der Karte setzen (Feld "binder" im Formular; leer = ohne Binder) */
@@ -95,11 +108,12 @@ export async function createListing(_prev: ListingFormState, formData: FormData)
   const parsed = listingSchema.safeParse(values);
   if (!parsed.success) return { errors: toFieldErrors(parsed.error), values };
 
-  const { card, binder, ...listing } = parsed.data;
+  const { card, binder, title_auto, ...listing } = parsed.data;
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("create_listing", { p: listing });
   if (error || !data) return { errors: { _form: error ? mapDbError(error) : "generic" }, values };
-  await saveCardDetails(data as string, listing.tcg, card);
+  if (title_auto) await setTitleAuto(data as string, true);
+  await saveCardDetails(data as string, listing.tcg, card, title_auto);
   await saveBinder(data as string, binder, formData);
   await saveListingEvents(data as string, formData);
 
@@ -121,11 +135,14 @@ export async function updateListing(_prev: ListingFormState, formData: FormData)
   const parsed = listingSchema.safeParse(values);
   if (!parsed.success) return { errors: toFieldErrors(parsed.error), values };
 
-  const { card, binder, ...listing } = parsed.data;
+  const { card, binder, title_auto, ...listing } = parsed.data;
   const supabase = await createClient();
+  // Eigener Titel: zuerst als echt markieren, damit Tausch/Verkauf ihn akzeptiert
+  if (!title_auto) await setTitleAuto(id, false);
   const { data, error } = await supabase.rpc("update_listing", { p_id: id, p: listing });
   if (error) return { errors: { _form: mapDbError(error) }, values };
-  await saveCardDetails(id, listing.tcg, card);
+  if (title_auto) await setTitleAuto(id, true);
+  await saveCardDetails(id, listing.tcg, card, title_auto);
   await saveBinder(id, binder, formData);
 
   await removePhotoFiles(profile.id, (data as string[] | null) ?? []);

@@ -224,7 +224,9 @@
     "invalid_quantity": "Please enter a quantity between 1 and 999.",
     "too_many_binders": "You can create up to 50 binders.",
     "pocket_taken": "There is already a card in this pocket.",
-    "binder_name_required": "Please give the binder a name."
+    "binder_name_required": "Please give the binder a name.",
+    "front_required": "Please add a photo of the front.",
+    "title_required": "To trade or sell, the card needs a title."
   },
   "Tcg": {
     "pokemon": "Pokémon",
@@ -407,7 +409,7 @@
     "cardName": "Card",
     "offerCollection": "Collection only",
     "offerCollectionHint": "Stays in your collection and shows on your profile, not in the marketplace. You can mark it for trade, sale or giveaway at any time.",
-    "offerMarketHint": "Marked: shows in the marketplace and stays part of your collection.",
+    "offerMarketHint": "Trade and sale show in the marketplace and need a title, game, front and back. Giveaways only need the front.",
     "quantity": "Quantity",
     "quantityShort": "{count}×",
     "saveCollection": "Add to collection",
@@ -424,7 +426,10 @@
     "binder": "Binder",
     "binderNone": "No binder",
     "binderHintNone": "Create a binder in your profile under Collection, then you can choose it here.",
-    "inBinder": "In binder “{name}”"
+    "inBinder": "In binder “{name}”",
+    "optional": "optional",
+    "titleHintOptional": "Optional for your collection. You need a title to trade or sell.",
+    "photosHintFront": "Required: a photo of the front. To trade or sell you also need the back."
   },
   "Moderation": {
     "title": "Moderation",
@@ -1078,7 +1083,19 @@
     "newBinder": "New binder",
     "firstBinder": "Create your first binder",
     "openBinder": "Open binder {name}",
-    "noBinder": "No binder"
+    "noBinder": "No binder",
+    "filter": "Filter",
+    "filterAll": "All cards in binders",
+    "filterShow": "Show",
+    "filterBinder": "Binder",
+    "allBinders": "All binders",
+    "filterReset": "Reset filter",
+    "filterEmpty": "No cards for this filter.",
+    "mark_alle": "All",
+    "mark_sammlung": "Collection only",
+    "mark_tausch": "Trade",
+    "mark_verkauf": "Sale",
+    "mark_verschenken": "Giveaway"
   },
   "Binder": {
     "back": "Back",
@@ -1146,6 +1163,7 @@
     "effect_gold": "Gold glitter",
     "effect_holo": "Holo",
     "effect_rainbow": "Rainbow",
-    "effect_cosmos": "Cosmos"
+    "effect_cosmos": "Cosmos",
+    "highlight": "Highlight cards"
   }
 }
