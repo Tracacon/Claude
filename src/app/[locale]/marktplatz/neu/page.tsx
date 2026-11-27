@@ -23,6 +23,8 @@ export default async function NewListingPage({ params, searchParams }: PageProps
   const toCollection = sp.sammlung === "1";
   // Aus einem Binder heraus ("Karte hinzufügen") kommt ?binder=<id>
   const presetBinder = binders.find((b) => b.id === sp.binder)?.id ?? "";
+  // Aus einem leeren Fach ("+") kommt ?fach=<nummer>
+  const fach = typeof sp.fach === "string" && /^\d{1,4}$/.test(sp.fach) && presetBinder ? sp.fach : "";
   const preset = events.filter((e) => e.id === wanted).map((e) => e.id);
   const t = await getTranslations("Listing");
 
@@ -52,6 +54,7 @@ export default async function NewListingPage({ params, searchParams }: PageProps
           card_code: "",
           card_no: "",
           binder: presetBinder,
+          pocket: fach,
         }}
         events={events}
         binders={binders}

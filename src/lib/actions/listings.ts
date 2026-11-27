@@ -64,7 +64,12 @@ async function saveCardDetails(listingId: string, tcg: string, card: ListingInpu
 async function saveBinder(listingId: string, binder: string | null, formData: FormData) {
   if (formData.get("binder_field") !== "1") return;
   const supabase = await createClient();
-  const { error } = await supabase.rpc("set_listing_binder", { p_listing: listingId, p_binder: binder, p_pocket: null });
+  // Aus einem leeren Fach im Binder ("+") kommt das gewünschte Fach mit
+  const raw = Number(formData.get("pocket"));
+  const pocket = binder && Number.isInteger(raw) && raw >= 0 && raw <= 8999 && formData.get("pocket") !== "" ? raw : null;
+  let { error } = await supabase.rpc("set_listing_binder", { p_listing: listingId, p_binder: binder, p_pocket: pocket });
+  // Fach inzwischen belegt: ins nächste freie Fach
+  if (error && pocket !== null) ({ error } = await supabase.rpc("set_listing_binder", { p_listing: listingId, p_binder: binder, p_pocket: null }));
   if (error) console.error("set_listing_binder", error.message);
 }
 

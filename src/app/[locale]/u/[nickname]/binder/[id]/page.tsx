@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { BackLink } from "@/components/back-link";
 import { BinderView, type PocketCard } from "@/components/binder/binder-view";
+import type { PickCard } from "@/components/binder/add-to-binder-sheet";
 import { Link } from "@/i18n/navigation";
 import { NO_BINDER } from "@/lib/binder-shared";
 import { getProfileBinders } from "@/lib/binders";
@@ -47,6 +48,19 @@ export default async function BinderPage({ params }: PageProps<"/[locale]/u/[nic
         .sort((a, b) => a.created_at.localeCompare(b.created_at))
         .map((i, n) => toPocket(i, n))
     : items.filter((i) => i.binder_id === id && i.pocket !== null).map((i) => toPocket(i, i.pocket!));
+  // Eigene Karten, die man in diesen Binder legen kann: ohne Binder und aus anderen Bindern
+  const binderName = new Map(binders.map((b) => [b.id, b.name]));
+  const pickable: PickCard[] =
+    profile.is_me && binder
+      ? items
+          .filter((i) => i.binder_id !== binder.id)
+          .map((i) => ({
+            id: i.id,
+            title: i.title,
+            front: i.cover_photo_id ? photoUrl(i.owner_id, i.cover_photo_id, "thumb") : null,
+            binderName: i.binder_id ? binderName.get(i.binder_id) ?? null : null,
+          }))
+      : [];
   const profilePath = profile.is_me ? "/profil" : `/u/${profile.nickname}`;
   const name = binder?.name ?? tC("noBinder");
 
@@ -66,14 +80,21 @@ export default async function BinderPage({ params }: PageProps<"/[locale]/u/[nic
         </div>
         {profile.is_me && (
           <div className="flex gap-2">
-            {binder && <Link href={`/binder/${binder.id}/bearbeiten`} className="btn-ghost">{t("edit")}</Link>}
-            <Link href={binder ? `/marktplatz/neu?sammlung=1&binder=${binder.id}` : "/marktplatz/neu?sammlung=1"} className="btn-primary">
-              + {tC("add")}
-            </Link>
+            {binder ? (
+              <Link href={`/binder/${binder.id}/bearbeiten`} className="btn-ghost">{t("edit")}</Link>
+            ) : (
+              <Link href="/marktplatz/neu?sammlung=1" className="btn-primary">+ {tC("add")}</Link>
+            )}
           </div>
         )}
       </header>
-      <BinderView cards={cards} color={binder?.color ?? "black"} sortable={profile.is_me && !loose} />
+      <BinderView
+        cards={cards}
+        color={binder?.color ?? "black"}
+        sortable={profile.is_me && !loose}
+        binderId={binder?.id}
+        pickable={pickable}
+      />
     </div>
   );
 }

@@ -67,3 +67,21 @@ export async function moveToPocket(listingId: string, pocket: number): Promise<{
   revalidatePath("/", "layout");
   return {};
 }
+
+/**
+ * Vorhandene Karten in einen Binder legen (aus "Ohne Binder" oder aus einem anderen Binder).
+ * Mit Fach: genau dorthin (nur eine Karte). Ohne Fach: in die nächsten freien Fächer.
+ */
+export async function addToBinder(binderId: string, listingIds: string[], pocket: number | null): Promise<{ error?: string }> {
+  await requireProfile();
+  const ids = [...new Set(listingIds)].filter((x) => UUID_PATTERN.test(x)).slice(0, 100);
+  if (!UUID_PATTERN.test(binderId) || ids.length === 0) return { error: "generic" };
+  if (pocket !== null && (ids.length !== 1 || !Number.isInteger(pocket) || pocket < 0 || pocket > 8999)) return { error: "generic" };
+  const supabase = await createClient();
+  for (const id of ids) {
+    const { error } = await supabase.rpc("set_listing_binder", { p_listing: id, p_binder: binderId, p_pocket: pocket });
+    if (error) return { error: mapDbError(error) };
+  }
+  revalidatePath("/", "layout");
+  return {};
+}
