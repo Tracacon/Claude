@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { QuickMarkPanel } from "@/components/quick-mark-panel";
-import { Link } from "@/i18n/navigation";
+import { PendingLink } from "@/components/pending-link";
 import type { PocketCard } from "./binder-view";
 
 /**
@@ -45,8 +45,12 @@ export function QuickMarkSheet({
             <p className="truncate font-semibold">{card.title}</p>
             <p className="text-sm text-cream/60">{card.mark ? tOffer(card.mark) : t("onlyCollection")}</p>
             <div className="mt-1.5 flex gap-3 text-sm">
-              <Link href={`/marktplatz/${card.id}`} className="text-brand hover:underline">{t("view")}</Link>
-              <Link href={`/marktplatz/${card.id}/bearbeiten?zurueck=${encodeURIComponent(returnTo)}`} className="text-brand hover:underline">{t("edit")}</Link>
+              <PendingLink href={`/marktplatz/${card.id}`} className="text-brand hover:underline" pendingLabel={t("opening")}>
+                {t("view")}
+              </PendingLink>
+              <PendingLink href={`/marktplatz/${card.id}/bearbeiten?zurueck=${encodeURIComponent(returnTo)}`} className="text-brand hover:underline" pendingLabel={t("opening")}>
+                {t("edit")}
+              </PendingLink>
             </div>
           </div>
         </div>

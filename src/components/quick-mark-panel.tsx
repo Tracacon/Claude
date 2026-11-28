@@ -3,7 +3,8 @@
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { OfferIcon } from "@/components/offer-icon";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { PendingLink } from "@/components/pending-link";
 import { quickMark } from "@/lib/actions/listings";
 import { centsToInput } from "@/lib/marketplace";
 
@@ -135,7 +136,11 @@ export function QuickMarkPanel({
       {error && (
         <div role="alert" className="rounded-xl border border-danger/40 bg-danger/10 p-3 text-sm">
           <p>{tErr.has(error) ? tErr(error) : tErr("generic")}</p>
-          {missing && <Link href={editHref} className="btn-primary mt-2 w-full">{t("complete")}</Link>}
+          {missing && (
+            <PendingLink href={editHref} className="btn-primary mt-2 w-full" pendingLabel={t("opening")}>
+              {t("complete")}
+            </PendingLink>
+          )}
         </div>
       )}
       {needsPrice && (
