@@ -431,7 +431,13 @@
     "inBinder": "In binder “{name}”",
     "optional": "optional",
     "titleHintOptional": "Optional for your collection. You need a title to trade or sell.",
-    "photosHintFront": "Required: a photo of the front. To trade or sell you also need the back."
+    "photosHintFront": "Required: a photo of the front. To trade or sell you also need the back.",
+    "titlePlaceholder": "Title, e.g. Charizard ex 199/165",
+    "titlePlaceholderOptional": "Title (optional)",
+    "descriptionPlaceholder": "Add a description: condition, details, what you are looking for …",
+    "detailsTitle": "Condition, language, grading",
+    "handoverTitle": "Location and handover",
+    "bringToCount": "{count, plural, =1 {1 event} other {# events}}"
   },
   "Moderation": {
     "title": "Moderation",
@@ -1176,11 +1182,11 @@
     "dragging": "Let go over a pocket. Hold at the edge to turn the page.",
     "effect": "Effect",
     "effect_none": "None",
-    "effect_glitter": "Glitter",
-    "effect_gold": "Gold glitter",
-    "effect_holo": "Holo",
-    "effect_rainbow": "Rainbow",
-    "effect_cosmos": "Cosmos",
+    "effect_glitter": "Stardust",
+    "effect_gold": "Gold foil",
+    "effect_holo": "Sheen",
+    "effect_rainbow": "Pearl",
+    "effect_cosmos": "Galaxy",
     "highlight": "Highlight cards",
     "coverImage": "Own cover image",
     "coverImageHint": "Optional. A photo for the cover that you can crop and adjust. Without one the binder shows its colour.",
@@ -1193,7 +1199,13 @@
     "autosaved": "Saved automatically",
     "nameFirst": "Give the binder a name and it will be saved automatically.",
     "done": "Done",
-    "visibilityShort": "Who can see it"
+    "visibilityShort": "Who can see it",
+    "libraryLoading": "Loading your images …",
+    "libraryCovers": "Recently used",
+    "libraryCards": "Your cards",
+    "libraryUseCover": "Use this cover image",
+    "libraryUseCard": "Crop this card as cover image",
+    "libraryForget": "Remove from selection"
   },
   "Highlights": {
     "title": "Highlights",

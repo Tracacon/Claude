@@ -74,7 +74,7 @@ export type BinderAutosave = {
  * zurück. Wird bei jeder Änderung im Formular aufgerufen.
  */
 export async function autosaveBinder(input: BinderAutosave): Promise<{ id?: string; error?: string }> {
-  const me = await requireProfile();
+  await requireProfile();
   if (input.id && !UUID_PATTERN.test(input.id)) return { error: "generic" };
   const parsed = binderSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "generic" };
@@ -87,13 +87,10 @@ export async function autosaveBinder(input: BinderAutosave): Promise<{ id?: stri
     p_effect: parsed.data.effect,
   });
   if (error || !data) return { error: error ? mapDbError(error) : "generic" };
+  // Titelbild setzen; frühere Bilder bleiben in der Bildersammlung
   const image = input.cover && UUID_PATTERN.test(input.cover) ? input.cover : null;
-  const { data: old, error: e2 } = await supabase.rpc("set_binder_cover", { p_binder: data as string, p_image: image });
+  const { error: e2 } = await supabase.rpc("set_binder_cover", { p_binder: data as string, p_image: image });
   if (e2) console.error("set_binder_cover", e2.message);
-  else if (old) {
-    const { error: e3 } = await supabase.storage.from(PHOTO_BUCKET).remove(photoPaths(me.id, old as string));
-    if (e3) console.error("altes Titelbild", e3.message);
-  }
   revalidatePath("/", "layout");
   return { id: data as string };
 }
@@ -137,5 +134,33 @@ export async function addToBinder(binderId: string, listingIds: string[], pocket
     if (error) return { error: mapDbError(error) };
   }
   revalidatePath("/", "layout");
+  return {};
+}
+
+export type LibraryImage = { image_id: string; kind: "cover" | "card"; created_at: string };
+
+/** Eigene Bilder zur Auswahl: frühere Titelbilder und Vorderseiten der eigenen Karten */
+export async function getMyImages(): Promise<LibraryImage[]> {
+  await requireProfile();
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("my_image_library");
+  if (error) {
+    console.error("my_image_library", error.message);
+    return [];
+  }
+  return (data ?? []) as LibraryImage[];
+}
+
+/** Früheres Titelbild aus der Bildersammlung entfernen (Datei wird gelöscht, wenn kein Binder es nutzt) */
+export async function removeLibraryImage(imageId: string): Promise<{ error?: string }> {
+  const me = await requireProfile();
+  if (!UUID_PATTERN.test(imageId)) return { error: "generic" };
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("remove_library_image", { p_image: imageId });
+  if (error) return { error: mapDbError(error) };
+  if (data === true) {
+    const { error: e2 } = await supabase.storage.from(PHOTO_BUCKET).remove(photoPaths(me.id, imageId));
+    if (e2) console.error("Bild löschen", e2.message);
+  }
   return {};
 }

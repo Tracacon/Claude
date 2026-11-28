@@ -6,7 +6,7 @@ import { FormError } from "@/components/form-error";
 import { ImageCropper } from "@/components/image-cropper";
 import { PhotoSourceSheet } from "@/components/photo-source-sheet";
 import { Link } from "@/i18n/navigation";
-import { autosaveBinder, deleteBinder, type BinderFormState } from "@/lib/actions/binders";
+import { autosaveBinder, deleteBinder, getMyImages, removeLibraryImage, type BinderFormState, type LibraryImage } from "@/lib/actions/binders";
 import {
   BINDER_COLORS,
   BINDER_COLOR_STYLES,
@@ -76,6 +76,16 @@ export function BinderForm({
   const [uploading, setUploading] = useState(false);
   const [coverError, setCoverError] = useState<string | null>(null);
   const [confirm, setConfirm] = useState(false);
+  // Eigene Bilder (frühere Titelbilder, Kartenvorderseiten) zur Auswahl im Foto-Menü
+  const [library, setLibrary] = useState<LibraryImage[] | null>(null);
+  useEffect(() => {
+    if (!sourceOpen || library) return;
+    let off = false;
+    void getMyImages().then((x) => !off && setLibrary(x));
+    return () => {
+      off = true;
+    };
+  }, [sourceOpen, library]);
   const [del, delAction, deleting] = useActionState<BinderFormState, FormData>(deleteBinder, {});
 
   // Vorschau bleibt unter der oberen Leiste stehen: deren Höhe messen
@@ -146,6 +156,30 @@ export function BinderForm({
     } catch {
       setCoverError(t("coverError"));
     }
+  }
+
+  /** Früheres Titelbild direkt übernehmen (hat schon das Einband-Format) */
+  function pickLibraryCover(imageId: string) {
+    setSourceOpen(false);
+    setCover({ id: imageId, preview: photoUrl(userId, imageId, "thumb") });
+  }
+
+  /** Kartenvorderseite als Ausgangsbild: laden und zum Zuschneiden öffnen */
+  async function cropFromCard(imageId: string) {
+    setSourceOpen(false);
+    setCoverError(null);
+    try {
+      const res = await fetch(photoUrl(userId, imageId));
+      const blob = await res.blob();
+      setCrop(await loadImage(new File([blob], `${imageId}.jpg`, { type: "image/jpeg" })));
+    } catch {
+      setCoverError(t("coverError"));
+    }
+  }
+
+  async function forgetImage(imageId: string) {
+    setLibrary((l) => l?.filter((x) => !(x.kind === "cover" && x.image_id === imageId)) ?? l);
+    await removeLibraryImage(imageId);
   }
 
   async function uploadCover(canvas: HTMLCanvasElement) {
@@ -339,7 +373,51 @@ export function BinderForm({
         onFiles={(files) => void pickCover(files)}
         facing="environment"
         title={t("coverImage")}
-      />
+        onRemove={cover ? () => setCover(null) : undefined}
+        removeLabel={t("coverRemove")}
+      >
+        {library === null ? (
+          <p className="px-4 py-3 text-sm text-cream/60">{t("libraryLoading")}</p>
+        ) : (
+          (["cover", "card"] as const).map((kind) => {
+            const list = library.filter((x) => x.kind === kind);
+            if (list.length === 0) return null;
+            return (
+              <div key={kind} className="px-3 pb-2 pt-3">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-cream/60">
+                  {kind === "cover" ? t("libraryCovers") : t("libraryCards")}
+                </p>
+                <ul className="grid grid-cols-4 gap-2">
+                  {list.map((x) => (
+                    <li key={`${kind}-${x.image_id}`} className="relative">
+                      <button
+                        type="button"
+                        onClick={() => (kind === "cover" ? pickLibraryCover(x.image_id) : void cropFromCard(x.image_id))}
+                        className={`block w-full overflow-hidden rounded-lg border-2 ${cover?.id === x.image_id ? "border-brand" : "border-transparent hover:border-brand/60"} ${kind === "cover" ? "aspect-[4/5]" : "aspect-[63/88]"}`}
+                        aria-label={kind === "cover" ? t("libraryUseCover") : t("libraryUseCard")}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={photoUrl(userId, x.image_id, "thumb")} alt="" loading="lazy" className="h-full w-full object-cover" />
+                      </button>
+                      {kind === "cover" && cover?.id !== x.image_id && (
+                        <button
+                          type="button"
+                          onClick={() => void forgetImage(x.image_id)}
+                          className="absolute -right-1.5 -top-1.5 grid size-6 place-items-center rounded-full border border-line bg-night text-xs text-cream/70 hover:text-danger"
+                          aria-label={t("libraryForget")}
+                          title={t("libraryForget")}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })
+        )}
+      </PhotoSourceSheet>
       {crop && (
         <ImageCropper
           key={crop.url}
