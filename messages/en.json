@@ -174,7 +174,7 @@
     "delete_confirm": "Please type DELETE to confirm.",
     "generic": "Something went wrong. Please try again.",
     "title_short": "The title needs at least 3 characters.",
-    "tcg_required": "Please choose the game.",
+    "tcg_required": "Please choose the TCG.",
     "price_required": "Please enter a price or choose “Trade”.",
     "invalid_price": "Please enter a valid price, e.g. 12.50.",
     "handover_required": "Please choose at least one handover option.",
@@ -411,7 +411,7 @@
     "cardName": "Card",
     "offerCollection": "Collection only",
     "offerCollectionHint": "Stays in your collection and shows on your profile, not in the marketplace. You can mark it for trade, sale or giveaway at any time.",
-    "offerMarketHint": "Trade and sale show in the marketplace and need a title, game, front and back. Giveaways only need the front.",
+    "offerMarketHint": "Trade and sale show in the marketplace and need a title, TCG, front and back. Giveaways only need the front.",
     "quantity": "Quantity",
     "quantityShort": "{count}×",
     "saveCollection": "Add to collection",
@@ -437,7 +437,8 @@
     "descriptionPlaceholder": "Add a description: condition, details, what you are looking for …",
     "detailsTitle": "Condition, language, grading",
     "handoverTitle": "Location and handover",
-    "bringToCount": "{count, plural, =1 {1 event} other {# events}}"
+    "bringToCount": "{count, plural, =1 {1 event} other {# events}}",
+    "tcg": "TCG"
   },
   "Moderation": {
     "title": "Moderation",
@@ -1231,6 +1232,8 @@
     "markAs": "Mark as",
     "complete": "Complete now",
     "saving": "Saving …",
-    "apply": "Apply"
+    "apply": "Apply",
+    "saved": "Saved",
+    "title": "Mark"
   }
 }

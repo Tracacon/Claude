@@ -174,7 +174,7 @@
     "delete_confirm": "Bitte gib zur Bestätigung LÖSCHEN ein.",
     "generic": "Etwas ist schiefgelaufen. Bitte versuch es noch einmal.",
     "title_short": "Der Titel braucht mindestens 3 Zeichen.",
-    "tcg_required": "Bitte wähle das Spiel.",
+    "tcg_required": "Bitte wähle das TCG.",
     "price_required": "Bitte gib einen Preis an oder wähle „Tausch“.",
     "invalid_price": "Bitte gib einen gültigen Preis ein, z. B. 12,50.",
     "handover_required": "Bitte wähle mindestens eine Übergabeart.",
@@ -411,7 +411,7 @@
     "cardName": "Karte",
     "offerCollection": "Nur Sammlung",
     "offerCollectionHint": "Liegt nur in deiner Sammlung und ist auf deinem Profil zu sehen, nicht im Marktplatz. Zum Tauschen, Verkaufen oder Verschenken kannst du es jederzeit markieren.",
-    "offerMarketHint": "Tausch und Verkauf erscheinen im Marktplatz und brauchen Titel, Spiel, Vorder- und Rückseite. Verschenken reicht mit Vorderseite.",
+    "offerMarketHint": "Tausch und Verkauf erscheinen im Marktplatz und brauchen Titel, TCG, Vorder- und Rückseite. Verschenken reicht mit Vorderseite.",
     "quantity": "Anzahl",
     "quantityShort": "{count}×",
     "saveCollection": "In die Sammlung",
@@ -437,7 +437,8 @@
     "descriptionPlaceholder": "Beschreibung hinzufügen: Zustand, Besonderheiten, was du im Tausch suchst …",
     "detailsTitle": "Zustand, Sprache, Grading",
     "handoverTitle": "Ort und Übergabe",
-    "bringToCount": "{count, plural, =1 {1 Termin} other {# Termine}}"
+    "bringToCount": "{count, plural, =1 {1 Termin} other {# Termine}}",
+    "tcg": "TCG"
   },
   "Moderation": {
     "title": "Moderation",
@@ -1231,6 +1232,8 @@
     "markAs": "Markieren als",
     "complete": "Jetzt ergänzen",
     "saving": "Wird gespeichert …",
-    "apply": "Übernehmen"
+    "apply": "Übernehmen",
+    "saved": "Gespeichert",
+    "title": "Markieren"
   }
 }

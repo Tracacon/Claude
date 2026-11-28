@@ -173,4 +173,4 @@ export type CardInfo = {
 };
 
 /** Erlaubte Rücksprungziele nach dem Speichern einer Karte (eigene Seiten, keine fremden Adressen) */
-export const RETURN_PATTERN = /^\/(profil|u\/[A-Za-z0-9_.-]{3,24}\/binder\/([0-9a-f-]{36}|ohne))$/;
+export const RETURN_PATTERN = /^\/(profil|u\/[A-Za-z0-9_.-]{3,24}\/binder\/([0-9a-f-]{36}|ohne)|marktplatz\/[0-9a-f-]{36})$/;

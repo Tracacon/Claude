@@ -15,6 +15,7 @@ import { DeleteListing, ModerateListing, ReportForm, StartConversation, StatusSw
 import { BrandText } from "@/components/brand-text";
 import { BackLink } from "@/components/back-link";
 import { InterestButton } from "@/components/interest-button";
+import { QuickMarkPanel } from "@/components/quick-mark-panel";
 import { getInterestedPeople, getInterestState } from "@/lib/interests";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/marktplatz/[id]">): Promise<Metadata> {
@@ -73,6 +74,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
     )
   ) : null;
   const tEv = await getTranslations("Events");
+  const tQ = await getTranslations("QuickMark");
 
   const handover = [
     l.handover_event && t("handoverEvent"),
@@ -91,11 +93,18 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
           <p className="mt-2 text-xs text-cream/60">{t("removedContact")}</p>
         </div>
       )}
-      {inCollection && isOwner && (
-        <div className="card space-y-2 text-sm">
-          <p>📁 {t("collectionOwnerHint")}</p>
-          <Link href={`/marktplatz/${l.id}/bearbeiten`} className="btn-primary">{t("markForMarket")}</Link>
-        </div>
+      {isOwner && (inCollection || publicVisible) && (
+        <section className="space-y-2">
+          <p className="px-1 text-xs font-semibold uppercase tracking-wide text-cream/60">{tQ("markAs")}</p>
+          <QuickMarkPanel
+            listingId={l.id}
+            mark={inCollection ? null : l.offer}
+            offer={l.offer}
+            priceCents={l.price_cents}
+            negotiable={l.negotiable}
+            returnTo={`/marktplatz/${l.id}`}
+          />
+        </section>
       )}
       {!publicVisible && !inCollection && l.status !== "removed" && <p className="card text-sm text-cream/70">{t("notVisible")}</p>}
 
