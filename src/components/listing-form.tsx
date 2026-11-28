@@ -6,7 +6,7 @@ import { useReturn } from "@/lib/use-return";
 import { CardCodeFields } from "@/components/card-code-fields";
 import { FormError } from "@/components/form-error";
 import { PhotoUploader } from "@/components/photo-uploader";
-import { OfferIcon } from "@/components/offer-icon";
+import { MarkButtons, type MarkOption } from "@/components/quick-mark-panel";
 import { Link } from "@/i18n/navigation";
 import { createListing, updateListing, type ListingFormState } from "@/lib/actions/listings";
 import { isMarketOffer } from "@/lib/validation";
@@ -55,15 +55,12 @@ export type BinderOption = { id: string; name: string };
 
 export type EventOption = { id: string; name: string; starts_at: string; ends_at: string; timezone: string | null; city: string | null };
 
-/** Reihenfolge der Angebotsknöpfe */
-const OFFER_ORDER = [COLLECTION_CHOICE, "trade", "sell", "sell_or_trade", "gift"] as const;
 
 /** Zeile in einer Gruppe: Symbol, Bezeichnung, Inhalt rechts (wie Instagram-Einstellungen) */
-function Row({ icon, label, htmlFor, children, error }: { icon: string; label: ReactNode; htmlFor?: string; children: ReactNode; error?: ReactNode }) {
+function Row({ label, htmlFor, children, error }: { label: ReactNode; htmlFor?: string; children: ReactNode; error?: ReactNode }) {
   return (
     <div className="px-4 py-3">
       <div className="flex items-center gap-3">
-        <span className="w-7 shrink-0 text-center text-lg" aria-hidden>{icon}</span>
         <label htmlFor={htmlFor} className="shrink-0 font-medium">{label}</label>
         <div className="flex min-w-0 flex-1 justify-end">{children}</div>
       </div>
@@ -73,11 +70,10 @@ function Row({ icon, label, htmlFor, children, error }: { icon: string; label: R
 }
 
 /** Aufklappbarer Bereich mit Zusammenfassung rechts */
-function Fold({ icon, title, summary, open, children }: { icon: string; title: string; summary?: string; open?: boolean; children: ReactNode }) {
+function Fold({ title, summary, open, children }: { title: string; summary?: string; open?: boolean; children: ReactNode }) {
   return (
     <details open={open} className="group">
       <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3.5 hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden">
-        <span className="w-7 shrink-0 text-center text-lg" aria-hidden>{icon}</span>
         <span className="flex-1 font-medium">{title}</span>
         {summary && <span className="max-w-[45%] truncate text-sm text-cream/60">{summary}</span>}
         <svg viewBox="0 0 24 24" className="size-5 shrink-0 text-cream/50 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
@@ -120,7 +116,6 @@ export function ListingForm({
   const t = useTranslations("Listing");
   const tTcg = useTranslations("Tcg");
   const tKind = useTranslations("Kind");
-  const tOffer = useTranslations("Offer");
   const tCond = useTranslations("Condition");
   const tLang = useTranslations("CardLanguage");
   const tErr = useTranslations("Errors");
@@ -226,20 +221,7 @@ export function ListingForm({
       {/* Angebot */}
       <fieldset className="space-y-2">
         <legend className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-cream/60">{t("offer")}</legend>
-        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {OFFER_ORDER.map((x) => (
-            <label
-              key={x}
-              className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-                offer === x ? "border-brand bg-brand text-on-brand" : "border-line bg-night-2 text-cream/80 hover:border-brand/50"
-              }`}
-            >
-              <input type="radio" name="offer" value={x} checked={offer === x} onChange={() => setOffer(x)} className="sr-only" />
-              <OfferIcon offer={x} />
-              {x === COLLECTION_CHOICE ? t("offerCollection") : tOffer(x)}
-            </label>
-          ))}
-        </div>
+        <MarkButtons name="offer" value={offer as MarkOption} onPick={(o) => setOffer(o)} />
         <p className="px-1 text-xs text-cream/60">{inCollection ? t("offerCollectionHint") : t("offerMarketHint")}</p>
 
         {offerHasPrice(offer) ? (
@@ -267,13 +249,13 @@ export function ListingForm({
 
       {/* Karte */}
       <section className={group}>
-        <Row icon="🎮" label={<>{t("game")}{!forMarket && optional}</>} htmlFor="tcg" error={<FormError code={e.tcg} />}>
+        <Row label={<>{t("tcg")}{!forMarket && optional}</>} htmlFor="tcg" error={<FormError code={e.tcg} />}>
           <select id="tcg" name="tcg" required={forMarket} value={tcg} onChange={(ev) => setTcg(ev.target.value)} className={inlineSelect}>
             <option value="">{t("choose")}</option>
             {TCGS.map((x) => <option key={x} value={x}>{tTcg(x)}</option>)}
           </select>
         </Row>
-        <Row icon="🃏" label={t("kind")} htmlFor="kind">
+        <Row label={t("kind")} htmlFor="kind">
           <select id="kind" name="kind" value={kind} onChange={(ev) => setKind(ev.target.value)} className={inlineSelect}>
             {KINDS.map((x) => <option key={x} value={x}>{tKind(x)}</option>)}
           </select>
@@ -283,7 +265,7 @@ export function ListingForm({
             <CardCodeFields initialCode={val("card_code")} initialNumber={val("card_no")} lookup={TCGS_WITH_CARD_LOOKUP.includes(tcg)} />
           </div>
         )}
-        <Row icon="🔢" label={t("quantity")} htmlFor="quantity" error={<FormError code={e.quantity} />}>
+        <Row label={t("quantity")} htmlFor="quantity" error={<FormError code={e.quantity} />}>
           <div className="flex items-center gap-1">
             <button type="button" onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="grid size-8 place-items-center rounded-full border border-line text-lg hover:border-brand" aria-label="−">−</button>
             <input
@@ -300,7 +282,7 @@ export function ListingForm({
             <button type="button" onClick={() => setQuantity((q) => Math.min(MAX_QUANTITY, q + 1))} className="grid size-8 place-items-center rounded-full border border-line text-lg hover:border-brand" aria-label="+">+</button>
           </div>
         </Row>
-        <Row icon="📁" label={t("binder")} htmlFor="binder">
+        <Row label={t("binder")} htmlFor="binder">
           <input type="hidden" name="binder_field" value="1" />
           <input type="hidden" name="pocket" value={initial.pocket ?? ""} />
           <select id="binder" name="binder" defaultValue={val("binder")} className={inlineSelect}>
@@ -313,7 +295,7 @@ export function ListingForm({
 
       {/* Weitere Angaben zum Aufklappen */}
       <section className={group}>
-        <Fold icon="✨" title={t("details")} summary={detailsSummary || t("optional")}>
+        <Fold title={t("details")} summary={detailsSummary || t("optional")}>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <label htmlFor="condition" className="label">{t("condition")}</label>
@@ -338,7 +320,7 @@ export function ListingForm({
 
         {/* Ort und Übergabe: nur im Marktplatz nötig (Felder bleiben für die Sammlung erhalten) */}
         <div className={inCollection ? "hidden" : ""}>
-          <Fold icon="🤝" title={t("handoverTitle")} summary={handoverSummary} open={Boolean(e.handover)}>
+          <Fold title={t("handoverTitle")} summary={handoverSummary} open={Boolean(e.handover)}>
             <div>
               <label htmlFor="city" className="label">{t("city")}</label>
               <input id="city" name="city" maxLength={80} autoComplete="address-level2" defaultValue={val("city")} className="input" />
@@ -359,9 +341,7 @@ export function ListingForm({
         </div>
 
         {events.length > 0 && !inCollection && (
-          <Fold
-            icon="📅"
-            title={t("bringTo")}
+          <Fold title={t("bringTo")}
             summary={chosenEvents.length > 0 ? t("bringToCount", { count: chosenEvents.length }) : t("optional")}
             open={chosenEvents.length > 0}
           >

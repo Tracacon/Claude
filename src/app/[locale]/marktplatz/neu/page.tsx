@@ -47,7 +47,7 @@ export default async function NewListingPage({ params, searchParams }: PageProps
         initial={{
           title: "",
           description: "",
-          tcg: "",
+          tcg: "pokemon",
           kind: "single",
           offer: toCollection ? "collection" : "sell",
           quantity: "1",
