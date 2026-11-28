@@ -20,8 +20,8 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/marktpla
 export default async function EditListingPage({ params, searchParams }: PageProps<"/[locale]/marktplatz/[id]/bearbeiten">) {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  const profile = await requireProfile();
-  const data = await getListing(id);
+  // Parallel laden, damit die Seite schneller da ist
+  const [profile, data] = await Promise.all([requireProfile(), getListing(id)]);
   if (!data || !data.is_owner) notFound();
   if (data.listing.status === "removed") redirect({ href: `/marktplatz/${id}`, locale });
 
@@ -31,8 +31,7 @@ export default async function EditListingPage({ params, searchParams }: PageProp
   const back = sp.zurueck;
   const wantOffer = typeof sp.angebot === "string" && ["collection", "trade", "sell", "sell_or_trade", "gift"].includes(sp.angebot) ? sp.angebot : null;
   const returnTo = typeof back === "string" && RETURN_PATTERN.test(back) ? back : undefined;
-  await ensureEventsFresh();
-  const [upcoming, chosen, binders] = await Promise.all([getEvents(false, 8), getListingEvents(l.id), getMyBinders()]);
+  const [, upcoming, chosen, binders] = await Promise.all([ensureEventsFresh(), getEvents(false, 8), getListingEvents(l.id), getMyBinders()]);
   // Bereits gewählte Termine immer anzeigen, auch wenn sie nicht unter den nächsten acht sind
   const events = [...upcoming, ...chosen.filter((c) => !upcoming.some((u) => u.id === c.id)).map((c) => ({ ...c, timezone: null }))];
   const t = await getTranslations("Listing");
