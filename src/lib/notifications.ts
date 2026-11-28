@@ -22,7 +22,7 @@ export type AppNotification = {
   request_open: boolean;
 };
 
-export type MiniProfile = { id: string; nickname: string; avatar_id: string | null };
+export type MiniProfile = { id: string; nickname: string; avatar_id: string | null; created_at?: string };
 
 export async function getNotifications(limit = 50): Promise<AppNotification[]> {
   if (!isSupabaseConfigured()) return [];

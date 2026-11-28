@@ -862,7 +862,11 @@
     "newMembers": "Neu dabei",
     "newBadge": "Neu dabei",
     "welcome": "Willkommen, @{nickname}!",
-    "welcomeRich": "Willkommen, <b>@{nickname}</b>!"
+    "welcomeRich": "Willkommen, <b>@{nickname}</b>!",
+    "newMembersOpen": "Liste der neuen Mitglieder öffnen",
+    "newMembersClose": "Liste schließen",
+    "newMembersJoined": "beigetreten",
+    "newMembersCount": "{count, plural, =1 {1 neues Mitglied} other {# neue Mitglieder}} in den letzten 14 Tagen"
   },
   "Push": {
     "title": "Tracacon App",
