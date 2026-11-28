@@ -23,6 +23,9 @@ function toPocket(i: CollectionItem, pocket: number): PocketCard {
     pocket,
     quantity: i.quantity ?? 1,
     mark: i.status === "collection" ? null : i.offer,
+    offer: i.offer,
+    price_cents: i.price_cents,
+    negotiable: i.negotiable,
   };
 }
 
@@ -95,6 +98,7 @@ export default async function BinderPage({ params }: PageProps<"/[locale]/u/[nic
         sortable={profile.is_me && !loose}
         binderId={binder?.id}
         pickable={pickable}
+        returnTo={`/u/${profile.nickname}/binder/${id}`}
       />
     </div>
   );

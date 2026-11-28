@@ -1,5 +1,6 @@
 "use server";
 
+import { RedirectType } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
@@ -62,7 +63,7 @@ export async function hideConversation(_prev: ChatActionState, formData: FormDat
   if (error) return { error: mapDbError(error) };
   revalidatePath("/", "layout");
   const locale = await getLocale();
-  return redirect({ href: "/nachrichten", locale });
+  return redirect({ href: "/nachrichten", locale }, RedirectType.replace);
 }
 
 export async function reportConversation(_prev: ChatActionState, formData: FormData): Promise<ChatActionState> {

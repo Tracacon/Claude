@@ -5,7 +5,6 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { FormError } from "@/components/form-error";
 import { ImageCropper } from "@/components/image-cropper";
 import { PhotoSourceSheet } from "@/components/photo-source-sheet";
-import { Link } from "@/i18n/navigation";
 import { autosaveBinder, deleteBinder, getMyImages, removeLibraryImage, type BinderFormState, type LibraryImage } from "@/lib/actions/binders";
 import {
   BINDER_COLORS,
@@ -20,6 +19,7 @@ import { canvasToJpeg, loadImage } from "@/lib/image";
 import { PHOTO_BUCKET, photoUrl } from "@/lib/marketplace";
 import { createClient } from "@/lib/supabase/client";
 import { BinderCover } from "./binder-cover";
+import { useReturn } from "@/lib/use-return";
 
 type Section = "color" | "effect" | "visibility" | null;
 type SaveState = "idle" | "saving" | "saved" | "error";
@@ -86,6 +86,7 @@ export function BinderForm({
       off = true;
     };
   }, [sourceOpen, library]);
+  const goTo = useReturn();
   const [del, delAction, deleting] = useActionState<BinderFormState, FormData>(deleteBinder, {});
 
   // Vorschau bleibt unter der oberen Leiste stehen: deren Höhe messen
@@ -344,7 +345,11 @@ export function BinderForm({
         </div>
       </div>
 
-      {id && <Link href={`/u/${nickname}/binder/${id}`} className="btn-primary w-full">{t("done")}</Link>}
+      {id && (
+        <button type="button" onClick={() => goTo(`/u/${nickname}/binder/${id}`)} className="btn-primary w-full">
+          {t("done")}
+        </button>
+      )}
 
       {id && (
         <section className="rounded-2xl border border-line bg-night-2 px-4 py-3">

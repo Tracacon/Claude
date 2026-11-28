@@ -7,12 +7,12 @@ import { requireProfile } from "@/lib/auth";
 import { getCardInfo, searchByCode } from "@/lib/cards";
 import { mapDbError } from "@/lib/db-errors";
 import { RedirectType } from "next/navigation";
-import { PHOTO_BUCKET, RETURN_PATTERN, STATUSES, TCGS_WITH_CARD_LOOKUP, UUID_PATTERN, photoPaths } from "@/lib/marketplace";
+import { parseEuroToCents, PHOTO_BUCKET, RETURN_PATTERN, STATUSES, TCGS_WITH_CARD_LOOKUP, UUID_PATTERN, photoPaths } from "@/lib/marketplace";
 import { setsForCode } from "@/lib/set-codes";
 import { createClient } from "@/lib/supabase/server";
 import { listingSchema, removalReasonSchema, reportSchema, toFieldErrors, type FieldErrors, type ListingInput } from "@/lib/validation";
 
-export type ListingFormState = { errors?: FieldErrors; values?: Record<string, string> };
+export type ListingFormState = { errors?: FieldErrors; values?: Record<string, string>; /** Gespeichert: hierhin wechseln */ done?: string };
 export type SimpleState = { ok?: boolean; error?: string };
 
 const FIELDS = [
@@ -118,13 +118,11 @@ export async function createListing(_prev: ListingFormState, formData: FormData)
   await saveListingEvents(data as string, formData);
 
   revalidatePath("/", "layout");
-  const locale = await getLocale();
-  // Liegt die neue Karte in einem Binder, geht es zurück zum Binder (das Formular ersetzt dabei
-  // den Verlaufseintrag, damit "Zurück" nicht wieder im Formular landet)
+  // Liegt die neue Karte in einem Binder, geht es zurück zum Binder. Das Formular wechselt
+  // selbst dorthin (zurück bzw. ersetzend), damit "Zurück" nicht wieder im Formular landet.
   const me = await requireProfile();
   const target = binder ? `/u/${me.nickname}/binder/${binder}` : returnTarget(formData);
-  if (target) return redirect({ href: target, locale }, RedirectType.replace);
-  return redirect({ href: `/marktplatz/${data as string}`, locale });
+  return { done: target ?? `/marktplatz/${data as string}` };
 }
 
 export async function updateListing(_prev: ListingFormState, formData: FormData): Promise<ListingFormState> {
@@ -148,10 +146,8 @@ export async function updateListing(_prev: ListingFormState, formData: FormData)
   await removePhotoFiles(profile.id, (data as string[] | null) ?? []);
   await saveListingEvents(id, formData);
   revalidatePath("/", "layout");
-  const locale = await getLocale();
   const target = returnTarget(formData);
-  if (target) return redirect({ href: target, locale }, RedirectType.replace);
-  return redirect({ href: `/marktplatz/${id}`, locale });
+  return { done: target ?? `/marktplatz/${id}` };
 }
 
 export async function setListingStatus(_prev: SimpleState, formData: FormData): Promise<SimpleState> {
@@ -182,7 +178,7 @@ export async function deleteListing(_prev: SimpleState, formData: FormData): Pro
   await removePhotoFiles(profile.id, (data as string[] | null) ?? []);
   revalidatePath("/", "layout");
   const locale = await getLocale();
-  return redirect({ href: "/profil", locale });
+  return redirect({ href: "/profil", locale }, RedirectType.replace);
 }
 
 export async function reportContent(_prev: SimpleState, formData: FormData): Promise<SimpleState> {
@@ -204,4 +200,24 @@ export async function reportContent(_prev: SimpleState, formData: FormData): Pro
   });
   if (error) return { error: mapDbError(error) };
   return { ok: true };
+}
+
+/**
+ * Schnell markieren aus dem Binder: Tausch, Verkauf (mit Preis), Verkauf oder Tausch, Verschenken
+ * oder zurück in die Sammlung. Fehlende Angaben meldet die Datenbank (z. B. Rückseite, Titel).
+ */
+export async function quickMark(listingId: string, offer: string, price: string, negotiable: boolean): Promise<{ error?: string }> {
+  await requireProfile();
+  if (!UUID_PATTERN.test(listingId) || !["collection", "trade", "sell", "sell_or_trade", "gift"].includes(offer)) return { error: "generic" };
+  let cents: number | null = null;
+  if (offer === "sell" || offer === "sell_or_trade") {
+    cents = parseEuroToCents(price);
+    if (cents === null) return { error: "price_required" };
+    if (Number.isNaN(cents) || cents < 0 || cents > 10_000_000) return { error: "invalid_price" };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("quick_mark", { p_id: listingId, p_offer: offer, p_price_cents: cents, p_negotiable: negotiable });
+  if (error) return { error: mapDbError(error) };
+  revalidatePath("/", "layout");
+  return {};
 }

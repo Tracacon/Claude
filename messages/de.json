@@ -1221,5 +1221,16 @@
     "save": "Speichern",
     "saved": "Gespeichert",
     "remove": "Highlight entfernen"
+  },
+  "QuickMark": {
+    "close": "Schließen",
+    "onlyCollection": "Nur in der Sammlung",
+    "onlyCollectionShort": "Sammlung",
+    "view": "Ansehen",
+    "edit": "Bearbeiten",
+    "markAs": "Markieren als",
+    "complete": "Jetzt ergänzen",
+    "saving": "Wird gespeichert …",
+    "apply": "Übernehmen"
   }
 }

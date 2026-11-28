@@ -1221,5 +1221,16 @@
     "save": "Save",
     "saved": "Saved",
     "remove": "Remove highlight"
+  },
+  "QuickMark": {
+    "close": "Close",
+    "onlyCollection": "Collection only",
+    "onlyCollectionShort": "Collection",
+    "view": "View",
+    "edit": "Edit",
+    "markAs": "Mark as",
+    "complete": "Complete now",
+    "saving": "Saving …",
+    "apply": "Apply"
   }
 }

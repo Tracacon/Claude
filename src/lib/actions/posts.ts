@@ -1,5 +1,6 @@
 "use server";
 
+import { RedirectType } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
@@ -43,7 +44,7 @@ export async function createPost(_prev: PostState, formData: FormData): Promise<
   if (error || !data) return { error: error ? mapDbError(error) : "generic" };
   revalidatePath("/", "layout");
   const locale = await getLocale();
-  return redirect({ href: `/p/${data as string}`, locale });
+  return redirect({ href: `/p/${data as string}`, locale }, RedirectType.replace);
 }
 
 export async function deletePost(_prev: PostState, formData: FormData): Promise<PostState> {
@@ -59,7 +60,7 @@ export async function deletePost(_prev: PostState, formData: FormData): Promise<
   }
   revalidatePath("/", "layout");
   const locale = await getLocale();
-  return redirect({ href: "/profil", locale });
+  return redirect({ href: "/profil", locale }, RedirectType.replace);
 }
 
 export async function toggleLike(postId: string): Promise<{ liked: boolean; like_count: number } | { error: string }> {

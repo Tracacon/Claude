@@ -129,3 +129,23 @@ describe("Sammlung", () => {
     expect((await status(x)).status).toBe("active");
   });
 });
+
+describe("Schnell markieren", () => {
+  it("markiert, prüft Preis und Fotos und legt zurück in die Sammlung", async () => {
+    const ok = await create(ana, { ...glurak, title: "Turtok 2/102", photos: [photo(40), photo(41)] });
+    await t.as(ana, "select public.quick_mark($1, 'trade')", [ok]);
+    expect((await status(ok)).status).toBe("active");
+    await expect(t.as(ana, "select public.quick_mark($1, 'sell')", [ok])).rejects.toThrow(/price_required/);
+    await t.as(ana, "select public.quick_mark($1, 'sell', 1500, true)", [ok]);
+    const r = await t.db.query<{ offer: string; price_cents: number; negotiable: boolean }>("select offer::text, price_cents, negotiable from public.listings where id = $1", [ok]);
+    expect(r.rows[0]).toEqual({ offer: "sell", price_cents: 1500, negotiable: true });
+    await t.as(ana, "select public.quick_mark($1, 'collection')", [ok]);
+    expect((await status(ok)).status).toBe("collection");
+    // nur Vorderseite: Tausch geht nicht, Verschenken schon
+    const front = await create(ana, { ...glurak, title: "Bisasam 44/102", photos: [photo(42)] });
+    await expect(t.as(ana, "select public.quick_mark($1, 'trade')", [front])).rejects.toThrow(/front_back_required/);
+    await t.as(ana, "select public.quick_mark($1, 'gift')", [front]);
+    expect((await status(front)).status).toBe("active");
+    await expect(t.as(ben, "select public.quick_mark($1, 'trade')", [ok])).rejects.toThrow(/not_found/);
+  });
+});

@@ -1,5 +1,6 @@
 "use server";
 
+import { RedirectType } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
@@ -105,7 +106,7 @@ export async function deleteBinder(_prev: BinderFormState, formData: FormData): 
   if (error) return { error: mapDbError(error) };
   revalidatePath("/", "layout");
   const locale = await getLocale();
-  return redirect({ href: "/profil", locale });
+  return redirect({ href: "/profil", locale }, RedirectType.replace);
 }
 
 /** Karte im Binder in ein anderes Fach legen (belegtes Fach: beide tauschen) */

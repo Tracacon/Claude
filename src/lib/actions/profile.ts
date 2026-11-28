@@ -1,5 +1,6 @@
 "use server";
 
+import { RedirectType } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
@@ -53,7 +54,7 @@ export async function completeOnboarding(_prev: FormState, formData: FormData): 
 
   revalidatePath("/", "layout");
   const locale = await getLocale();
-  return redirect({ href: (await takePendingCheckin()) ?? "/profil", locale });
+  return redirect({ href: (await takePendingCheckin()) ?? "/profil", locale }, RedirectType.replace);
 }
 
 function passwordErrorCode(code?: string) {
@@ -97,7 +98,7 @@ export async function updateProfile(_prev: FormState, formData: FormData): Promi
   // Im Formular den bereinigten Namen zeigen (aus einem eingefügten Link wird "name")
   values.instagram = parsed.data.instagram ?? "";
   if (parsed.data.locale !== profile.locale) {
-    return redirect({ href: "/einstellungen", locale: parsed.data.locale });
+    return redirect({ href: "/einstellungen", locale: parsed.data.locale }, RedirectType.replace);
   }
   return { ok: true, values };
 }
@@ -137,5 +138,5 @@ export async function deleteAccount(_prev: FormState, formData: FormData): Promi
   // Konto ist weg; lokale Sitzung entfernen.
   await supabase.auth.signOut({ scope: "local" });
   const locale = await getLocale();
-  return redirect({ href: "/", locale });
+  return redirect({ href: "/", locale }, RedirectType.replace);
 }

@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- Bilder kommen direkt aus Supabase Storage */
 import { getTranslations } from "next-intl/server";
+import { OfferIcon } from "@/components/offer-icon";
 import { Link } from "@/i18n/navigation";
 import {
   COLLECTION_MARKS,
@@ -11,7 +12,6 @@ import {
 import { photoUrl, type CollectionItem } from "@/lib/marketplace";
 import { BinderCover } from "./binder-cover";
 
-const MARK_ICON: Record<string, string> = { trade: "🔁", sell_or_trade: "🔁€", sell: "€", gift: "🎁" };
 
 const markOf = (i: CollectionItem) => (i.status === "collection" ? null : i.offer);
 
@@ -142,7 +142,7 @@ export async function BinderShelf({
                       )}
                       {m && (
                         <span className="absolute right-1 top-1 rounded bg-brand px-1 py-0.5 text-[10px] font-bold leading-none text-on-brand shadow">
-                          {MARK_ICON[m]}
+                          <OfferIcon offer={m} className="size-3" />
                         </span>
                       )}
                       {c.quantity > 1 && (
