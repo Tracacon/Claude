@@ -431,7 +431,13 @@
     "inBinder": "Im Binder „{name}“",
     "optional": "freiwillig",
     "titleHintOptional": "Für die Sammlung freiwillig. Zum Tauschen oder Verkaufen brauchst du einen Titel.",
-    "photosHintFront": "Pflicht: ein Foto der Vorderseite. Zum Tauschen oder Verkaufen brauchst du zusätzlich die Rückseite."
+    "photosHintFront": "Pflicht: ein Foto der Vorderseite. Zum Tauschen oder Verkaufen brauchst du zusätzlich die Rückseite.",
+    "titlePlaceholder": "Titel, z. B. Glurak ex 199/165",
+    "titlePlaceholderOptional": "Titel (freiwillig)",
+    "descriptionPlaceholder": "Beschreibung hinzufügen: Zustand, Besonderheiten, was du im Tausch suchst …",
+    "detailsTitle": "Zustand, Sprache, Grading",
+    "handoverTitle": "Ort und Übergabe",
+    "bringToCount": "{count, plural, =1 {1 Termin} other {# Termine}}"
   },
   "Moderation": {
     "title": "Moderation",
@@ -1176,11 +1182,11 @@
     "dragging": "Lass die Karte über einem Fach los. Am Rand festhalten blättert um.",
     "effect": "Effekt",
     "effect_none": "Ohne",
-    "effect_glitter": "Glitzer",
-    "effect_gold": "Goldglitzer",
-    "effect_holo": "Holo",
-    "effect_rainbow": "Regenbogen",
-    "effect_cosmos": "Kosmos",
+    "effect_glitter": "Sternenstaub",
+    "effect_gold": "Goldfolie",
+    "effect_holo": "Schimmer",
+    "effect_rainbow": "Perlmutt",
+    "effect_cosmos": "Galaxie",
     "highlight": "Karten hervorheben",
     "coverImage": "Eigenes Titelbild",
     "coverImageHint": "Freiwillig. Ein Foto für den Einband, zum Zuschneiden und Anpassen. Ohne Foto zeigt der Binder seine Farbe.",
@@ -1193,7 +1199,13 @@
     "autosaved": "Automatisch gespeichert",
     "nameFirst": "Gib dem Binder einen Namen, dann wird er automatisch gespeichert.",
     "done": "Fertig",
-    "visibilityShort": "Wer sieht ihn"
+    "visibilityShort": "Wer sieht ihn",
+    "libraryLoading": "Deine Bilder werden geladen …",
+    "libraryCovers": "Zuletzt verwendet",
+    "libraryCards": "Deine Karten",
+    "libraryUseCover": "Dieses Titelbild verwenden",
+    "libraryUseCard": "Diese Karte als Titelbild zuschneiden",
+    "libraryForget": "Aus der Auswahl entfernen"
   },
   "Highlights": {
     "title": "Highlights",

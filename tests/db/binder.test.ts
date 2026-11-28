@@ -101,15 +101,25 @@ describe("Binder", () => {
     await t.as(ana, "delete from public.binders where id = $1", [id]);
   });
 
-  it("setzt ein eigenes Titelbild und gibt das alte zurück", async () => {
+  it("setzt Titelbilder und behält sie in der Bildersammlung", async () => {
     const r = await t.as<{ save_binder: string }>(ana, "select public.save_binder(null, 'Mit Bild', 'black', 'public')");
     const id = r.rows[0].save_binder;
     const img1 = "60000000-0000-0000-0000-000000000001";
     const img2 = "60000000-0000-0000-0000-000000000002";
-    expect((await t.as<{ old: string | null }>(ana, "select public.set_binder_cover($1, $2) as old", [id, img1])).rows[0].old).toBeNull();
-    expect((await t.as<{ old: string | null }>(ana, "select public.set_binder_cover($1, $2) as old", [id, img2])).rows[0].old).toBe(img1);
+    await t.as(ana, "select public.set_binder_cover($1, $2)", [id, img1]);
+    await t.as(ana, "select public.set_binder_cover($1, $2)", [id, img2]);
     const b = await t.as<{ cover_image: string }>(null, "select cover_image from public.profile_binders('Ana') where id = $1", [id]);
     expect(b.rows[0].cover_image).toBe(img2);
+    const lib = await t.as<{ image_id: string; kind: string }>(ana, "select image_id, kind from public.my_image_library() where kind = 'cover'");
+    expect(lib.rows.map((x) => x.image_id)).toEqual([img2, img1]);
+    // Kartenvorderseiten erscheinen ebenfalls
+    const cards = await t.as<{ kind: string }>(ana, "select kind from public.my_image_library() where kind = 'card'");
+    expect(cards.rows.length).toBeGreaterThan(0);
+    // Fremde sehen nichts
+    expect((await t.as(ben, "select * from public.my_image_library() where kind = 'cover'")).rows).toEqual([]);
+    // Entfernen: img1 wird nicht mehr genutzt, img2 schon
+    expect((await t.as<{ r: boolean }>(ana, "select public.remove_library_image($1) as r", [img1])).rows[0].r).toBe(true);
+    expect((await t.as<{ r: boolean }>(ana, "select public.remove_library_image($1) as r", [img2])).rows[0].r).toBe(false);
     await expect(t.as(ben, "select public.set_binder_cover($1, null)", [id])).rejects.toThrow(/not_found/);
     await t.as(ana, "delete from public.binders where id = $1", [id]);
   });

@@ -118,101 +118,115 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
-   Binder-Einbände: Effekte über der Einbandfarbe (Glitzer, Gold, Holo, Regenbogen, Kosmos)
-   Ein <span class="binder-fx binder-fx-…"> liegt über dem Einband.
+   Binder-Einbände: Effekte über der Einbandfarbe bzw. dem Titelbild.
+   Bewusst dezent; Bewegung nur über transform/opacity (läuft flüssig, auch auf dem Handy).
+   Schlüssel bleiben gleich: glitter = Sternenstaub, gold = Goldfolie, holo = Schimmer,
+   rainbow = Perlmutt, cosmos = Galaxie.
    --------------------------------------------------------------------------- */
 .binder-fx {
   position: absolute;
   inset: 0;
+  overflow: hidden;
   pointer-events: none;
   border-radius: inherit;
 }
-
-/* Glitzer: viele kleine Punkte in zwei Ebenen, die versetzt funkeln */
-.binder-fx-glitter,
-.binder-fx-gold {
-  --sp: rgba(255, 255, 255, 0.95);
-  --sp2: rgba(220, 235, 255, 0.7);
-  background-image:
-    radial-gradient(circle at 20% 30%, var(--sp) 0 1px, transparent 1.6px),
-    radial-gradient(circle at 70% 60%, var(--sp2) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 40% 80%, var(--sp) 0 0.8px, transparent 1.3px),
-    radial-gradient(circle at 85% 15%, var(--sp2) 0 1.2px, transparent 1.8px);
-  background-size: 23px 19px, 31px 27px, 17px 23px, 41px 37px;
-  mix-blend-mode: screen;
-  animation: binder-twinkle 2.6s ease-in-out infinite alternate;
-}
-.binder-fx-glitter::after,
-.binder-fx-gold::after {
+.binder-fx::before,
+.binder-fx::after {
   content: "";
   position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(circle at 50% 50%, var(--sp) 0 0.9px, transparent 1.4px),
-    radial-gradient(circle at 10% 90%, var(--sp2) 0 1px, transparent 1.6px);
-  background-size: 29px 33px, 37px 21px;
-  animation: binder-twinkle 1.9s ease-in-out infinite alternate-reverse;
-}
-.binder-fx-gold {
-  --sp: rgba(255, 221, 120, 1);
-  --sp2: rgba(255, 190, 70, 0.85);
-  box-shadow: inset 0 0 40px rgba(255, 200, 80, 0.25);
+  pointer-events: none;
 }
 
-/* Holo: schimmernder Regenbogenstreifen, der langsam wandert */
-.binder-fx-holo,
-.binder-fx-rainbow,
-.binder-fx-cosmos {
-  background-image: linear-gradient(
-    115deg,
-    transparent 25%,
-    rgba(255, 80, 200, 0.35) 38%,
-    rgba(80, 230, 255, 0.4) 46%,
-    rgba(255, 245, 120, 0.35) 54%,
-    rgba(140, 255, 160, 0.3) 62%,
-    transparent 75%
+/* Schimmer: weicher Lichtstreif, der alle paar Sekunden über den Einband gleitet */
+.binder-fx-holo {
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.16) 0%, transparent 38%);
+}
+.binder-fx-holo::before,
+.binder-fx-gold::before {
+  inset: -20% -150%;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.38) 50%, transparent 60%);
+  transform: translateX(-60%);
+  animation: binder-sweep 5.5s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+  will-change: transform;
+}
+
+/* Goldfolie: warmer Metallglanz plus Lichtstreif (wirkt auf jeder Einbandfarbe) */
+.binder-fx-gold {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 221, 128, 0.42) 0%,
+    rgba(191, 144, 39, 0.28) 30%,
+    rgba(255, 238, 176, 0.4) 52%,
+    rgba(150, 104, 18, 0.3) 75%,
+    rgba(240, 200, 110, 0.38) 100%
   );
-  background-size: 300% 300%;
-  mix-blend-mode: color-dodge;
-  animation: binder-holo 6s ease-in-out infinite alternate;
+}
+.binder-fx-gold::before {
+  background: linear-gradient(105deg, transparent 42%, rgba(255, 240, 200, 0.55) 50%, transparent 58%);
 }
 
-/* Regenbogen-Holo: ganze Fläche in Regenbogenfarben mit feinem Rillenmuster */
-.binder-fx-rainbow {
-  background-image:
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 2px, transparent 2px 5px),
-    linear-gradient(120deg, #ff4fa3, #ffb347, #fff275, #6dff9e, #5ad1ff, #a77bff, #ff4fa3);
-  background-size: 100% 100%, 300% 300%;
-  mix-blend-mode: soft-light;
-  opacity: 0.9;
+/* Perlmutt: zarte Pastellfarben, die sich sehr langsam drehen */
+.binder-fx-rainbow::before {
+  inset: -60%;
+  background: conic-gradient(from 0deg, #ffd1e8, #c9f5e6, #c7e3ff, #e3d1ff, #fff2c2, #ffd1e8);
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  animation: binder-spin 18s linear infinite;
+  will-change: transform;
+}
+.binder-fx-rainbow::after {
+  inset: 0;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.22), transparent 45%, rgba(255, 255, 255, 0.08));
 }
 
-/* Kosmos: Sterne plus Holo-Schimmer */
+/* Sternenstaub: wenige feine Lichtpunkte, die sanft funkeln */
+.binder-fx-glitter::before,
+.binder-fx-glitter::after,
 .binder-fx-cosmos::after {
-  content: "";
-  position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(circle at 15% 25%, #fff 0 1.2px, transparent 2px),
-    radial-gradient(circle at 65% 70%, #cfe8ff 0 1px, transparent 1.8px),
-    radial-gradient(circle at 80% 20%, #ffe9ff 0 0.8px, transparent 1.4px),
-    radial-gradient(4px 4px at 40% 55%, rgba(255, 255, 255, 0.9), transparent);
-  background-size: 37px 41px, 53px 47px, 29px 31px, 71px 67px;
-  mix-blend-mode: screen;
-  animation: binder-twinkle 3.2s ease-in-out infinite alternate;
+    radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.95) 0 0.7px, transparent 1.3px),
+    radial-gradient(circle at 72% 38%, rgba(255, 255, 255, 0.8) 0 0.6px, transparent 1.2px),
+    radial-gradient(circle at 44% 76%, rgba(255, 255, 255, 0.9) 0 0.8px, transparent 1.4px);
+  background-size: 47px 53px, 61px 43px, 37px 59px;
+  animation: binder-twinkle 3.4s ease-in-out infinite alternate;
+  will-change: opacity;
+}
+.binder-fx-glitter::after {
+  background-position: 21px 17px, 9px 30px, 30px 5px;
+  animation-delay: -1.7s;
 }
 
+/* Galaxie: tiefe Nebelfarben, langsam atmend, mit Sternen */
+.binder-fx-cosmos::before {
+  inset: -25%;
+  background:
+    radial-gradient(40% 35% at 30% 30%, rgba(146, 84, 255, 0.55), transparent 70%),
+    radial-gradient(35% 30% at 70% 65%, rgba(34, 205, 215, 0.4), transparent 70%),
+    radial-gradient(30% 25% at 60% 20%, rgba(255, 79, 163, 0.35), transparent 70%);
+  mix-blend-mode: screen;
+  animation: binder-breathe 9s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+
+@keyframes binder-sweep {
+  0%, 55% { transform: translateX(-60%); }
+  100% { transform: translateX(60%); }
+}
+@keyframes binder-spin {
+  to { transform: rotate(360deg); }
+}
 @keyframes binder-twinkle {
-  from { opacity: 0.35; }
+  from { opacity: 0.25; }
   to { opacity: 1; }
 }
-@keyframes binder-holo {
-  from { background-position: 0% 30%, 0% 0%; }
-  to { background-position: 100% 70%, 100% 100%; }
+@keyframes binder-breathe {
+  from { transform: scale(1) rotate(0deg); opacity: 0.75; }
+  to { transform: scale(1.12) rotate(8deg); opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .binder-fx,
+  .binder-fx::before,
   .binder-fx::after {
     animation: none !important;
   }
