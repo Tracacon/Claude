@@ -7,7 +7,8 @@ import { requireProfile } from "@/lib/auth";
 import { ensureEventsFresh, getEvents, getListingEvents } from "@/lib/events";
 import { getListing } from "@/lib/listings";
 import { getMyBinders } from "@/lib/binders";
-import { centsToInput } from "@/lib/marketplace";
+import { centsToInput, RETURN_PATTERN } from "@/lib/marketplace";
+import { BackTarget } from "@/components/back-target";
 import { SET_CODES } from "@/lib/set-codes";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/marktplatz/[id]/bearbeiten">): Promise<Metadata> {
@@ -16,7 +17,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/marktpla
   return { title: t("editTitle") };
 }
 
-export default async function EditListingPage({ params }: PageProps<"/[locale]/marktplatz/[id]/bearbeiten">) {
+export default async function EditListingPage({ params, searchParams }: PageProps<"/[locale]/marktplatz/[id]/bearbeiten">) {
   const { locale, id } = await params;
   setRequestLocale(locale);
   const profile = await requireProfile();
@@ -25,6 +26,11 @@ export default async function EditListingPage({ params }: PageProps<"/[locale]/m
   if (data.listing.status === "removed") redirect({ href: `/marktplatz/${id}`, locale });
 
   const l = data.listing;
+  // Aus dem Binder (Schnell-Markieren → Ergänzen) kommt ?zurueck=<Binder-Adresse>
+  const sp = await searchParams;
+  const back = sp.zurueck;
+  const wantOffer = typeof sp.angebot === "string" && ["collection", "trade", "sell", "sell_or_trade", "gift"].includes(sp.angebot) ? sp.angebot : null;
+  const returnTo = typeof back === "string" && RETURN_PATTERN.test(back) ? back : undefined;
   await ensureEventsFresh();
   const [upcoming, chosen, binders] = await Promise.all([getEvents(false, 8), getListingEvents(l.id), getMyBinders()]);
   // Bereits gewählte Termine immer anzeigen, auch wenn sie nicht unter den nächsten acht sind
@@ -33,8 +39,10 @@ export default async function EditListingPage({ params }: PageProps<"/[locale]/m
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">{t("editTitle")}</h1>
+      {returnTo && <BackTarget href={returnTo} />}
       <ListingForm
         userId={profile.id}
+        returnTo={returnTo}
         listingId={l.id}
         initial={{
           // Automatischer Titel wird nicht vorausgefüllt (zum Tauschen/Verkaufen braucht es einen echten)
@@ -42,7 +50,7 @@ export default async function EditListingPage({ params }: PageProps<"/[locale]/m
           description: l.description ?? "",
           tcg: l.tcg,
           kind: l.kind,
-          offer: l.status === "collection" ? "collection" : l.offer,
+          offer: wantOffer ?? (l.status === "collection" ? "collection" : l.offer),
           quantity: String(l.quantity ?? 1),
           price: centsToInput(l.price_cents),
           negotiable: l.negotiable,

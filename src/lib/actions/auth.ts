@@ -1,5 +1,6 @@
 "use server";
 
+import { RedirectType } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { takePendingCheckin } from "@/lib/checkin";
@@ -33,7 +34,7 @@ async function afterLogin(userId: string, href?: string): Promise<never> {
     .maybeSingle<{ nickname: string | null; locale: "de" | "en" }>();
   const locale = profile?.locale ?? (await getLocale());
   const pending = profile?.nickname ? await takePendingCheckin() : null;
-  return redirect({ href: pending ?? href ?? (profile?.nickname ? "/profil" : "/willkommen"), locale });
+  return redirect({ href: pending ?? href ?? (profile?.nickname ? "/profil" : "/willkommen"), locale }, RedirectType.replace);
 }
 
 const str = (fd: FormData, k: string) => String(fd.get(k) ?? "");
@@ -230,5 +231,5 @@ export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   const locale = await getLocale();
-  redirect({ href: "/", locale });
+  redirect({ href: "/", locale }, RedirectType.replace);
 }

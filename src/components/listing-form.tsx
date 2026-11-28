@@ -1,10 +1,12 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useActionState, useState, type ReactNode } from "react";
+import { useActionState, useEffect, useState, type ReactNode } from "react";
+import { useReturn } from "@/lib/use-return";
 import { CardCodeFields } from "@/components/card-code-fields";
 import { FormError } from "@/components/form-error";
 import { PhotoUploader } from "@/components/photo-uploader";
+import { OfferIcon } from "@/components/offer-icon";
 import { Link } from "@/i18n/navigation";
 import { createListing, updateListing, type ListingFormState } from "@/lib/actions/listings";
 import { isMarketOffer } from "@/lib/validation";
@@ -17,7 +19,6 @@ import {
   KINDS_NEEDING_BOTH_SIDES,
   KINDS_WITH_CARD,
   MAX_QUANTITY,
-  OFFERS,
   TCGS,
   TCGS_WITH_CARD_LOOKUP,
   offerHasPrice,
@@ -54,8 +55,8 @@ export type BinderOption = { id: string; name: string };
 
 export type EventOption = { id: string; name: string; starts_at: string; ends_at: string; timezone: string | null; city: string | null };
 
-/** Symbole der Angebote */
-const OFFER_ICON: Record<string, string> = { collection: "📁", sell: "€", trade: "🔁", sell_or_trade: "🔁€", gift: "🎁" };
+/** Reihenfolge der Angebotsknöpfe */
+const OFFER_ORDER = [COLLECTION_CHOICE, "trade", "sell", "sell_or_trade", "gift"] as const;
 
 /** Zeile in einer Gruppe: Symbol, Bezeichnung, Inhalt rechts (wie Instagram-Einstellungen) */
 function Row({ icon, label, htmlFor, children, error }: { icon: string; label: ReactNode; htmlFor?: string; children: ReactNode; error?: ReactNode }) {
@@ -125,6 +126,12 @@ export function ListingForm({
   const tErr = useTranslations("Errors");
   const [state, action, pending] = useActionState<ListingFormState, FormData>(listingId ? updateListing : createListing, {});
   const [uploading, setUploading] = useState(false);
+  // Gespeichert: zur Zielseite (zurück, falls man von dort kam)
+  const goTo = useReturn();
+  useEffect(() => {
+    if (state.done) goTo(state.done);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.done]);
 
   // Nach einem Fehler die eingegebenen Werte behalten
   const v = state.values;
@@ -170,7 +177,14 @@ export function ListingForm({
 
       {/* Fotos */}
       <section className="space-y-2">
-        <PhotoUploader key={photos.join(",")} userId={userId} initial={photos} requireBothSides={bothSides} onPendingChange={setUploading} />
+        <PhotoUploader
+          key={photos.join(",")}
+          userId={userId}
+          initial={photos}
+          requireBothSides={bothSides}
+          cropCards={needsPhoto}
+          onPendingChange={setUploading}
+        />
         <p className={`text-xs ${bothSides ? "text-brand" : "text-cream/60"}`}>
           {bothSides ? t("photosHintRequired") : needsPhoto ? t("photosHintFront") : t("photosHint")}
         </p>
@@ -213,7 +227,7 @@ export function ListingForm({
       <fieldset className="space-y-2">
         <legend className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-cream/60">{t("offer")}</legend>
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {[COLLECTION_CHOICE, ...OFFERS].map((x) => (
+          {OFFER_ORDER.map((x) => (
             <label
               key={x}
               className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
@@ -221,7 +235,7 @@ export function ListingForm({
               }`}
             >
               <input type="radio" name="offer" value={x} checked={offer === x} onChange={() => setOffer(x)} className="sr-only" />
-              <span aria-hidden>{OFFER_ICON[x]}</span>
+              <OfferIcon offer={x} />
               {x === COLLECTION_CHOICE ? t("offerCollection") : tOffer(x)}
             </label>
           ))}
@@ -299,7 +313,7 @@ export function ListingForm({
 
       {/* Weitere Angaben zum Aufklappen */}
       <section className={group}>
-        <Fold icon="✨" title={t("detailsTitle")} summary={detailsSummary || t("optional")}>
+        <Fold icon="✨" title={t("details")} summary={detailsSummary || t("optional")}>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <label htmlFor="condition" className="label">{t("condition")}</label>

@@ -32,6 +32,7 @@ const KNOWN = [
   "too_many_binders",
   "pocket_taken",
   "title_required",
+  "price_required",
   "too_many_highlights",
 ] as const;
 

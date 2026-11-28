@@ -20,12 +20,15 @@ export function PhotoUploader({
   userId,
   initial,
   requireBothSides = false,
+  cropCards = false,
   onPendingChange,
 }: {
   userId: string;
   initial: string[];
   /** Erste zwei Plätze als Vorder- und Rückseite beschriften und als Pflicht markieren */
   requireBothSides?: boolean;
+  /** Jedes Foto im Kartenformat zuschneiden und anpassen (Einzelkarten und Slabs) */
+  cropCards?: boolean;
   onPendingChange?: (pending: boolean) => void;
 }) {
   const t = useTranslations("Listing");
@@ -82,7 +85,8 @@ export function PhotoUploader({
   function handleFiles(files: File[]) {
     setError(null);
     const selected = files.slice(0, Math.max(0, MAX_PHOTOS - photos.length));
-    if (requireBothSides) {
+    // Kartenfotos immer zuschneiden (auch die Rückseite und weitere Fotos)
+    if (requireBothSides || cropCards) {
       void openNext(selected);
       return;
     }
@@ -181,6 +185,7 @@ export function PhotoUploader({
           src={crop.url}
           img={crop.img}
           shape="card"
+          adjustable
           output={{ width: 1146, height: 1600 }}
           title={cropTitle}
           onCancel={() => finishCrop(null)}

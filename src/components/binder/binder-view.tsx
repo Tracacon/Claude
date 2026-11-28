@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { FormError } from "@/components/form-error";
+import { OfferIcon } from "@/components/offer-icon";
 import { Link, useRouter } from "@/i18n/navigation";
 import { moveToPocket } from "@/lib/actions/binders";
 import {
@@ -17,6 +18,7 @@ import {
   type CollectionMark,
 } from "@/lib/binder-shared";
 import { AddToBinderSheet, type PickCard } from "./add-to-binder-sheet";
+import { QuickMarkSheet } from "./quick-mark-sheet";
 
 export type PocketCard = {
   id: string;
@@ -27,9 +29,12 @@ export type PocketCard = {
   quantity: number;
   /** Markierung für den Marktplatz, null = nur Sammlung */
   mark: "trade" | "sell" | "sell_or_trade" | "gift" | null;
+  /** Gespeichertes Angebot und Preis (für das Schnell-Markieren) */
+  offer: string;
+  price_cents: number | null;
+  negotiable: boolean;
 };
 
-const MARK_ICON: Record<string, string> = { trade: "🔁", sell_or_trade: "🔁€", sell: "€", gift: "🎁" };
 
 /**
  * Aufgeschlagener Sammelkartenbinder: Seiten mit 3 × 3 Fächern zum Durchblättern.
@@ -45,6 +50,7 @@ export function BinderView({
   sortable,
   binderId,
   pickable = [],
+  returnTo,
 }: {
   cards: PocketCard[];
   color: BinderColor;
@@ -54,6 +60,8 @@ export function BinderView({
   binderId?: string;
   /** Eigene Karten aus anderen Bindern oder ohne Binder */
   pickable?: PickCard[];
+  /** Adresse dieses Binders (Rücksprung nach dem Ergänzen einer Karte) */
+  returnTo?: string;
 }) {
   const t = useTranslations("Binder");
   const tOffer = useTranslations("Offer");
@@ -66,6 +74,8 @@ export function BinderView({
   const [perView, setPerView] = useState(1);
   /** Offenes Auswahlfenster: Fach (ab 0) oder null = nächste freie Fächer */
   const [sheet, setSheet] = useState<{ pocket: number | null } | null>(null);
+  /** Schnell-Markieren-Fenster für eine Karte (eigener Binder) */
+  const [quick, setQuick] = useState<PocketCard | null>(null);
   const canAdd = sortable && Boolean(binderId);
   const tC = useTranslations("Collection");
   /** Hervorheben: passende Karten bleiben hell, die anderen werden abgedunkelt */
@@ -363,7 +373,7 @@ export function BinderView({
                       <span aria-hidden className="pointer-events-none absolute inset-x-1 top-[6%] h-px bg-white/25" />
                       {card?.mark && (
                         <span className="absolute right-1 top-1 rounded bg-brand px-1 py-0.5 text-[10px] font-bold leading-none text-on-brand shadow" title={tOffer(card.mark)}>
-                          {MARK_ICON[card.mark]}
+                          <OfferIcon offer={card.mark} className="size-3" />
                         </span>
                       )}
                       {card && card.quantity > 1 && (
@@ -399,11 +409,23 @@ export function BinderView({
                     : {};
                   return (
                     <li key={pocket}>
-                      {card ? (
+                      {card && sortable ? (
+                        // Eigener Binder: Antippen öffnet das Schnell-Markieren, Gedrückthalten verschiebt
+                        <button
+                          type="button"
+                          ref={refFn}
+                          {...pressProps}
+                          onClick={() => setQuick(card)}
+                          className={`${pocketClass} w-full hover:-translate-y-0.5`}
+                          title={card.title}
+                          aria-label={t("pocketCard", { title: card.title })}
+                        >
+                          {inner}
+                        </button>
+                      ) : card ? (
                         <Link
                           href={`/marktplatz/${card.id}`}
                           ref={refFn}
-                          {...pressProps}
                           className={`${pocketClass} hover:-translate-y-0.5`}
                           title={card.title}
                         >
@@ -444,6 +466,17 @@ export function BinderView({
           </div>,
           document.body,
         )}
+
+      {quick && (
+        <QuickMarkSheet
+          card={quick}
+          returnTo={returnTo ?? ""}
+          onClose={() => setQuick(null)}
+          onMarked={(mark, offer, cents) =>
+            setCards((list) => list.map((x) => (x.id === quick.id ? { ...x, mark: mark as PocketCard["mark"], offer, price_cents: cents } : x)))
+          }
+        />
+      )}
 
       {sheet && binderId && (
         <AddToBinderSheet binderId={binderId} pocket={sheet.pocket} cards={pickable} onClose={() => setSheet(null)} />
