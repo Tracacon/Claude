@@ -17,7 +17,7 @@ const LOGO_URL = "https://www.tracacon.de/web/image/website/1/logo/TRACACON"; //
 export async function SiteHeader() {
   const t = await getTranslations("Nav");
   const { profile, onboarded, isTeam, reports, unread, activity, menu } = await getUserMenu();
-  const [newMembers] = await Promise.all([getNewMembers(), onboarded ? touchPresence() : undefined]);
+  const [newMembers] = await Promise.all([getNewMembers(50), onboarded ? touchPresence() : undefined]);
 
   return (
     <>
