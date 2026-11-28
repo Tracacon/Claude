@@ -19,7 +19,7 @@ export default async function NewBinderPage({ params }: PageProps<"/[locale]/bin
     <div className="mx-auto max-w-lg space-y-4">
       <BackLink fallback="/profil" label={t("back")} />
       <h1 className="text-2xl font-bold">{t("newTitle")}</h1>
-      <BinderForm userId={me.id} />
+      <BinderForm userId={me.id} nickname={me.nickname!} />
     </div>
   );
 }
