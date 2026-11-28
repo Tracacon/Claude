@@ -45,12 +45,12 @@ export function EventCard({
         )}
         <span className="mt-1 flex flex-wrap gap-2 text-xs">
           {event.listing_count ? (
-            <span className="rounded-full bg-white/10 px-2 py-0.5">🃏 {labels.listings}</span>
+            <span className="rounded-full bg-tint/10 px-2 py-0.5">🃏 {labels.listings}</span>
           ) : null}
           {event.dealer_count && labels.dealers ? (
-            <span className="rounded-full bg-white/10 px-2 py-0.5">🏪 {labels.dealers}</span>
+            <span className="rounded-full bg-tint/10 px-2 py-0.5">🏪 {labels.dealers}</span>
           ) : null}
-          {labels.tables && <span className="rounded-full bg-white/10 px-2 py-0.5">{labels.tables}</span>}
+          {labels.tables && <span className="rounded-full bg-tint/10 px-2 py-0.5">{labels.tables}</span>}
           {event.checked_in && <span className="rounded-full bg-ok/20 px-2 py-0.5 text-ok">✓ {labels.checkedIn}</span>}
         </span>
       </span>

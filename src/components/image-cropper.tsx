@@ -235,11 +235,11 @@ export function ImageCropper({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-night" role="dialog" aria-modal="true" aria-label={title}>
+    <div className="theme-dark fixed inset-0 z-50 flex flex-col bg-night" role="dialog" aria-modal="true" aria-label={title}>
       <div className="flex items-center justify-between border-b border-line px-4 py-3">
         <button type="button" onClick={onCancel} className="text-cream/80">{t("cancel")}</button>
         <p className="font-semibold">{title}</p>
-        <button type="button" onClick={confirm} className="font-bold text-brand">{confirmLabel ?? t("apply")}</button>
+        <button type="button" onClick={confirm} className="font-bold text-brand-ink">{confirmLabel ?? t("apply")}</button>
       </div>
 
       <div
@@ -299,7 +299,7 @@ export function ImageCropper({
                 role="tab"
                 aria-selected={panel === x}
                 onClick={() => setPanel(x)}
-                className={`rounded-full px-4 py-1.5 text-sm ${panel === x ? "bg-brand/15 font-semibold text-brand" : "text-cream/70"}`}
+                className={`rounded-full px-4 py-1.5 text-sm ${panel === x ? "bg-brand/15 font-semibold text-brand-ink" : "text-cream/70"}`}
               >
                 {t(x === "crop" ? "tabCrop" : "tabAdjust")}
               </button>

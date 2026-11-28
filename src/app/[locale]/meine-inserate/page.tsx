@@ -26,10 +26,10 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/meine-in
 }
 
 const statusColor: Record<ListingStatus, string> = {
-  collection: "bg-white/10 text-cream/80",
+  collection: "bg-tint/10 text-cream/80",
   active: "bg-ok/15 text-ok",
-  reserved: "bg-brand/15 text-brand",
-  done: "bg-white/10 text-cream/70",
+  reserved: "bg-brand/15 text-brand-ink",
+  done: "bg-tint/10 text-cream/70",
   removed: "bg-danger/15 text-danger",
 };
 
@@ -69,7 +69,7 @@ export default async function MyListingsPage({ params }: PageProps<"/[locale]/me
                   <p className="text-xs text-cream/60">
                     {tTcg(l.tcg)} · {format.dateTime(new Date(l.created_at), { dateStyle: "short" })}
                   </p>
-                  <p className="text-sm font-bold text-brand">
+                  <p className="text-sm font-bold text-brand-ink">
                     <PriceTag offer={l.offer} cents={l.price_cents} negotiable={false} />
                   </p>
                   {l.status === "removed" && l.removed_reason && (

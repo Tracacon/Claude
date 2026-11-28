@@ -58,7 +58,7 @@ export async function BinderShelf({
   };
   const countFor = (m: CollectionMark) => items.filter((i) => inBinder(i) && matchesMark(markOf(i), m)).length;
   const chip = (on: boolean) =>
-    `shrink-0 rounded-full border px-3 py-1.5 text-sm ${on ? "border-brand bg-brand/15 font-semibold text-brand" : "border-line text-cream/75 hover:bg-white/5"}`;
+    `shrink-0 rounded-full border px-3 py-1.5 text-sm ${on ? "border-brand bg-brand/15 font-semibold text-brand-ink" : "border-line text-cream/75 hover:bg-tint/5"}`;
 
   const summary = [
     mark !== "alle" ? t(`mark_${mark}`) : null,
@@ -118,7 +118,7 @@ export async function BinderShelf({
               </div>
             )}
             {active && (
-              <Link href={`${basePath}?tab=sammlung`} className="inline-block text-sm text-brand hover:underline">✕ {t("filterReset")}</Link>
+              <Link href={`${basePath}?tab=sammlung`} className="inline-block text-sm text-brand-ink hover:underline">✕ {t("filterReset")}</Link>
             )}
           </div>
         </details>
@@ -134,7 +134,7 @@ export async function BinderShelf({
               return (
                 <li key={c.id}>
                   <Link href={`/marktplatz/${c.id}`} className="group block" title={c.title}>
-                    <span className="relative block aspect-[63/88] overflow-hidden rounded-md border border-white/15 bg-night-3 transition-transform group-hover:-translate-y-0.5">
+                    <span className="relative block aspect-[63/88] overflow-hidden rounded-md border border-tint/15 bg-night-3 transition-transform group-hover:-translate-y-0.5">
                       {c.cover_photo_id ? (
                         <img src={photoUrl(c.owner_id, c.cover_photo_id, "thumb")} alt={c.title} loading="lazy" className="h-full w-full object-cover" />
                       ) : (
@@ -198,7 +198,7 @@ export async function BinderShelf({
             <li>
               <Link
                 href="/binder/neu"
-                className="flex aspect-[4/5] flex-col items-center justify-center gap-2 rounded-l-md rounded-r-2xl border-2 border-dashed border-line text-cream/60 hover:border-brand/60 hover:text-brand"
+                className="flex aspect-[4/5] flex-col items-center justify-center gap-2 rounded-l-md rounded-r-2xl border-2 border-dashed border-line text-cream/60 hover:border-brand/60 hover:text-brand-ink"
               >
                 <span className="text-3xl leading-none">+</span>
                 <span className="text-sm font-semibold">{t("newBinder")}</span>

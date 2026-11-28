@@ -33,7 +33,7 @@ export function ConversationMenu({
         aria-expanded={open !== null}
         aria-haspopup="menu"
         onClick={() => setOpen(open ? null : "menu")}
-        className="rounded-lg px-3 py-1.5 text-lg leading-none hover:bg-white/5"
+        className="rounded-lg px-3 py-1.5 text-lg leading-none hover:bg-tint/5"
         aria-label={t("options")}
       >
         ⋯

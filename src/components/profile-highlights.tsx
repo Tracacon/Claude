@@ -55,7 +55,7 @@ export async function ProfileHighlights({
       {isMe && (
         <li className="w-[4.5rem] shrink-0">
           <Link href="/highlights" className="group block text-center">
-            <span className="mx-auto flex size-[4.25rem] items-center justify-center rounded-full border-2 border-line text-3xl font-light text-cream/80 transition-colors group-hover:border-brand group-hover:text-brand">
+            <span className="mx-auto flex size-[4.25rem] items-center justify-center rounded-full border-2 border-line text-3xl font-light text-cream/80 transition-colors group-hover:border-brand group-hover:text-brand-ink">
               +
             </span>
             <span className="mt-1 block truncate text-xs">{highlights.length === 0 ? t("new") : t("edit")}</span>

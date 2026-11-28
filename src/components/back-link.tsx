@@ -16,7 +16,7 @@ export function BackLink({ fallback, label }: { fallback: string; label: string 
         if (navDepth() > 0) router.back();
         else router.push(fallback);
       }}
-      className="inline-flex items-center gap-1.5 rounded-lg py-1 pr-2 text-sm font-semibold text-cream/80 hover:text-brand"
+      className="inline-flex items-center gap-1.5 rounded-lg py-1 pr-2 text-sm font-semibold text-cream/80 hover:text-brand-ink"
     >
       <span aria-hidden className="text-lg leading-none">←</span>
       {label}

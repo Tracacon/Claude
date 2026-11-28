@@ -73,7 +73,7 @@ function Row({ label, htmlFor, children, error }: { label: ReactNode; htmlFor?: 
 function Fold({ title, summary, open, children }: { title: string; summary?: string; open?: boolean; children: ReactNode }) {
   return (
     <details open={open} className="group">
-      <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3.5 hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3.5 hover:bg-tint/[0.03] [&::-webkit-details-marker]:hidden">
         <span className="flex-1 font-medium">{title}</span>
         {summary && <span className="max-w-[45%] truncate text-sm text-cream/60">{summary}</span>}
         <svg viewBox="0 0 24 24" className="size-5 shrink-0 text-cream/50 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
@@ -86,7 +86,7 @@ function Fold({ title, summary, open, children }: { title: string; summary?: str
 }
 
 const group = "divide-y divide-line overflow-hidden rounded-2xl border border-line bg-night-2";
-const inlineSelect = "min-w-0 max-w-full cursor-pointer appearance-none truncate bg-transparent py-1 pr-1 text-right text-cream/80 outline-none focus-visible:text-brand";
+const inlineSelect = "min-w-0 max-w-full cursor-pointer appearance-none truncate bg-transparent py-1 pr-1 text-right text-cream/80 outline-none focus-visible:text-brand-ink";
 
 /**
  * Karte einpflegen bzw. Inserat anlegen, aufgebaut wie bei Instagram:
@@ -180,7 +180,7 @@ export function ListingForm({
           cropCards={needsPhoto}
           onPendingChange={setUploading}
         />
-        <p className={`text-xs ${bothSides ? "text-brand" : "text-cream/60"}`}>
+        <p className={`text-xs ${bothSides ? "text-brand-ink" : "text-cream/60"}`}>
           {bothSides ? t("photosHintRequired") : needsPhoto ? t("photosHintFront") : t("photosHint")}
         </p>
         <FormError code={e.photos} />
@@ -227,7 +227,7 @@ export function ListingForm({
         {offerHasPrice(offer) ? (
           <div className={`${group} flex items-center gap-3 px-4 py-2`}>
             <label htmlFor="price" className="sr-only">{t("price")}</label>
-            <span className="text-2xl font-black text-brand" aria-hidden>€</span>
+            <span className="text-2xl font-black text-brand-ink" aria-hidden>€</span>
             <input
               id="price"
               name="price"
@@ -329,7 +329,7 @@ export function ListingForm({
               <legend className="label">{t("handover")}</legend>
               <div className="flex flex-wrap gap-2">
                 {(["handover_event", "handover_pickup", "handover_shipping"] as const).map((k) => (
-                  <label key={k} className="flex cursor-pointer items-center gap-2 rounded-full border border-line px-3 py-2 text-sm has-[:checked]:border-brand has-[:checked]:bg-brand/10 has-[:checked]:text-brand">
+                  <label key={k} className="flex cursor-pointer items-center gap-2 rounded-full border border-line px-3 py-2 text-sm has-[:checked]:border-brand has-[:checked]:bg-brand/10 has-[:checked]:text-brand-ink">
                     <input type="checkbox" name={k} defaultChecked={checked(k)} className="size-4 accent-brand" />
                     {t(k === "handover_event" ? "handoverEvent" : k === "handover_pickup" ? "handoverPickup" : "handoverShipping")}
                   </label>

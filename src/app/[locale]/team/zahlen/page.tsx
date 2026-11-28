@@ -34,7 +34,7 @@ function Trend({ week, prev, label }: Pair & { label: (n: string) => string }) {
   if (week === prev) return <span className="text-xs text-cream/50">{label("±0")}</span>;
   const up = week > prev;
   const diff = `${up ? "+" : "−"}${Math.abs(week - prev)}`;
-  return <span className={`text-xs font-semibold ${up ? "text-brand" : "text-danger"}`}>{label(diff)}</span>;
+  return <span className={`text-xs font-semibold ${up ? "text-brand-ink" : "text-danger"}`}>{label(diff)}</span>;
 }
 
 function Tile({ title, value, hint, children }: { title: string; value: number; hint?: string; children?: React.ReactNode }) {
@@ -56,7 +56,7 @@ function Bars({ rows }: { rows: { label: string; value: number }[] }) {
       {rows.map((r) => (
         <li key={r.label} className="grid grid-cols-[7rem_1fr_2.5rem] items-center gap-2 text-sm">
           <span className="truncate text-cream/80">{r.label}</span>
-          <span className="h-3 rounded-full bg-white/5">
+          <span className="h-3 rounded-full bg-tint/5">
             <span className="block h-3 rounded-full bg-brand" style={{ width: `${(r.value / max) * 100}%` }} />
           </span>
           <span className="text-right tabular-nums">{r.value}</span>
@@ -84,7 +84,7 @@ export default async function TeamStatsPage({ params }: PageProps<"/[locale]/tea
     return (
       <div className="space-y-3">
         <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <p className="card text-brand">{t("unavailable")}</p>
+        <p className="card text-brand-ink">{t("unavailable")}</p>
       </div>
     );
   }

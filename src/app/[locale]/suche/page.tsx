@@ -59,7 +59,7 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
               <ul className="space-y-1">
                 {people.map((p) => (
                   <li key={p.id}>
-                    <Link href={`/u/${p.nickname}`} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-white/5">
+                    <Link href={`/u/${p.nickname}`} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-tint/5">
                       <Avatar userId={p.id} avatarId={p.avatar_id} nickname={p.nickname} size="sm" />
                       <span>
                         <span className="block font-semibold">{p.nickname}</span>
@@ -75,7 +75,7 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
           <section className="space-y-2">
             <h2 className="kicker">{t("market")}</h2>
             <Link href={{ pathname: "/marktplatz", query: { q } }} className="card card-hover flex items-center gap-3 p-4">
-              <MarketIcon className="size-6 text-brand" />
+              <MarketIcon className="size-6 text-brand-ink" />
               <span>{t("searchMarket", { q })}</span>
             </Link>
           </section>
@@ -86,8 +86,8 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
               <ul className="space-y-1">
                 {matchingEvents.map((e) => (
                   <li key={e.id}>
-                    <Link href={`/termine/${e.id}`} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-white/5">
-                      <CalendarIcon className="size-6 text-brand" />
+                    <Link href={`/termine/${e.id}`} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-tint/5">
+                      <CalendarIcon className="size-6 text-brand-ink" />
                       <span>
                         <span className="block font-semibold">{e.name}</span>
                         <span className="block text-xs text-cream/60">{eventDay(e, locale)}{e.city ? ` · ${e.city}` : ""}</span>

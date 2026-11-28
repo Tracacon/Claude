@@ -14,7 +14,7 @@ export default async function RulesPage({ params }: PageProps<"/[locale]/regeln"
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">{t("rulesTitle")}</h1>
-      <p className="card border-brand/40 text-brand">{t("rulesDraft")}</p>
+      <p className="card border-brand/40 text-brand-ink">{t("rulesDraft")}</p>
       <ol className="list-decimal space-y-2 pl-5 text-cream/85">
         <li>{t("rules1")}</li>
         <li>{t("rules2")}</li>

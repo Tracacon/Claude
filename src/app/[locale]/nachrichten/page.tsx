@@ -37,7 +37,7 @@ export default async function InboxPage({ params }: PageProps<"/[locale]/nachric
           <Link href="/marktplatz" className="link text-sm">{t("toMarket")} →</Link>
         </div>
       ) : (
-        <ul className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-line bg-night-2">
+        <ul className="divide-y divide-tint/10 overflow-hidden rounded-2xl border border-line bg-night-2">
           {items.map((c) => {
             const d = new Date(c.last_message_at);
             const when = d.toDateString() === today
@@ -45,7 +45,7 @@ export default async function InboxPage({ params }: PageProps<"/[locale]/nachric
               : format.dateTime(d, { day: "2-digit", month: "2-digit" });
             return (
               <li key={c.id}>
-                <Link href={`/nachrichten/${c.id}`} className="flex items-center gap-3 p-3 hover:bg-white/5">
+                <Link href={`/nachrichten/${c.id}`} className="flex items-center gap-3 p-3 hover:bg-tint/5">
                   <div className="relative h-14 w-11 shrink-0 overflow-hidden rounded-lg bg-night-3">
                     {c.cover_photo_id && c.listing_owner_id && (
                       <img src={photoUrl(c.listing_owner_id, c.cover_photo_id, "thumb")} alt="" loading="lazy" className="h-full w-full object-cover" />
@@ -67,7 +67,7 @@ export default async function InboxPage({ params }: PageProps<"/[locale]/nachric
                     </p>
                   </div>
                   {c.unread > 0 && (
-                    <span className="shrink-0 rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-night" aria-label={t("unread", { count: c.unread })}>
+                    <span className="shrink-0 rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-on-brand" aria-label={t("unread", { count: c.unread })}>
                       {c.unread}
                     </span>
                   )}

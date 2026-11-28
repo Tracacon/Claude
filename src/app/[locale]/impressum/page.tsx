@@ -18,7 +18,7 @@ export default async function ImprintPage({ params }: PageProps<"/[locale]/impre
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">{t("imprintTitle")}</h1>
       {!isOperatorComplete(o) ? (
-        <p className="card text-brand">{t("imprintMissing")}</p>
+        <p className="card text-brand-ink">{t("imprintMissing")}</p>
       ) : (
         <div className="card space-y-4">
           <section>

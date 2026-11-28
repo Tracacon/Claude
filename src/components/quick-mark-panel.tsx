@@ -118,7 +118,7 @@ export function QuickMarkPanel({
       <MarkButtons value={choice} onPick={pick} disabled={pending} />
       {needsPrice && (
         <div className="flex items-center gap-3 rounded-2xl border border-line bg-night-2 px-4 py-2">
-          <span className="text-2xl font-black text-brand" aria-hidden>€</span>
+          <span className="text-2xl font-black text-brand-ink" aria-hidden>€</span>
           <input
             value={price}
             onChange={(e) => setPrice(e.target.value)}

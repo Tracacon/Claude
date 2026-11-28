@@ -97,7 +97,7 @@ export function CardCodeFields({
                     }}
                     className="flex min-h-11 w-full items-center gap-2 rounded-lg px-2 text-left text-sm hover:bg-brand/10"
                   >
-                    <span className="w-14 shrink-0 font-semibold text-brand">{s.code}</span>
+                    <span className="w-14 shrink-0 font-semibold text-brand-ink">{s.code}</span>
                     <span className="min-w-0 truncate">{s.name}</span>
                     <span className="ml-auto shrink-0 text-xs text-cream/50">{s.released.slice(0, 4)}</span>
                   </button>

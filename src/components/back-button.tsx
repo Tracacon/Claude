@@ -23,7 +23,7 @@ export function BackButton({ label }: { label: string }) {
         if (navDepth() > 0) router.back();
         else router.push(parentPath(pathname));
       }}
-      className="-ml-2 grid size-10 shrink-0 place-items-center rounded-full text-cream hover:bg-white/10 hover:text-brand"
+      className="-ml-2 grid size-10 shrink-0 place-items-center rounded-full text-cream hover:bg-tint/10 hover:text-brand-ink"
     >
       <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M15 5l-7 7 7 7" />

@@ -20,7 +20,7 @@ export function InterestButton({ listingId, ownerId, initial }: { listingId: str
         aria-pressed={mine}
         title={mine ? t("activeHint") : t("hint")}
         className={`rounded-full px-4 py-2.5 text-sm font-bold shadow-lg backdrop-blur transition ${
-          mine ? "bg-brand text-night" : "border border-white/25 bg-night/80 text-cream hover:bg-night"
+          mine ? "bg-brand text-on-brand" : "border border-tint/25 bg-night/80 text-cream hover:bg-night"
         }`}
       >
         {mine ? `✓ ${t("active")}` : `🔁 ${t("button")}`}

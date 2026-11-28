@@ -64,7 +64,7 @@ export function PhotoSourceSheet({
   }
 
   const row = (htmlFor: string, icon: string, label: ReactNode) => (
-    <label htmlFor={htmlFor} className="flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3.5 text-base hover:bg-white/5">
+    <label htmlFor={htmlFor} className="flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3.5 text-base hover:bg-tint/5">
       <span aria-hidden className="w-7 text-center text-xl">{icon}</span>
       {label}
     </label>
@@ -98,7 +98,7 @@ export function PhotoSourceSheet({
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={title}>
           <button type="button" aria-hidden tabIndex={-1} className="absolute inset-0 cursor-default bg-night/70" onClick={onClose} />
           <div className="relative max-h-[88dvh] w-full max-w-md overflow-y-auto overscroll-contain rounded-t-3xl border-t border-line bg-night-2 p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-2xl sm:rounded-3xl sm:border">
-            <div aria-hidden className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-white/20 sm:hidden" />
+            <div aria-hidden className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-tint/20 sm:hidden" />
             <p className="px-4 pb-2 pt-1 text-center text-sm font-semibold text-cream/70">{title}</p>
             {touch && row(`${base}-camera`, "📷", t("camera"))}
             {row(`${base}-gallery`, "🖼", multiple ? t("galleryMany") : t("gallery"))}
@@ -109,14 +109,14 @@ export function PhotoSourceSheet({
                   onClose();
                   onRemove();
                 }}
-                className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-left text-base text-danger hover:bg-white/5"
+                className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-left text-base text-danger hover:bg-tint/5"
               >
                 <span aria-hidden className="w-7 text-center text-xl">🗑</span>
                 {removeLabel ?? t("remove")}
               </button>
             )}
             {children}
-            <button type="button" onClick={onClose} className="mt-1 w-full rounded-xl px-4 py-3 text-center text-cream/70 hover:bg-white/5">
+            <button type="button" onClick={onClose} className="mt-1 w-full rounded-xl px-4 py-3 text-center text-cream/70 hover:bg-tint/5">
               {t("cancel")}
             </button>
           </div>

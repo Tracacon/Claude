@@ -45,7 +45,7 @@ export function BottomNav({
   return (
     <nav
       aria-label="Navigation"
-      className="fixed inset-x-0 bottom-0 z-20 flex border-t border-line bg-black/95 px-[env(safe-area-inset-left)] pb-[max(env(safe-area-inset-bottom),0.25rem)] backdrop-blur sm:hidden"
+      className="fixed inset-x-0 bottom-0 z-20 flex border-t border-line bg-base/95 px-[env(safe-area-inset-left)] pb-[max(env(safe-area-inset-bottom),0.25rem)] backdrop-blur sm:hidden"
     >
       {item("/", HomeIcon, labels.home, is("/"))}
       {item("/marktplatz", MarketIcon, labels.market, is("/marktplatz"))}

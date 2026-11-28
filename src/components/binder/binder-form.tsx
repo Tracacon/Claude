@@ -208,7 +208,7 @@ export function BinderForm({
   }
 
   const toggle = (x: Section) => setOpen((o) => (o === x ? null : x));
-  const row = "flex w-full items-center gap-3 px-4 py-3.5 text-left hover:bg-white/[0.03]";
+  const row = "flex w-full items-center gap-3 px-4 py-3.5 text-left hover:bg-tint/[0.03]";
   const swatch = (x: BinderColor) => ({ background: `radial-gradient(circle at 30% 30%, ${BINDER_COLOR_STYLES[x].base}, ${BINDER_COLOR_STYLES[x].edge})` });
 
   return (
@@ -265,7 +265,7 @@ export function BinderForm({
         <div>
           <button type="button" className={row} onClick={() => toggle("color")} aria-expanded={open === "color"}>
             <span className="w-7 text-center" aria-hidden>
-              <span className="mx-auto block size-6 rounded-full border border-white/20" style={swatch(color)} />
+              <span className="mx-auto block size-6 rounded-full border border-tint/20" style={swatch(color)} />
             </span>
             <span className="flex-1 font-medium">{t("color")}</span>
             <span className="text-sm text-cream/60">{t(`color_${color}`)}</span>
@@ -281,7 +281,7 @@ export function BinderForm({
                   aria-pressed={color === x}
                   title={t(`color_${x}`)}
                   aria-label={t(`color_${x}`)}
-                  className={`size-11 rounded-full border-2 ring-offset-2 ring-offset-night-2 ${color === x ? "border-transparent ring-2 ring-brand" : "border-white/10"}`}
+                  className={`size-11 rounded-full border-2 ring-offset-2 ring-offset-night-2 ${color === x ? "border-transparent ring-2 ring-brand" : "border-tint/10"}`}
                   style={swatch(x)}
                 />
               ))}
@@ -330,14 +330,14 @@ export function BinderForm({
                   type="button"
                   onClick={() => setVisibility(v)}
                   aria-pressed={visibility === v}
-                  className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left ${visibility === v ? "bg-brand/10" : "hover:bg-white/[0.03]"}`}
+                  className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left ${visibility === v ? "bg-brand/10" : "hover:bg-tint/[0.03]"}`}
                 >
                   <span className="w-6 text-center" aria-hidden>{VIS_ICON[v]}</span>
                   <span className="flex-1">
                     <span className="block font-medium">{t(`visibility_${v}`)}</span>
                     <span className="block text-xs text-cream/60">{t(`visibility_${v}_hint`)}</span>
                   </span>
-                  {visibility === v && <span className="text-brand" aria-hidden>✓</span>}
+                  {visibility === v && <span className="text-brand-ink" aria-hidden>✓</span>}
                 </button>
               ))}
             </div>

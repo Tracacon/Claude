@@ -78,7 +78,7 @@ export function AvatarForm({ userId, nickname, avatarId }: { userId: string; nic
         aria-label={avatarId ? t("changeAvatar") : t("addAvatar")}
       >
         <Avatar userId={userId} avatarId={avatarId} nickname={nickname} size="lg" />
-        <span aria-hidden className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full border-2 border-night-2 bg-brand text-sm text-night">
+        <span aria-hidden className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full border-2 border-night-2 bg-brand text-sm text-on-brand">
           {busy ? "…" : "📷"}
         </span>
       </button>

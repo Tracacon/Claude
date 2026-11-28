@@ -63,7 +63,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
           <p aria-hidden className="text-5xl">✓</p>
           <h2 className="mt-2 text-xl font-bold">{sp.eingecheckt === "neu" ? t("checkedInTitle") : t("alreadyCheckedIn")}</h2>
           <p className="text-cream/80">{t("checkedInText", { name: e.name, count: visits })}</p>
-          {newStep && <p className="mt-3 font-semibold text-brand">🎖️ {t("newRegularBadge", { count: newStep })}</p>}
+          {newStep && <p className="mt-3 font-semibold text-brand-ink">🎖️ {t("newRegularBadge", { count: newStep })}</p>}
           <p className="mt-2 text-sm text-cream/70">{t("checkedInHint")}</p>
         </section>
       )}
@@ -167,7 +167,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[l
                   )}
                 </>
               ) : (
-                <span className="rounded-full bg-white/10 px-3 py-1 text-cream/80">{t("tablesSoldOut")}</span>
+                <span className="rounded-full bg-tint/10 px-3 py-1 text-cream/80">{t("tablesSoldOut")}</span>
               )}
             </p>
           )}
@@ -251,7 +251,7 @@ function DescBlocks({ blocks }: { blocks: DescBlock[] }) {
       while (i < blocks.length && blocks[i].type === "li") items.push(blocks[i++]);
       i--;
       out.push(
-        <ul key={i} className="list-disc space-y-1 pl-5 text-sm text-cream/85 marker:text-brand">
+        <ul key={i} className="list-disc space-y-1 pl-5 text-sm text-cream/85 marker:text-brand-ink">
           {items.map((li, j) => (
             <li key={j}><Parts parts={li.parts} /></li>
           ))}

@@ -94,7 +94,7 @@ export function PostCard({
           </span>
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold">{post.author.nickname}</span>
-            {post.highlighted && <span className="block text-xs text-brand">✦ {t("highlighted")}</span>}
+            {post.highlighted && <span className="block text-xs text-brand-ink">✦ {t("highlighted")}</span>}
             {post.hidden && <span className="block text-xs text-danger">{t("hidden")}</span>}
           </span>
         </Link>
@@ -145,7 +145,7 @@ export function PostCard({
           {post.photos.length > 1 && (
             <span className="mx-auto flex gap-1 pr-16" aria-hidden>
               {post.photos.map((ph, i) => (
-                <span key={ph} className={`size-1.5 rounded-full ${i === slide ? "bg-brand" : "bg-white/30"}`} />
+                <span key={ph} className={`size-1.5 rounded-full ${i === slide ? "bg-brand" : "bg-tint/30"}`} />
               ))}
             </span>
           )}

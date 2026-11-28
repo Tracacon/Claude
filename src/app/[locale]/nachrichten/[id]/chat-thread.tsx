@@ -33,7 +33,7 @@ function ChatPhoto({ conversationId, photoId, label }: { conversationId: string;
       alive = false;
     };
   }, [conversationId, photoId]);
-  if (!url) return <div className="aspect-[3/4] w-48 animate-pulse rounded-xl bg-white/10" />;
+  if (!url) return <div className="aspect-[3/4] w-48 animate-pulse rounded-xl bg-tint/10" />;
   return (
     <a href={url} target="_blank" rel="noopener" aria-label={label} className="block">
       {/* eslint-disable-next-line @next/next/no-img-element -- signierte Adresse aus Supabase Storage */}
@@ -238,7 +238,7 @@ export function ChatThread({
               <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                 <div
                   className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-[15px] leading-snug ${
-                    mine ? "rounded-br-md bg-brand text-night" : "rounded-bl-md bg-night-3 text-cream"
+                    mine ? "rounded-br-md bg-brand text-on-brand" : "rounded-bl-md bg-night-3 text-cream"
                   }`}
                 >
                   <span className="sr-only">{mine ? t("you") : otherNickname}: </span>
@@ -248,7 +248,7 @@ export function ChatThread({
                     </div>
                   )}
                   {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
-                  <p className={`mt-0.5 text-right text-[10px] ${mine ? "text-night/60" : "text-cream/50"}`}>
+                  <p className={`mt-0.5 text-right text-[10px] ${mine ? "text-on-brand/60" : "text-cream/50"}`}>
                     {format.dateTime(date, { timeStyle: "short" })}
                   </p>
                 </div>

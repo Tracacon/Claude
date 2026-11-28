@@ -24,7 +24,7 @@ export default async function PrivacyPage({ params }: PageProps<"/[locale]/daten
       <header className="space-y-2">
         <h1 className="text-2xl font-bold">{t("title")}</h1>
         <p className="text-sm text-cream/60">{t("updated")}</p>
-        <p className="card border-brand/40 text-sm text-brand">{t("draft")}</p>
+        <p className="card border-brand/40 text-sm text-brand-ink">{t("draft")}</p>
       </header>
 
       <section className="space-y-2">

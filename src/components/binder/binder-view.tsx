@@ -311,7 +311,7 @@ export function BinderView({
                 onClick={() => setHighlight(m)}
                 aria-pressed={highlight === m}
                 className={`shrink-0 rounded-full border px-3 py-1.5 text-sm ${
-                  highlight === m ? "border-brand bg-brand/15 font-semibold text-brand" : "border-line text-cream/75 hover:bg-white/5"
+                  highlight === m ? "border-brand bg-brand/15 font-semibold text-brand-ink" : "border-line text-cream/75 hover:bg-tint/5"
                 }`}
               >
                 {tC(`mark_${m}`)} ({n})
@@ -347,7 +347,7 @@ export function BinderView({
             <section
               key={p}
               aria-label={t("page", { page: p + 1, count: pageCount })}
-              className={`relative w-full shrink-0 snap-start bg-[#0f1419] py-3 pr-3 pl-7 md:w-1/2 ${
+              className={`theme-dark relative w-full shrink-0 snap-start bg-[#0f1419] py-3 pr-3 pl-7 md:w-1/2 ${
                 p % 2 === 0 ? "md:rounded-l-lg md:border-r md:border-black/60" : "md:rounded-r-lg"
               } rounded-lg md:rounded-none`}
             >
@@ -440,7 +440,7 @@ export function BinderView({
                           className={`${pocketClass} group w-full hover:border-brand/70 hover:bg-brand/5`}
                           aria-label={t("pocketAdd", { pocket: pocket + 1 })}
                         >
-                          <span className="absolute inset-0 flex items-center justify-center text-2xl font-light text-cream/25 group-hover:text-brand">+</span>
+                          <span className="absolute inset-0 flex items-center justify-center text-2xl font-light text-cream/25 group-hover:text-brand-ink">+</span>
                         </button>
                       ) : (
                         <span ref={refFn} className={pocketClass} aria-label={t("pocketEmpty", { pocket: pocket + 1 })} />
