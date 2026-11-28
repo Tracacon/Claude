@@ -385,7 +385,7 @@ export function BinderView({
                   const isOrigin = drag !== null && card?.id === drag.id;
                   const pocketClass = `relative block aspect-[63/88] rounded-[6px] border transition-shadow select-none [-webkit-touch-callout:none] ${
                     isTarget
-                      ? "border-brand ring-2 ring-brand shadow-[0_0_18px_4px_rgba(34,205,215,0.75)]"
+                      ? "border-brand ring-2 ring-brand shadow-[0_0_18px_4px_rgba(92,229,233,0.75)]"
                       : card
                           ? "border-white/20"
                           : "border-dashed border-white/12 bg-white/[0.025]"
