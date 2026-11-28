@@ -60,7 +60,7 @@ export default async function ActivityPage({ params }: PageProps<"/[locale]/akti
           <p className="text-sm text-cream/70">{t("emptyText")}</p>
         </div>
       ) : (
-        <ul className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-line bg-night-2">
+        <ul className="divide-y divide-tint/10 overflow-hidden rounded-2xl border border-line bg-night-2">
           {items.map((n) => (
             <li key={n.id} className={`flex items-center gap-3 p-3 ${n.read ? "" : "bg-brand/[0.07]"}`}>
               <Link href={`/u/${n.actor.nickname}`} className="shrink-0" aria-label={`@${n.actor.nickname}`}>

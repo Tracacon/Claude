@@ -29,7 +29,7 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/eins
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-2">
-        <Link href="/profil" className="rounded-lg px-2 py-1 text-cream/70 hover:bg-white/5" aria-label={t("back")}>←</Link>
+        <Link href="/profil" className="rounded-lg px-2 py-1 text-cream/70 hover:bg-tint/5" aria-label={t("back")}>←</Link>
         <h1 className="text-2xl font-bold">{t("title")}</h1>
       </div>
       <p className="text-sm text-cream/60">

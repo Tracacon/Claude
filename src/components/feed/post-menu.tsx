@@ -33,7 +33,7 @@ export function PostMenu({
     setOpen(false);
     setMode("menu");
   };
-  const row = "flex w-full items-center justify-center border-b border-line px-4 py-3.5 text-center last:border-b-0 hover:bg-white/5";
+  const row = "flex w-full items-center justify-center border-b border-line px-4 py-3.5 text-center last:border-b-0 hover:bg-tint/5";
 
   return (
     <>
@@ -88,7 +88,7 @@ export function PostMenu({
                   <fieldset className="space-y-1">
                     <legend className="label">{t("reportWhy")}</legend>
                     {REPORT_REASONS.map((r) => (
-                      <label key={r} className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-white/5">
+                      <label key={r} className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-tint/5">
                         <input type="radio" name="reason" value={r} className="accent-brand" />
                         {tReason(r)}
                       </label>

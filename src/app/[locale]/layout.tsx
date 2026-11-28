@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -10,6 +11,7 @@ import "@fontsource-variable/inter";
 import "@fontsource/chakra-petch/latin-500.css";
 import "@fontsource/chakra-petch/latin-600.css";
 import "@fontsource/chakra-petch/latin-700.css";
+import { parseTheme, THEME_COLOR, THEME_COOKIE } from "@/lib/theme";
 import "../globals.css";
 
 
@@ -30,21 +32,31 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
   };
 }
 
-export const viewport: Viewport = {
-  themeColor: "#0a0d11",
-  width: "device-width",
-  initialScale: 1,
-  // Ohne "cover" meldet das iPhone den Bereich am Home-Balken nicht, und die untere Leiste rutscht darauf
-  viewportFit: "cover",
-};
+export async function generateViewport(): Promise<Viewport> {
+  // Statusleiste am Handy passend zum Tag- oder Nachtmodus; ohne eigene Wahl nach der Geräte-Einstellung
+  const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
+  return {
+    themeColor: theme
+      ? THEME_COLOR[theme]
+      : [
+          { media: "(prefers-color-scheme: light)", color: THEME_COLOR.light },
+          { media: "(prefers-color-scheme: dark)", color: THEME_COLOR.dark },
+        ],
+    width: "device-width",
+    initialScale: 1,
+    // Ohne "cover" meldet das iPhone den Bereich am Home-Balken nicht, und die untere Leiste rutscht darauf
+    viewportFit: "cover",
+  };
+}
 
 export default async function LocaleLayout({ children, params }: LayoutProps<"/[locale]">) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
+  const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
 
   return (
-    <html lang={locale} className="h-full antialiased">
+    <html lang={locale} data-theme={theme} className="h-full antialiased">
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider timeZone="Europe/Berlin">
           <SiteHeader />

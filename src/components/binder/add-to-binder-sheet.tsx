@@ -72,15 +72,15 @@ export function AddToBinderSheet({
       <button type="button" aria-label={t("close")} className="absolute inset-0 bg-night/75" onClick={onClose} />
       <div className="relative flex max-h-[88dvh] w-full max-w-lg flex-col rounded-t-3xl border border-line bg-night-2 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:rounded-3xl">
         <div className="space-y-3 p-4 pb-2">
-          <div aria-hidden className="mx-auto h-1.5 w-10 rounded-full bg-white/20 sm:hidden" />
+          <div aria-hidden className="mx-auto h-1.5 w-10 rounded-full bg-tint/20 sm:hidden" />
           <div className="flex items-center justify-between gap-3">
             <p className="font-display font-semibold">
               {single ? t("pocketTitle", { pocket: pocket + 1, page: Math.floor(pocket / 9) + 1 }) : t("addTitle")}
             </p>
-            <button type="button" onClick={onClose} className="rounded-lg px-2 py-1 text-cream/70 hover:bg-white/5" aria-label={t("close")}>✕</button>
+            <button type="button" onClick={onClose} className="rounded-lg px-2 py-1 text-cream/70 hover:bg-tint/5" aria-label={t("close")}>✕</button>
           </div>
-          <Link href={newHref} className="flex items-center gap-4 rounded-xl border border-line px-3 py-3 hover:bg-white/5">
-            <span className="flex size-11 items-center justify-center rounded-xl bg-brand/15 text-xl text-brand" aria-hidden>📷</span>
+          <Link href={newHref} className="flex items-center gap-4 rounded-xl border border-line px-3 py-3 hover:bg-tint/5">
+            <span className="flex size-11 items-center justify-center rounded-xl bg-brand/15 text-xl text-brand-ink" aria-hidden>📷</span>
             <span>
               <span className="block font-semibold">{t("addNew")}</span>
               <span className="block text-sm text-cream/60">{single ? t("addNewHintPocket") : t("addNewHint")}</span>

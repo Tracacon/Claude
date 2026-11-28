@@ -55,7 +55,7 @@ export function HighlightRow({
       {active && (
         <form action={remove}>
           <input type="hidden" name="binderId" value={binderId} />
-          <button type="submit" className="rounded-lg px-2 py-1 text-cream/60 hover:bg-white/5 hover:text-danger" aria-label={t("remove")} title={t("remove")} disabled={removing}>
+          <button type="submit" className="rounded-lg px-2 py-1 text-cream/60 hover:bg-tint/5 hover:text-danger" aria-label={t("remove")} title={t("remove")} disabled={removing}>
             ✕
           </button>
         </form>

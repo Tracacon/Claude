@@ -93,7 +93,7 @@ export function Comments({ postId, comments, loggedIn }: { postId: string; comme
             placeholder={t("addComment")}
             className="input resize-none"
           />
-          <button type="submit" disabled={pending || !text.trim()} className="shrink-0 px-2 py-2 font-semibold text-brand disabled:opacity-40">
+          <button type="submit" disabled={pending || !text.trim()} className="shrink-0 px-2 py-2 font-semibold text-brand-ink disabled:opacity-40">
             {t("post")}
           </button>
         </form>

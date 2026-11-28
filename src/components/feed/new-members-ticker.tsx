@@ -66,7 +66,7 @@ export function NewMembersTicker({
           aria-label={open ? labels.close : labels.open}
           className="mx-auto flex h-8 w-full max-w-5xl items-center text-left"
         >
-          <span className="flex h-full shrink-0 items-center gap-1 bg-brand/15 px-3 text-[11px] font-bold uppercase tracking-wide text-brand">
+          <span className="flex h-full shrink-0 items-center gap-1 bg-brand/15 px-3 text-[11px] font-bold uppercase tracking-wide text-brand-ink">
             {labels.badge}
             <svg viewBox="0 0 24 24" className={`size-3.5 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth={2.5} aria-hidden>
               <path d="m6 9 6 6 6-6" />
@@ -99,7 +99,7 @@ export function NewMembersTicker({
             <ul className="max-h-[55vh] overflow-y-auto overscroll-contain px-2 pb-3">
               {people.map((p) => (
                 <li key={p.id}>
-                  <Link href={`/u/${p.nickname}`} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-white/5">
+                  <Link href={`/u/${p.nickname}`} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-tint/5">
                     <Avatar userId={p.id} avatarId={p.avatar_id} nickname={p.nickname} size="sm" />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-semibold">@{p.nickname}</span>

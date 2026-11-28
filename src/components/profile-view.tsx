@@ -129,7 +129,7 @@ export async function ProfileView({
       </>
     );
     return href && p.can_view ? (
-      <Link href={href} className="rounded-lg px-2 py-1 text-center hover:bg-white/5">{inner}</Link>
+      <Link href={href} className="rounded-lg px-2 py-1 text-center hover:bg-tint/5">{inner}</Link>
     ) : (
       <div className="px-2 py-1 text-center">{inner}</div>
     );
@@ -150,10 +150,10 @@ export async function ProfileView({
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-base font-bold normal-case">{p.nickname}</h1>
             {p.role !== "member" && (
-              <span className="rounded-full bg-brand/15 px-2 py-0.5 text-xs font-semibold text-brand">{tRoles(p.role)}</span>
+              <span className="rounded-full bg-brand/15 px-2 py-0.5 text-xs font-semibold text-brand-ink">{tRoles(p.role)}</span>
             )}
             {p.visibility === "followers" && <span className="text-xs text-cream/60" title={t("privateLabel")}>🔒</span>}
-            {p.follows_me && !p.is_me && <span className="rounded bg-white/10 px-1.5 py-0.5 text-xs text-cream/70">{t("followsYou")}</span>}
+            {p.follows_me && !p.is_me && <span className="rounded bg-tint/10 px-1.5 py-0.5 text-xs text-cream/70">{t("followsYou")}</span>}
           </div>
           {p.can_view && p.bio && <p className="whitespace-pre-line text-[15px]">{p.bio}</p>}
           {p.can_view && p.city && <p className="text-sm text-cream/70">📍 {p.city}</p>}
@@ -170,7 +170,7 @@ export async function ProfileView({
                   href={`https://www.instagram.com/${p.instagram}/`}
                   target="_blank"
                   rel="noopener noreferrer nofollow ugc"
-                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-cream hover:text-brand"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-cream hover:text-brand-ink"
                   aria-label={t("instagramLink", { name: p.instagram })}
                 >
                   <InstagramIcon className="size-4" />
@@ -309,7 +309,7 @@ export async function ProfileView({
                   href={f === "alle" ? `${basePath}?tab=inserate` : `${basePath}?tab=inserate&angebot=${f}`}
                   aria-current={offerFilter === f ? "true" : undefined}
                   className={`shrink-0 rounded-full border px-3 py-1.5 text-sm ${
-                    offerFilter === f ? "border-brand bg-brand/15 font-semibold text-brand" : "border-line text-cream/75"
+                    offerFilter === f ? "border-brand bg-brand/15 font-semibold text-brand-ink" : "border-line text-cream/75"
                   }`}
                 >
                   {t(`offer_${f}`)} ({n})
@@ -331,7 +331,7 @@ export async function ProfileView({
                 ) : (
                   <span className="flex h-full items-center justify-center p-2 text-center text-xs text-cream/60">{l.title}</span>
                 )}
-                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/90 to-transparent px-1.5 pb-1 pt-4 text-[11px] font-bold text-brand">
+                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-night/90 to-transparent px-1.5 pb-1 pt-4 text-[11px] font-bold text-brand-ink">
                   <PriceTag offer={l.offer} cents={l.price_cents} negotiable={l.negotiable} />
                 </span>
               </Link>

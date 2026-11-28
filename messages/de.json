@@ -41,7 +41,9 @@
     "activityCount": "Aktivität, {count} neu",
     "back": "Zurück",
     "createCollection": "Zur Sammlung",
-    "createCollectionHint": "Karten einpflegen und zeigen"
+    "createCollectionHint": "Karten einpflegen und zeigen",
+    "themeLight": "Zum Tagmodus wechseln",
+    "themeDark": "Zum Nachtmodus wechseln"
   },
   "Home": {
     "claim": "Trading · Dealing · Connecting",

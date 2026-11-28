@@ -68,7 +68,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
     user ? (
       <InterestButton listingId={l.id} ownerId={l.owner_id} initial={interest.mine} />
     ) : (
-      <Link href="/anmelden" className="rounded-full border border-white/25 bg-night/80 px-4 py-2.5 text-sm font-bold text-cream shadow-lg backdrop-blur">
+      <Link href="/anmelden" className="rounded-full border border-tint/25 bg-night/80 px-4 py-2.5 text-sm font-bold text-cream shadow-lg backdrop-blur">
         🔁 {tInt("button")}
       </Link>
     )
@@ -135,20 +135,20 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
 
       <header className="space-y-2">
         <div className="flex flex-wrap gap-2 text-xs">
-          <span className="rounded-full bg-brand/15 px-2.5 py-1 font-semibold text-brand">{tTcg(l.tcg)}</span>
-          <span className="rounded-full bg-white/10 px-2.5 py-1">{tKind(l.kind)}</span>
-          {!inCollection && <span className="rounded-full bg-white/10 px-2.5 py-1">{tOffer(l.offer)}</span>}
-          {l.status !== "active" && <span className="rounded-full bg-white/10 px-2.5 py-1">{tStatus(l.status)}</span>}
-          {l.quantity > 1 && <span className="rounded-full bg-white/10 px-2.5 py-1">{t("quantityShort", { count: l.quantity })}</span>}
+          <span className="rounded-full bg-brand/15 px-2.5 py-1 font-semibold text-brand-ink">{tTcg(l.tcg)}</span>
+          <span className="rounded-full bg-tint/10 px-2.5 py-1">{tKind(l.kind)}</span>
+          {!inCollection && <span className="rounded-full bg-tint/10 px-2.5 py-1">{tOffer(l.offer)}</span>}
+          {l.status !== "active" && <span className="rounded-full bg-tint/10 px-2.5 py-1">{tStatus(l.status)}</span>}
+          {l.quantity > 1 && <span className="rounded-full bg-tint/10 px-2.5 py-1">{t("quantityShort", { count: l.quantity })}</span>}
         </div>
         <h1 className="text-2xl font-bold leading-tight"><BrandText text={l.title} /></h1>
         {data.binder && (
-          <Link href={`/u/${owner.nickname}/binder/${data.binder.id}`} className="inline-flex items-center gap-1.5 text-sm text-brand hover:underline">
+          <Link href={`/u/${owner.nickname}/binder/${data.binder.id}`} className="inline-flex items-center gap-1.5 text-sm text-brand-ink hover:underline">
             📁 {t("inBinder", { name: data.binder.name })}
           </Link>
         )}
         {!inCollection && (
-          <p className="text-3xl font-black text-brand">
+          <p className="text-3xl font-black text-brand-ink">
             <PriceTag offer={l.offer} cents={l.price_cents} negotiable={l.negotiable} />
           </p>
         )}
@@ -194,7 +194,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
             <dt className="text-cream/60">{tEv("bringsTo")}</dt>
             <dd className="mt-1 flex flex-wrap gap-2">
               {bringTo.map((ev) => (
-                <Link key={ev.id} href={`/termine/${ev.id}`} className="rounded-full border border-brand/50 bg-brand/10 px-3 py-1 text-sm text-brand hover:bg-brand/20">
+                <Link key={ev.id} href={`/termine/${ev.id}`} className="rounded-full border border-brand/50 bg-brand/10 px-3 py-1 text-sm text-brand-ink hover:bg-brand/20">
                   📅 {ev.name} · {eventDay({ ...ev, timezone: null }, locale)}
                 </Link>
               ))}
@@ -212,7 +212,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
           <p className="text-xs text-cream/50">{t("memberSince", { date: date(owner.member_since) })}</p>
         </div>
         {owner.role !== "member" && (
-          <span className="rounded-full bg-brand/15 px-3 py-1 text-xs font-semibold text-brand">{tRoles(owner.role)}</span>
+          <span className="rounded-full bg-brand/15 px-3 py-1 text-xs font-semibold text-brand-ink">{tRoles(owner.role)}</span>
         )}
       </section>
 
@@ -275,7 +275,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/markt
                       <p className="text-xs text-cream/60">{tInt("noCards")}</p>
                     )}
                     {Number(p.trade_count) > p.cards.length && (
-                      <Link href={`/u/${p.nickname}?tab=inserate&angebot=tausch`} className="text-sm text-brand hover:underline">
+                      <Link href={`/u/${p.nickname}?tab=inserate&angebot=tausch`} className="text-sm text-brand-ink hover:underline">
                         {tInt("allCards")}
                       </Link>
                     )}

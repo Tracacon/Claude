@@ -41,7 +41,7 @@ export function EventDealers({
               {d.logo_url ? (
                 <img src={d.logo_url} alt={`Logo ${d.name}`} className="size-full object-contain" loading="lazy" />
               ) : (
-                <span className="font-display text-xl font-bold text-night" aria-hidden>
+                <span className="font-display text-xl font-bold text-on-brand" aria-hidden>
                   {d.name.split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase()}
                 </span>
               )}
@@ -51,9 +51,9 @@ export function EventDealers({
               {(d.tcgs.length > 0 || d.other) && (
                 <span className="flex flex-wrap gap-1">
                   {d.tcgs.map((t) => (
-                    <span key={t} className="rounded-full bg-brand/15 px-2 py-0.5 text-xs text-brand">{TCG_LABEL.get(t)}</span>
+                    <span key={t} className="rounded-full bg-brand/15 px-2 py-0.5 text-xs text-brand-ink">{TCG_LABEL.get(t)}</span>
                   ))}
-                  {d.other && <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">{d.other}</span>}
+                  {d.other && <span className="rounded-full bg-tint/10 px-2 py-0.5 text-xs">{d.other}</span>}
                 </span>
               )}
               {d.products.length > 0 && (

@@ -40,7 +40,7 @@ export default async function ConversationPage({ params }: PageProps<"/[locale]/
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <Link href="/nachrichten" className="rounded-lg px-2 py-1 text-cream/70 hover:bg-white/5" aria-label={t("back")}>←</Link>
+        <Link href="/nachrichten" className="rounded-lg px-2 py-1 text-cream/70 hover:bg-tint/5" aria-label={t("back")}>←</Link>
         <Link href={`/u/${c.other_nickname}`} className="flex min-w-0 flex-1 items-center gap-2">
           <Avatar userId={c.other_id} avatarId={c.other_avatar_id} nickname={c.other_nickname} size="xs" />
           <h1 className="truncate text-lg font-bold normal-case">{c.other_nickname}</h1>
@@ -57,7 +57,7 @@ export default async function ConversationPage({ params }: PageProps<"/[locale]/
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{c.listing_title}</p>
-            <p className="text-sm text-brand">
+            <p className="text-sm text-brand-ink">
               {c.listing_offer && <PriceTag offer={c.listing_offer} cents={c.listing_price_cents} negotiable={false} />}
               {c.listing_status && c.listing_status !== "active" && (
                 <span className="ml-2 text-xs text-cream/60">({tStatus(c.listing_status)})</span>

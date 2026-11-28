@@ -25,7 +25,7 @@ function Face({ data, size }: { data: UserMenuData; size: string }) {
   return data.avatarId ? (
     <img src={avatarUrl(data.id, data.avatarId)} alt="" className={`${size} rounded-full bg-night-3 object-cover`} />
   ) : (
-    <span aria-hidden className={`${size} flex items-center justify-center rounded-full bg-brand text-sm font-black text-night`}>
+    <span aria-hidden className={`${size} flex items-center justify-center rounded-full bg-brand text-sm font-black text-on-brand`}>
       {data.nickname.slice(0, 1).toUpperCase()}
     </span>
   );
@@ -57,10 +57,10 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
   }, [open]);
 
   const item = (href: string, icon: string, label: string, count = 0) => (
-    <Link href={href} className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white/5">
+    <Link href={href} className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-tint/5">
       <span aria-hidden className="w-6 text-center text-lg">{icon}</span>
       <span className="flex-1">{label}</span>
-      {count > 0 && <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-night">{count}</span>}
+      {count > 0 && <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-on-brand">{count}</span>}
     </Link>
   );
 
@@ -75,8 +75,8 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
           : "fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl border-t border-line bg-night-2 p-3 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl"
       }
     >
-      {variant === "bottom" && <div aria-hidden className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-white/20" />}
-      <Link href="/profil" className="mb-1 flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-white/5">
+      {variant === "bottom" && <div aria-hidden className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-tint/20" />}
+      <Link href="/profil" className="mb-1 flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-tint/5">
         <Face data={data} size="size-11" />
         <span className="min-w-0">
           <span className="block truncate font-bold">@{data.nickname}</span>
@@ -97,7 +97,7 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
       {(data.role === "team" || data.role === "admin") && item("/team/termine", "📅", L.teamEvents)}
       {data.role === "admin" && item("/admin", "🛡", L.admin)}
       <form action={signOut}>
-        <button type="submit" className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-cream/70 hover:bg-white/5">
+        <button type="submit" className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-cream/70 hover:bg-tint/5">
           <span aria-hidden className="w-6 text-center text-lg">⎋</span>
           {L.logout}
         </button>
@@ -113,7 +113,7 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-haspopup="menu"
-          className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 hover:bg-white/5"
+          className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 hover:bg-tint/5"
         >
           <span className="relative">
             <Face data={data} size="size-8" />
@@ -153,7 +153,7 @@ export function UserMenu({ data, variant }: { data: UserMenuData; variant: "head
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label={L.menu}
-        className="relative grid size-11 place-items-center rounded-lg text-cream hover:bg-white/5"
+        className="relative grid size-11 place-items-center rounded-lg text-cream hover:bg-tint/5"
       >
         <svg viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
           <path d="M4 7h16M4 12h16M4 17h16" />

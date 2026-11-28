@@ -77,7 +77,7 @@ export function PostComposer({ userId }: { userId: string }) {
         <button
           type="button"
           onClick={() => setSheet(true)}
-          className="flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-line text-cream/70 hover:border-brand hover:text-brand"
+          className="flex aspect-[4/5] w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-line text-cream/70 hover:border-brand hover:text-brand-ink"
         >
           <span className="text-5xl" aria-hidden>📷</span>
           <span className="font-semibold">{t("choosePhotos")}</span>
@@ -110,7 +110,7 @@ export function PostComposer({ userId }: { userId: string }) {
                 <button
                   type="button"
                   onClick={() => setSheet(true)}
-                  className="flex aspect-[4/5] w-full flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-line text-cream/70 hover:border-brand hover:text-brand"
+                  className="flex aspect-[4/5] w-full flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-line text-cream/70 hover:border-brand hover:text-brand-ink"
                 >
                   <span className="text-2xl" aria-hidden>+</span>
                   <span className="text-xs">{t("addMorePhotos")}</span>

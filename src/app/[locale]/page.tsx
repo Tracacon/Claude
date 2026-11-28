@@ -35,7 +35,7 @@ export default async function FeedPage({ params }: PageProps<"/[locale]">) {
         <section className="card space-y-3 bg-[radial-gradient(ellipse_at_10%_0%,rgb(34_205_215/0.22),transparent_60%)]">
           <p className="kicker">Trade · Card · Convention</p>
           <p className="font-display text-2xl font-bold leading-tight">
-            Trading · <span className="text-brand">Dealing</span> · Connecting
+            Trading · <span className="text-brand-ink">Dealing</span> · Connecting
           </p>
           <p className="text-sm text-cream/75">{tHome("intro")}</p>
           <div className="flex flex-wrap gap-2">
@@ -45,7 +45,7 @@ export default async function FeedPage({ params }: PageProps<"/[locale]">) {
         </section>
       )}
       {profile && !profile.nickname && (
-        <Link href="/willkommen" className="card block text-sm text-brand">{tHome("ctaProfile")} →</Link>
+        <Link href="/willkommen" className="card block text-sm text-brand-ink">{tHome("ctaProfile")} →</Link>
       )}
 
       {loggedIn && <PushSettings available={isPushConfigured()} compact />}
@@ -69,7 +69,7 @@ export default async function FeedPage({ params }: PageProps<"/[locale]">) {
         </div>
       )}
 
-      {!configured && <p className="card border-brand/40 text-sm text-brand">{tHome("notConfigured")}</p>}
+      {!configured && <p className="card border-brand/40 text-sm text-brand-ink">{tHome("notConfigured")}</p>}
     </div>
   );
 }

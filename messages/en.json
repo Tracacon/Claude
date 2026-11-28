@@ -41,7 +41,9 @@
     "activityCount": "Activity, {count} new",
     "back": "Back",
     "createCollection": "Add to collection",
-    "createCollectionHint": "Add and show off your cards"
+    "createCollectionHint": "Add and show off your cards",
+    "themeLight": "Switch to day mode",
+    "themeDark": "Switch to night mode"
   },
   "Home": {
     "claim": "Trading · Dealing · Connecting",

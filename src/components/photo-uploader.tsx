@@ -116,7 +116,7 @@ export function PhotoUploader({
           <li key={p.id} className="relative aspect-[3/4] overflow-hidden rounded-xl border border-line bg-night-3">
             <img src={p.preview} alt="" className={`h-full w-full object-cover ${p.state !== "ready" ? "opacity-40" : ""}`} />
             {requireBothSides && i < 2 && (
-              <span className="absolute left-1 top-1 rounded-md bg-night/85 px-1.5 py-0.5 text-[10px] font-semibold text-brand">
+              <span className="absolute left-1 top-1 rounded-md bg-night/85 px-1.5 py-0.5 text-[10px] font-semibold text-brand-ink">
                 {i === 0 ? t("front") : t("back")}
               </span>
             )}
@@ -155,8 +155,8 @@ export function PhotoUploader({
             <button
               type="button"
               onClick={() => setSheet(true)}
-              className={`flex aspect-[3/4] w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-center text-xs hover:border-brand hover:text-brand ${
-                requireBothSides && photos.length < 2 ? "border-brand/60 text-brand" : "border-white/20 text-cream/70"
+              className={`flex aspect-[3/4] w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-center text-xs hover:border-brand hover:text-brand-ink ${
+                requireBothSides && photos.length < 2 ? "border-brand/60 text-brand-ink" : "border-tint/20 text-cream/70"
               }`}
             >
               <span className="text-2xl leading-none">📷</span>

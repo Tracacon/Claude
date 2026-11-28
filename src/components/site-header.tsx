@@ -8,6 +8,7 @@ import { NavTracker } from "./nav-tracker";
 import { CreateMenu } from "./create-menu";
 import { HeartIcon } from "./icons";
 import { LanguageSwitch } from "./language-switch";
+import { ThemeToggle } from "./theme-toggle";
 import { PresencePing } from "./presence-ping";
 import { NewMembersBar } from "./feed/new-members-bar";
 import { UserMenu } from "./user-menu";
@@ -22,7 +23,7 @@ export async function SiteHeader() {
   return (
     <>
       <NavTracker />
-      <header className="sticky top-0 z-20 border-b border-line bg-black/90 pt-[env(safe-area-inset-top)] backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-line bg-base/90 pt-[env(safe-area-inset-top)] backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-2.5 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
           <BackButton label={t("back")} />
           <Link href="/" className="shrink-0" aria-label="Tracacon">
@@ -31,20 +32,20 @@ export async function SiteHeader() {
             <img src={LOGO_URL} alt="Tracacon" width={112} height={32} className="h-8 w-auto" />
           </Link>
           <nav className="ml-auto flex items-center gap-1 text-sm sm:gap-2">
-            <Link href="/termine" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
+            <Link href="/termine" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand-ink sm:inline">
               {t("events")}
             </Link>
-            <Link href="/marktplatz" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
+            <Link href="/marktplatz" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand-ink sm:inline">
               {t("market")}
             </Link>
-            <Link href="/suche" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
+            <Link href="/suche" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand-ink sm:inline">
               {t("search")}
             </Link>
             {onboarded && (
-              <Link href="/nachrichten" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
+              <Link href="/nachrichten" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand-ink sm:inline">
                 {t("messages")}
                 {unread > 0 && (
-                  <span className="ml-1 rounded-full bg-brand px-1.5 py-0.5 text-xs font-bold text-night">{unread}</span>
+                  <span className="ml-1 rounded-full bg-brand px-1.5 py-0.5 text-xs font-bold text-on-brand">{unread}</span>
                 )}
               </Link>
             )}
@@ -66,7 +67,7 @@ export async function SiteHeader() {
               <Link
                 href="/aktivitaet"
                 aria-label={activity > 0 ? t("activityCount", { count: activity }) : t("activity")}
-                className="relative rounded-lg p-1.5 text-cream hover:text-brand"
+                className="relative rounded-lg p-1.5 text-cream hover:text-brand-ink"
               >
                 <HeartIcon className="size-[26px]" />
                 {activity > 0 && (
@@ -77,7 +78,7 @@ export async function SiteHeader() {
               </Link>
             )}
             {isTeam && (
-              <Link href="/moderation" className="relative rounded-lg px-2 py-1.5 hover:bg-white/5" aria-label={t("moderation")}>
+              <Link href="/moderation" className="relative rounded-lg px-2 py-1.5 hover:bg-tint/5" aria-label={t("moderation")}>
                 <span className="hidden sm:inline">{t("moderation")}</span>
                 <span className="sm:hidden" aria-hidden>⚑</span>
                 {reports > 0 && (
@@ -88,12 +89,12 @@ export async function SiteHeader() {
             {menu ? (
               <UserMenu data={menu} variant="header" />
             ) : profile ? (
-              <Link href="/willkommen" className="rounded-lg px-2 py-1.5 hover:bg-white/5">
+              <Link href="/willkommen" className="rounded-lg px-2 py-1.5 hover:bg-tint/5">
                 {t("profile")}
               </Link>
             ) : (
               <>
-                <Link href="/registrieren" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand sm:inline">
+                <Link href="/registrieren" className="hidden rounded-lg px-2 py-1.5 font-display text-[13px] font-medium uppercase tracking-wider text-cream/85 hover:text-brand-ink sm:inline">
                   {t("register")}
                 </Link>
                 <Link href="/anmelden" className="btn-primary px-3 py-1.5">
@@ -101,6 +102,7 @@ export async function SiteHeader() {
                 </Link>
               </>
             )}
+            <ThemeToggle labels={{ toLight: t("themeLight"), toDark: t("themeDark") }} />
             <LanguageSwitch label={t("language")} />
           </nav>
         </div>

@@ -11,6 +11,9 @@
   --color-brand-dark: #2cc9ce;
   --color-on-brand: #061215;
   --color-line: rgb(92 229 233 / 0.14);
+  --color-brand-ink: #5ce5e9; /* Markenfarbe als Schrift; im Tagmodus dunkler, damit sie auf Weiß lesbar ist */
+  --color-base: #000; /* Kopfzeile, untere Leiste, Fußzeile */
+  --color-tint: #fff; /* leichte Aufhellung von Flächen; im Tagmodus leichte Abdunklung */
   --color-danger: #ff5d6c;
   --color-ok: #3ddc97;
   --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
@@ -21,6 +24,56 @@
 
 :root {
   color-scheme: dark;
+}
+
+/* ---------------------------------------------------------------------------
+   Tag- und Nachtmodus
+   Nacht ist das gewohnte Tracacon-Aussehen. Im Tagmodus werden nur die Farben
+   getauscht: weißer Hintergrund, dunkle Schrift, Türkis bleibt.
+   data-theme="light" / "dark" setzt der Knopf oben; ohne Wahl gilt die Einstellung am Gerät.
+   --------------------------------------------------------------------------- */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-night: #ffffff;
+  --color-night-2: #f2f6f7;
+  --color-night-3: #e7eef0;
+  --color-cream: #0a0d11;
+  --color-line: rgb(10 13 17 / 0.12);
+  --color-brand-ink: #0a7f84;
+  --color-base: #ffffff;
+  --color-tint: #0a0d11;
+  --color-danger: #d92f42;
+  --color-ok: #138a57;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+    --color-night: #ffffff;
+    --color-night-2: #f2f6f7;
+    --color-night-3: #e7eef0;
+    --color-cream: #0a0d11;
+    --color-line: rgb(10 13 17 / 0.12);
+    --color-brand-ink: #0a7f84;
+    --color-base: #ffffff;
+    --color-tint: #0a0d11;
+    --color-danger: #d92f42;
+    --color-ok: #138a57;
+  }
+}
+/* Bereiche, die immer dunkel bleiben (Binderseiten, Foto-Bearbeitung) */
+.theme-dark {
+  color-scheme: dark;
+  --color-night: #0a0d11;
+  --color-night-2: #151a20;
+  --color-night-3: #1c232b;
+  --color-cream: #eef7f8;
+  --color-line: rgb(92 229 233 / 0.14);
+  --color-brand-ink: #5ce5e9;
+  --color-base: #000;
+  --color-tint: #fff;
+  --color-danger: #ff5d6c;
+  --color-ok: #3ddc97;
+  color: var(--color-cream);
 }
 
 body {
@@ -52,7 +105,7 @@ body {
 
 /* Kleine Überzeile über Überschriften, wie "Trade · Card · Convention" */
 @utility kicker {
-  @apply inline-block font-display text-xs font-semibold uppercase tracking-[0.22em] text-brand;
+  @apply inline-block font-display text-xs font-semibold uppercase tracking-[0.22em] text-brand-ink;
 }
 
 @utility label {
@@ -76,7 +129,7 @@ body {
 }
 
 @utility btn-ghost {
-  @apply btn border border-cream/35 text-cream hover:border-brand hover:bg-brand/5 hover:text-brand;
+  @apply btn border border-cream/35 text-cream hover:border-brand hover:bg-brand/5 hover:text-brand-ink;
 }
 
 @utility btn-danger {
@@ -88,7 +141,7 @@ body {
 }
 
 @utility link {
-  @apply text-brand underline-offset-2 hover:underline;
+  @apply text-brand-ink underline-offset-2 hover:underline;
 }
 
 /* Karte, die beim Darüberfahren leicht anhebt und leuchtet */

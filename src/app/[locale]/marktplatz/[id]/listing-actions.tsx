@@ -26,7 +26,7 @@ export function StatusSwitch({ id, status }: { id: string; status: ListingStatus
             value={s}
             disabled={pending || s === status}
             aria-pressed={s === status}
-            className={`btn border ${s === status ? "border-brand bg-brand/15 text-brand" : "border-line hover:bg-white/5"}`}
+            className={`btn border ${s === status ? "border-brand bg-brand/15 text-brand-ink" : "border-line hover:bg-tint/5"}`}
           >
             {tStatus(s)}
           </button>
@@ -58,7 +58,7 @@ export function DeleteListing({ id }: { id: string }) {
         <legend className="label">{t("removalReason")}</legend>
         <div className="flex flex-wrap gap-2">
           {REMOVAL_REASONS.map((r) => (
-            <label key={r} className="btn cursor-pointer border border-line has-[:checked]:border-brand has-[:checked]:bg-brand/15 has-[:checked]:text-brand">
+            <label key={r} className="btn cursor-pointer border border-line has-[:checked]:border-brand has-[:checked]:bg-brand/15 has-[:checked]:text-brand-ink">
               <input type="radio" name="reason" value={r} required className="sr-only" />
               {t(`removal_${r}`)}
             </label>
@@ -110,7 +110,7 @@ export function ModerateListing({ id, removed }: { id: string; removed: boolean 
 
   return (
     <section className="card space-y-3 border-brand/40">
-      <h2 className="font-semibold text-brand">{t("moderate")}</h2>
+      <h2 className="font-semibold text-brand-ink">{t("moderate")}</h2>
       <form action={action} className="space-y-3" noValidate>
         <input type="hidden" name="listingId" value={id} />
         {removed ? (

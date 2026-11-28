@@ -56,7 +56,7 @@ export default async function ModerationPage({ params }: PageProps<"/[locale]/mo
       <div>
         <h1 className="text-2xl font-bold">{t("title")}</h1>
         <p className="text-sm text-cream/70">{t("intro")}</p>
-        {total > 0 && <p className="mt-1 text-sm font-semibold text-brand">{t("openCount", { count: total })}</p>}
+        {total > 0 && <p className="mt-1 text-sm font-semibold text-brand-ink">{t("openCount", { count: total })}</p>}
       </div>
       {error && <p className="error">{error.message}</p>}
       {reports.length === 0 ? (
@@ -67,7 +67,7 @@ export default async function ModerationPage({ params }: PageProps<"/[locale]/mo
             <li key={r.id} className="card space-y-3">
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <span className="rounded-full bg-danger/15 px-2.5 py-1 font-semibold text-danger">{tReason(r.reason)}</span>
-                <span className="rounded-full bg-white/10 px-2.5 py-1">
+                <span className="rounded-full bg-tint/10 px-2.5 py-1">
                   {r.listing_id ? t("listing") : r.conversation_id ? t("conversation") : r.post_id ? t("post") : r.comment_id ? t("comment") : t("profile")}
                 </span>
                 <span className="text-cream/50">

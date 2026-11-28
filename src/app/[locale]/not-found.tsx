@@ -5,7 +5,7 @@ export default function NotFound() {
   const t = useTranslations("Nav");
   return (
     <div className="space-y-4 py-10 text-center">
-      <p className="text-6xl font-black text-brand">404</p>
+      <p className="text-6xl font-black text-brand-ink">404</p>
       <Link href="/" className="btn-primary">{t("home")}</Link>
     </div>
   );

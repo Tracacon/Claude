@@ -49,7 +49,7 @@ export function InstallSteps({ mode, onInstall }: { mode: Mode; onInstall?: () =
     <ol className="space-y-1.5 text-sm text-cream/85">
       {steps.map((s, i) => (
         <li key={i} className="flex gap-2">
-          <span className="grid size-6 shrink-0 place-items-center rounded-full bg-brand text-xs font-bold text-night">{i + 1}</span>
+          <span className="grid size-6 shrink-0 place-items-center rounded-full bg-brand text-xs font-bold text-on-brand">{i + 1}</span>
           <span className="pt-0.5">{s}</span>
         </li>
       ))}
@@ -126,7 +126,7 @@ export function InstallBanner() {
           <p id="install-title" className="font-display font-semibold">{t("title")}</p>
           <p className="text-sm text-cream/70">{t("text")}</p>
         </div>
-        <button type="button" onClick={hide} className="-m-1 grid size-11 shrink-0 place-items-center rounded-lg text-cream/60 hover:bg-white/5" aria-label={t("close")}>
+        <button type="button" onClick={hide} className="-m-1 grid size-11 shrink-0 place-items-center rounded-lg text-cream/60 hover:bg-tint/5" aria-label={t("close")}>
           ✕
         </button>
       </div>

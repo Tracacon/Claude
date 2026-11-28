@@ -36,19 +36,19 @@ export function QuickMarkSheet({
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={card.title}>
       <button type="button" aria-label={t("close")} className="absolute inset-0 bg-night/75" onClick={onClose} />
       <div className="relative w-full max-w-md rounded-t-3xl border-t border-line bg-night-2 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] shadow-2xl sm:rounded-3xl sm:border">
-        <div aria-hidden className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-white/20 sm:hidden" />
+        <div aria-hidden className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-tint/20 sm:hidden" />
         <div className="flex items-center gap-3">
-          <span className="block aspect-[63/88] w-16 shrink-0 overflow-hidden rounded-md border border-white/15 bg-night-3">
+          <span className="block aspect-[63/88] w-16 shrink-0 overflow-hidden rounded-md border border-tint/15 bg-night-3">
             {card.front && <img src={card.front} alt="" className="h-full w-full object-cover" />}
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate font-semibold">{card.title}</p>
             <p className="text-sm text-cream/60">{card.mark ? tOffer(card.mark) : t("onlyCollection")}</p>
             <div className="mt-1.5 flex gap-3 text-sm">
-              <PendingLink href={`/marktplatz/${card.id}`} className="text-brand hover:underline" pendingLabel={t("opening")}>
+              <PendingLink href={`/marktplatz/${card.id}`} className="text-brand-ink hover:underline" pendingLabel={t("opening")}>
                 {t("view")}
               </PendingLink>
-              <PendingLink href={`/marktplatz/${card.id}/bearbeiten?zurueck=${encodeURIComponent(returnTo)}`} className="text-brand hover:underline" pendingLabel={t("opening")}>
+              <PendingLink href={`/marktplatz/${card.id}/bearbeiten?zurueck=${encodeURIComponent(returnTo)}`} className="text-brand-ink hover:underline" pendingLabel={t("opening")}>
                 {t("edit")}
               </PendingLink>
             </div>
